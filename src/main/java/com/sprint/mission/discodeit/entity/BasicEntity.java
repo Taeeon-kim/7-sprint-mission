@@ -14,6 +14,12 @@ public abstract class BasicEntity {
 
     }
 
+    public BasicEntity(UUID id) {
+        this.id = id;
+        this.createdAt = System.currentTimeMillis();
+        this.updatedAt = System.currentTimeMillis();
+    }
+
     public UUID getId() { // NOTE: 캡슐화, 정보은닉
         return id;
     }
