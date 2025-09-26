@@ -17,12 +17,24 @@ public class User extends BasicEntity {
     }
 
     public User(String nickname, String email, String password, RoleType role, String phoneNumber) {
+        this();
         this.nickname = nickname;
         this.email = email;
         this.password = password;
         this.role = role;
         this.phoneNumber = phoneNumber;
     }
+    public User(User other){
+        super(other.getId());
+        this.nickname = other.nickname;
+        this.email = other.email;
+        this.password = other.password;
+        this.role = other.role;
+        this.phoneNumber = other.phoneNumber;
+        this.friends = other.friends;
+    }
+
+
 
     public String getNickname() {
         return nickname;
@@ -44,14 +56,49 @@ public class User extends BasicEntity {
         return phoneNumber;
     }
 
+    public void updateNickname(String nickname) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+
+    }
+
+    public void updatePassword(String password) {
+        if (password != null && !password.isBlank()) {
+            this.password = password;
+        }
+    }
+
+    public void updateEmail(String email) {
+        if (email != null && !email.isBlank()) {
+            this.email = email;
+        }
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+
+
+    public List<User> getFriends() {
+        return friends;
+    }
+
+    public void addFriend(User friend) {
+        friends.add(friend);
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "nickname='" + nickname + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
+                ", role=" + role +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", friends=" + friends +
                 '}';
     }
 }
