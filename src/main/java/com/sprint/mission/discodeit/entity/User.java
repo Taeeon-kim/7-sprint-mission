@@ -32,7 +32,7 @@ public class User extends BasicEntity {
         this.password = other.password;
         this.role = other.role;
         this.phoneNumber = other.phoneNumber;
-        this.friends = other.friends;
+        this.friends = new ArrayList<>(other.friends);
     }
 
 
