@@ -24,8 +24,9 @@ public class User extends BasicEntity {
         this.role = role;
         this.phoneNumber = phoneNumber;
     }
-    public User(User other){
-        super(other.getId());
+
+    public User(User other) {
+        super(other);
         this.nickname = other.nickname;
         this.email = other.email;
         this.password = other.password;
@@ -33,7 +34,6 @@ public class User extends BasicEntity {
         this.phoneNumber = other.phoneNumber;
         this.friends = other.friends;
     }
-
 
 
     public String getNickname() {
@@ -56,29 +56,37 @@ public class User extends BasicEntity {
         return phoneNumber;
     }
 
-    public void updateNickname(String nickname) {
-        if (nickname != null && !nickname.isBlank()) {
+    public boolean updateNickname(String nickname) {
+        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.nickname)) {
             this.nickname = nickname;
+            return true;
         }
+        return false;
 
     }
 
-    public void updatePassword(String password) {
-        if (password != null && !password.isBlank()) {
+    public boolean updatePassword(String password) {
+        if (password != null && !password.isBlank() && !password.equals(this.password)) {
             this.password = password;
+            return true;
         }
+        return false;
     }
 
-    public void updateEmail(String email) {
-        if (email != null && !email.isBlank()) {
+    public boolean updateEmail(String email) {
+        if (email != null && !email.isBlank() && !email.equals(this.email)) {
             this.email = email;
+            return true;
         }
+        return false;
     }
 
-    public void updatePhoneNumber(String phoneNumber) {
-        if (phoneNumber != null && !phoneNumber.isBlank()) {
+    public boolean updatePhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.isBlank() && !phoneNumber.equals(this.phoneNumber)) {
             this.phoneNumber = phoneNumber;
+            return true;
         }
+        return false;
     }
 
 
@@ -93,7 +101,10 @@ public class User extends BasicEntity {
     @Override
     public String toString() {
         return "User{" +
-                "nickname='" + nickname + '\'' +
+                "id='" + getId() + '\'' +
+                ", createdAt=" + getCreatedAt() +
+                ", updatedAt=" + getUpdatedAt() +
+                ",nickname='" + nickname + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +

@@ -14,10 +14,10 @@ public abstract class BasicEntity {
 
     }
 
-    public BasicEntity(UUID id) {
-        this.id = id;
-        this.createdAt = System.currentTimeMillis();
-        this.updatedAt = System.currentTimeMillis();
+    protected BasicEntity(BasicEntity user) {
+        this.id = user.id; // 클래스가 같으니 getId아닌 직접참조
+        this.createdAt = user.createdAt;
+        this.updatedAt = user.updatedAt;
     }
 
     public UUID getId() { // NOTE: 캡슐화, 정보은닉
@@ -34,5 +34,14 @@ public abstract class BasicEntity {
 
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "BasicEntity{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

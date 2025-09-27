@@ -20,9 +20,9 @@ public class JCFUserService implements UserService {
     @Override
     public User getUserById(UUID userId) {
         if (!data.containsKey(userId)) {
-           throw new NoSuchElementException("사용자가 없습니다");
+            throw new NoSuchElementException("사용자가 없습니다");
         }
-        return Optional.ofNullable(data.get(userId)).orElseThrow(()-> new NoSuchElementException("사용자가 없습니다"));
+        return Optional.ofNullable(data.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
     }
 
     @Override
@@ -35,10 +35,14 @@ public class JCFUserService implements UserService {
         User userById = null;
         try {
             userById = getUserById(user.getId());
-            userById.updateNickname(user.getNickname());
-            userById.updateEmail(user.getEmail());
-            userById.updatePassword(user.getPassword());
-            userById.updatePhoneNumber(user.getPhoneNumber());
+            boolean changeFlag = false;
+            changeFlag |= userById.updateNickname(user.getNickname());
+            changeFlag |= userById.updateEmail(user.getEmail());
+            changeFlag |= userById.updatePassword(user.getPassword());
+            changeFlag |= userById.updatePhoneNumber(user.getPhoneNumber());
+            if (changeFlag) {
+                userById.setUpdatedAt(System.currentTimeMillis());
+            }
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(e);
         }
