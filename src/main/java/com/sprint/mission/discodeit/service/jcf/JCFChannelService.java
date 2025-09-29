@@ -1,10 +1,8 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.*;
@@ -13,11 +11,9 @@ public class JCFChannelService implements ChannelService {
     // 채널들을 담을 리스트(맵)
     private final Map<UUID, Channel> data;
     private final UserService userService;
-    private final MessageService messageService;
 
-    public JCFChannelService(UserService userService, MessageService messageService) {
+    public JCFChannelService(UserService userService) {
         this.userService = userService;
-        this.messageService = messageService;
         data = new HashMap<>();
     }
 
@@ -89,12 +85,7 @@ public class JCFChannelService implements ChannelService {
         return data.values().stream().toList();
     }
 
-    @Override
-    public List<Message> getAllMessages(UUID channelId) {
-        Channel channel = getChannel(channelId);
-        List<UUID> messageIds = channel.getMessageIds();
-        return messageService.getAllMessagesByIds(messageIds); // TODO: 인메모리사용시 불변리스트 반환 안해도되는지,,
-    }
+//   ㅌ
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {

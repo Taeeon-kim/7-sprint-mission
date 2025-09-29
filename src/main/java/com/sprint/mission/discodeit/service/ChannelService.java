@@ -40,7 +40,6 @@ public interface ChannelService {
     // 전체 채널목록 불러오기 getAllChannels (전체 체널 리스트)
     public List<Channel> getAllChannels();
 
-    public List<Message> getAllMessages(UUID channelId);
     // 특정 유저의 채널 목록 불러오기 getUserChannels(userId)
     public List<Channel> getChannelsByUserId(UUID userId);
 }
