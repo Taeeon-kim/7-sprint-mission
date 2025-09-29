@@ -12,23 +12,12 @@ public interface ChannelService {
     // === 명령 (Command) 영역 ===
     // 채널 생성
     public void createChannel(
-            String title,
-            String description,
-            List<User> joinedUsers,
-            List<Message> messages,
-            User createdBy,
-            boolean isPrivate
+            Channel channel
     ); // TODO: 진행시 일반 List형식말고 HashMap 으로 key : UUID, value : List<Channel> 이렇게 -> 이건 인메모리 jcf 부분에서 하면됨 여기랑 별도
 
     // 채널 수정 -> 어차피 DB없으니 넘겨주는 값보고 같은지 비교후 다르면 해당 부분수정(그래야 "" 이런것도 지운걸로 인식할테니)
     public void updateChannel(
-            UUID channelId,
-            String title,
-            String description,
-            List<User> joinedUsers,
-            List<Message> messages,
-            User createdBy,
-            boolean isPrivate);
+            Channel channel);
 
     // 채널 삭제
     public void deleteChannel(UUID channelId); // TODO: HashMap이므로 key 조회후 바로삭제 -> 이건 인메모리 jcf 부분에서 하면됨 여기랑 별도
@@ -38,10 +27,10 @@ public interface ChannelService {
     // 초기 메세지 가져오기 // 어차피 실시간 아니므로 단일 혹은 요청시에 보내는걸로?
 
     // 채널 입장
-    public void joinChannel(UUID channelId, User user);
+    public void joinChannel(UUID channelId, UUID userId);
 
     // 채널 퇴장
-    public void leaveChannel(UUID channelId, User user);
+    public void leaveChannel(UUID channelId, UUID userId);
 
     //=== 조회 (Query) 영역 ===
 
@@ -51,6 +40,7 @@ public interface ChannelService {
     // 전체 채널목록 불러오기 getAllChannels (전체 체널 리스트)
     public List<Channel> getAllChannels();
 
+    public List<Message> getAllMessages(UUID channelId);
     // 특정 유저의 채널 목록 불러오기 getUserChannels(userId)
     public List<Channel> getChannelsByUserId(UUID userId);
 }
