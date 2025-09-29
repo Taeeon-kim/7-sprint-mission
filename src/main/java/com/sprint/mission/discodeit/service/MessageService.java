@@ -13,8 +13,8 @@ public interface MessageService {
     // 특정 메세지(uuid 사용) 수정하기
     // 특정 메세지(uuid 사용) 삭제하기
 
-    public List<Message> getAllMessagesByIds(List<UUID> messageIds);
-
+//    public List<Message> getAllMessagesByIds(List<UUID> messageIds);
+    public List<Message> getAllMessagesOfChannel(UUID channelId);
 
 
 }

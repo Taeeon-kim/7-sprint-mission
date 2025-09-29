@@ -7,10 +7,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class JCFMessageService implements MessageService {
     private final Map<UUID, Message> data;
@@ -26,7 +23,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public void sendMessage(Message message, UUID channelId, UUID senderId) {
-        if(message == null){
+        if (message == null) {
             throw new IllegalArgumentException("메세지 정보가 잘못되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
@@ -37,7 +34,7 @@ public class JCFMessageService implements MessageService {
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        if(data.containsKey(message.getId())){
+        if (data.containsKey(message.getId())) {
             throw new IllegalStateException("이미 존재하는 메세지 ID가 있습니다.");
         }
         // NOTE: 3. 메세지를 전역 data 인메모리에 저장
@@ -55,8 +52,24 @@ public class JCFMessageService implements MessageService {
 
     }
 
+//    @Override
+//    public List<Message> getAllMessagesByIds(List<UUID> messageIds) {
+//        return messageIds.stream()
+//                .map(data::get)
+//                .filter(Objects::nonNull) // NOTE: nonNull 처리가 실제 서비스에서 필요한지 아니면 다른 처리가 필요한지 고려
+//                .toList();
+//    }
+
     @Override
-    public List<Message> getAllMessagesByIds(List<UUID> messageIds) {
-        return List.of();
+    public List<Message> getAllMessagesOfChannel(UUID channelId) {
+        Channel channel = channelService.getChannel(channelId);
+
+        return channel.getMessageIds()
+                .stream()
+                .map(data::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
+
+
 }
