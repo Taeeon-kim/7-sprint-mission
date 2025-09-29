@@ -17,6 +17,7 @@ public class User extends BasicEntity {
     }
 
     public User(String nickname, String email, String password, RoleType role, String phoneNumber) {
+        // TODO: null 값, "" 빈스트링 등 체크
         this();
         this.nickname = nickname;
         this.email = email;
@@ -26,6 +27,7 @@ public class User extends BasicEntity {
     }
 
     public User(User other) {
+        // TODO: null 체크
         super(other);
         this.nickname = other.nickname;
         this.email = other.email;
