@@ -54,4 +54,14 @@ public class JCFUserService implements UserService {
         return data.values().stream()
                 .toList();
     }
+
+    @Override
+    public List<User> getUsersByIds(List<UUID> userIds) {
+        return userIds.stream()
+                .map(data::get)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+
 }

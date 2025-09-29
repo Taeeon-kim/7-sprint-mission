@@ -19,4 +19,5 @@ public interface UserService {
     // 모든 유저리스트 읽기(관리측면 메서드)
     public List<User> getAllUsers();
 
+    public List<User> getUsersByIds(List<UUID> userIds);
 }
