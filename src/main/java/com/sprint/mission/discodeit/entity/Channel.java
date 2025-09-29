@@ -53,7 +53,7 @@ public class Channel extends BasicEntity {
         }
     }
 
-    public void addMessage(UUID messageId) {
+    public void addMessageId(UUID messageId) {
         if (messageId == null){
             throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");
         }
@@ -61,6 +61,10 @@ public class Channel extends BasicEntity {
         if(!isAdded){
             throw new IllegalStateException("메세지를 추가할수 없습니다.");
         }
+    }
+
+    public boolean isMember(UUID userId){
+            return userIds.contains(userId);
     }
 
     public List<UUID> getMessageIds() {
