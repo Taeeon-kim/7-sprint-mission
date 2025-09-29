@@ -10,7 +10,7 @@ public interface UserService {
     // 회원가입
     public void signUp(User user);
     // 회원정보 읽기
-    public User getUserById(UUID userId) throws NoSuchElementException;
+    public User getUserById(UUID userId);
     // 회원탈퇴
     public void deleteUser(UUID userId);
     // 정보수정
