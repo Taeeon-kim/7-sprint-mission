@@ -19,6 +19,9 @@ public class JCFUserService implements UserService {
 
     @Override
     public User getUserById(UUID userId) {
+        if(userId == null){
+            throw new IllegalArgumentException("유저정보가 잘못되었습니다.");
+        }
         if (!data.containsKey(userId)) {
             throw new NoSuchElementException("사용자가 없습니다");
         }
