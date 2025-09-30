@@ -23,6 +23,9 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public void sendMessageToChannel(UUID channelId, UUID senderId, String content) {
+        if (channelId == null || senderId == null || content == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
         User sender = userService.getUserById(senderId);
         // NOTE: 2. 보내려는 채널이있는지 확인
@@ -60,6 +63,9 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public List<Message> getAllMessagesOfChannel(UUID channelId) {
+        if (channelId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         Channel channel = channelService.getChannel(channelId);
 
         return channel.getMessageIds()

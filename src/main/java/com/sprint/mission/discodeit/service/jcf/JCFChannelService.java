@@ -20,6 +20,9 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void createChannel(String title, String description, UUID createdByUserId) {
+        if (title == null || title.isBlank() || description == null || description.isBlank()) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         userService.getUserById(createdByUserId);
         Channel channel = new Channel("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", createdByUserId, false);
         data.put(channel.getId(), channel);
@@ -27,6 +30,9 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void updateChannel(UUID channelId, String title, String description) {
+        if (channelId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         Channel channelById = null;
 
         try {
@@ -48,7 +54,7 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void deleteChannel(UUID channelId) {
-        if (channelId == null){ // TODO: 인메모리라 Null 체크하는지 실제에선 안해도되는지 고려
+        if (channelId == null) { // TODO: 인메모리라 Null 체크하는지 실제에선 안해도되는지 고려
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         data.remove(channelId);
@@ -68,6 +74,9 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void joinChannel(UUID channelId, UUID userId) {
+        if (channelId == null || userId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         Channel channel = getChannel(channelId);
         userService.getUserById(userId);
         channel.addUser(userId);
@@ -75,12 +84,18 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void leaveChannel(UUID channelId, UUID userId) {
+        if (channelId == null || userId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         Channel channel = getChannel(channelId);
         channel.removeUserId(userId);
     }
 
     @Override
     public List<User> getAllMembers(UUID channelId) {
+        if (channelId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         Channel channel = getChannel(channelId);
         List<UUID> userIds = channel.getUserIds();
         return userService.getUsersByIds(userIds);
@@ -96,9 +111,11 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
         User userById = userService.getUserById(userId);
-
-        return  getAllChannels().stream()
+        return getAllChannels().stream()
                 .filter(channel -> channel.isMember(userById.getId()))
                 .toList();
     }
