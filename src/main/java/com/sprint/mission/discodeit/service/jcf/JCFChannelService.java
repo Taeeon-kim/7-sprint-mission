@@ -13,7 +13,7 @@ public class JCFChannelService implements ChannelService {
     private final UserService userService;
 
     public JCFChannelService(UserService userService) {
-        this.userService = userService;
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
         data = new HashMap<>();
     }
 

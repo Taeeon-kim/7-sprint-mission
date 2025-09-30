@@ -16,8 +16,9 @@ public class JCFMessageService implements MessageService {
     private final ChannelService channelService;
 
     public JCFMessageService(UserService userService, ChannelService channelService) {
-        this.userService = userService;
-        this.channelService = channelService;
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
+        this.channelService = Objects.requireNonNull(channelService, "channelService must not be null");
+
         data = new HashMap<>();
     }
 
