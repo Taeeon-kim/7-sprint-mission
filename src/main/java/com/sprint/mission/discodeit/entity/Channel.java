@@ -57,10 +57,8 @@ public class Channel extends BasicEntity {
         if (messageId == null){
             throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");
         }
-        boolean isAdded = messageIds.add(messageId);
-        if(!isAdded){
-            throw new IllegalStateException("메세지를 추가할수 없습니다.");
-        }
+        messageIds.add(messageId);
+
     }
 
     public boolean isMember(UUID userId){
@@ -87,7 +85,7 @@ public class Channel extends BasicEntity {
     // TODO: updatePrivaqte 변경
 
     public boolean updateTitle(String title) {
-        if (title != null && title.isBlank() && !title.equals(this.title)) {
+        if (title != null && !title.isBlank() && !title.equals(this.title)) {
             this.title = title;
             return true;
         }
@@ -111,7 +109,7 @@ public class Channel extends BasicEntity {
                 "id='" + getId() + '\'' +
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
-                "title='" + title + '\'' +
+                ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", userIds=" + userIds +
                 ", messages=" + messageIds +
