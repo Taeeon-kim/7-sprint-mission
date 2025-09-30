@@ -5,6 +5,8 @@ import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.*;
 
+import static com.sprint.mission.discodeit.entity.RoleType.USER;
+
 public class JCFUserService implements UserService {
     private final Map<UUID, User> data;
 
@@ -13,7 +15,8 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public void signUp(User user) {
+    public void signUp(String nickname, String email, String pasword, String PhoneNumber) {
+        User user = new User(nickname, email, pasword, USER, PhoneNumber);
         data.put(user.getId(), user);
     }
 
@@ -34,15 +37,15 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) {
         User userById = null;
         try {
-            userById = getUserById(user.getId());
+            userById = getUserById(userId);
             boolean changeFlag = false;
-            changeFlag |= userById.updateNickname(user.getNickname());
-            changeFlag |= userById.updateEmail(user.getEmail());
-            changeFlag |= userById.updatePassword(user.getPassword());
-            changeFlag |= userById.updatePhoneNumber(user.getPhoneNumber());
+            changeFlag |= userById.updateNickname(nickname);
+            changeFlag |= userById.updateEmail(email);
+            changeFlag |= userById.updatePassword(password);
+            changeFlag |= userById.updatePhoneNumber(phoneNumber);
             if (changeFlag) {
                 userById.setUpdatedAt(System.currentTimeMillis());
             }
