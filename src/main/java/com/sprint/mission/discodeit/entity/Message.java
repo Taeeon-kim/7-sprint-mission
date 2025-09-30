@@ -9,6 +9,18 @@ public class Message extends BasicEntity{
     private final UUID channelId; // TODO: Channel과 연관관계 체크할것
 
     public Message(String content, UUID senderId, UUID receiverId, UUID channelId) {
+        if ( content == null){
+            throw new IllegalArgumentException("Content is null");
+        }
+        if (senderId == null ){
+            throw new IllegalArgumentException("SenderId is null");
+        }
+        if (receiverId == null ){
+            throw new IllegalArgumentException("ReceiverId is null");
+        }
+        if (channelId == null ){
+            throw new IllegalArgumentException("ChannelId is null");
+        }
         this.content = content;
         this.senderId = senderId;
         this.receiverId = receiverId;

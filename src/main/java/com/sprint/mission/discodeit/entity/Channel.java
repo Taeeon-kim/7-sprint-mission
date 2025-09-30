@@ -12,6 +12,17 @@ public class Channel extends BasicEntity {
 
 
     public Channel(String title, String description, UUID createdByUserId, boolean isPrivate) {
+
+        if (title == null || title.isBlank()){
+            throw new IllegalArgumentException("title is invalid");
+        }
+        if (description == null){
+            throw new IllegalArgumentException("description is null");
+        }
+        if (createdByUserId == null){
+            throw new IllegalArgumentException("createdByUserId is null");
+        }
+
         this.title = title;
         this.description = description;
         this.createdByUserId = createdByUserId;
