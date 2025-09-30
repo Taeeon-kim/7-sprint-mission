@@ -22,18 +22,16 @@ public class JCFMessageService implements MessageService {
     }
 
     @Override
-    public void sendMessage(Message message, UUID channelId, UUID senderId) {
-        if (message == null) {
-            throw new IllegalArgumentException("메세지 정보가 잘못되었습니다.");
-        }
+    public void sendMessageToChannel(UUID channelId, UUID senderId, String content) {
         // NOTE: 1. 보내려는 유저가 맞는지 확인
         User sender = userService.getUserById(senderId);
         // NOTE: 2. 보내려는 채널이있는지 확인
         Channel channel = channelService.getChannel(channelId);
-        boolean isMember = channel.isMember(senderId);
+        boolean isMember = channel.isMember(sender.getId());
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
+        Message message = new Message(content, senderId, null, channelId);
         if (data.containsKey(message.getId())) {
             throw new IllegalStateException("이미 존재하는 메세지 ID가 있습니다.");
         }
@@ -48,7 +46,7 @@ public class JCFMessageService implements MessageService {
             throw new RuntimeException(e);
         }
 
-        channel.setUpdatedAt(System.currentTimeMillis()); // NOTE: 보통 메타정보와 메세지 변경을 분리해야하지만 일단 모두 변경으로 인식
+//        channel.setUpdatedAt(System.currentTimeMillis()); // NOTE: 보통 메타정보와 메세지 변경을 분리해야하지만 일단 모두 변경으로 인식
 
     }
 
