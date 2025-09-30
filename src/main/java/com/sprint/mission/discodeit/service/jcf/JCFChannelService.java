@@ -19,7 +19,9 @@ public class JCFChannelService implements ChannelService {
 
 
     @Override
-    public void createChannel(Channel channel) {
+    public void createChannel(String title, String description, UUID createdByUserId) {
+        userService.getUserById(createdByUserId);
+        Channel channel = new Channel("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", createdByUserId, false);
         data.put(channel.getId(), channel);
     }
 
@@ -64,6 +66,7 @@ public class JCFChannelService implements ChannelService {
     @Override
     public void joinChannel(UUID channelId, UUID userId) {
         Channel channel = getChannel(channelId);
+        userService.getUserById(userId);
         channel.addUser(userId);
     }
 
@@ -82,10 +85,11 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public List<Channel> getAllChannels() {
-        return data.values().stream().toList();
+        return data.values()
+                .stream()
+                .toList();
     }
 
-//   ㅌ
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
