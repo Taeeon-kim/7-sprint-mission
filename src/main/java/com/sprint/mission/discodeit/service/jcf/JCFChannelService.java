@@ -26,14 +26,14 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void updateChannel(Channel channel) {
+    public void updateChannel(UUID channelId, String title, String description) {
         Channel channelById = null;
 
         try {
-            channelById = getChannel(channel.getId());
+            channelById = getChannel(channelId);
             boolean changeFlag = false;
-            changeFlag |= channelById.updateTitle(channel.getTitle());
-            changeFlag |= channelById.updateDescription(channel.getDescription());
+            changeFlag |= channelById.updateTitle(title);
+            changeFlag |= channelById.updateDescription(description);
             if (changeFlag) {
                 channelById.setUpdatedAt(System.currentTimeMillis());
             }
@@ -48,7 +48,10 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void deleteChannel(UUID channelId) {
-
+        if (channelId == null){ // TODO: 인메모리라 Null 체크하는지 실제에선 안해도되는지 고려
+            throw new IllegalArgumentException("전달값을 확인해주세요.");
+        }
+        data.remove(channelId);
     }
 
     @Override
@@ -93,6 +96,10 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
-        return List.of();
+        User userById = userService.getUserById(userId);
+
+        return  getAllChannels().stream()
+                .filter(channel -> channel.isMember(userById.getId()))
+                .toList();
     }
 }
