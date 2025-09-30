@@ -17,16 +17,17 @@ public class JCFUserService implements UserService {
     @Override
     public void signUp(String nickname, String email, String pasword, String PhoneNumber) {
         User user = new User(nickname, email, pasword, USER, PhoneNumber);
-        data.put(user.getId(), user);
+
+        User prev = data.put(user.getId(), user); // NOTE: 솔직히 현재로선 UUID 중복될일없음 하지만 추후 실무, 테스트, DB마이그레이션 등 특정 ID를 넣을수있을때 문제라 방어코드
+        if (prev != null) {
+            throw new IllegalStateException("이미 존재하는 사용자 입니다.: " + user.getId());
+        }
     }
 
     @Override
     public User getUserById(UUID userId) {
-        if(userId == null){
+        if (userId == null) {
             throw new IllegalArgumentException("유저정보가 잘못되었습니다.");
-        }
-        if (!data.containsKey(userId)) {
-            throw new NoSuchElementException("사용자가 없습니다");
         }
         return Optional.ofNullable(data.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
     }
@@ -57,7 +58,8 @@ public class JCFUserService implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return data.values().stream()
+        return data.values()
+                .stream()
                 .toList();
     }
 
