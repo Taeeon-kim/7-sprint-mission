@@ -12,7 +12,7 @@ public interface ChannelService {
     // === 명령 (Command) 영역 ===
     // 채널 생성
     public void createChannel(
-            Channel channel
+            String title, String description, UUID createdByUserId
     ); // TODO: 진행시 일반 List형식말고 HashMap 으로 key : UUID, value : List<Channel> 이렇게 -> 이건 인메모리 jcf 부분에서 하면됨 여기랑 별도
 
     // 채널 수정 -> 어차피 DB없으니 넘겨주는 값보고 같은지 비교후 다르면 해당 부분수정(그래야 "" 이런것도 지운걸로 인식할테니)
