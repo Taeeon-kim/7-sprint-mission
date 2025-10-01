@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public abstract class BasicEntity {
     private final UUID id;
-    private final long createdAt;
-    private long updatedAt;
+    private final Long createdAt;
+    private Long updatedAt;
 
     protected BasicEntity() { // NOTE: 직접 생성 불가 + 자식에서 호출하도록
         this.id = UUID.randomUUID();
@@ -24,15 +24,23 @@ public abstract class BasicEntity {
         return id;
     }
 
-    public long getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public long getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(long updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
+        if (updatedAt == null) {
+            throw new IllegalArgumentException("updatedAt is null");
+        }
+
+        if (updatedAt < this.updatedAt) {
+            throw new IllegalStateException("업데이트 날짜가 잘못되었습니다.");
+        }
+
         this.updatedAt = updatedAt;
     }
 
