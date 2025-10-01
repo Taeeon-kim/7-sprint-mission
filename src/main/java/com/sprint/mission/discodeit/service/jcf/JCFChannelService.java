@@ -24,7 +24,7 @@ public class JCFChannelService implements ChannelService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         userService.getUserById(createdByUserId);
-        Channel channel = new Channel("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", createdByUserId, false);
+        Channel channel = new Channel(title, description, createdByUserId, false);
         data.put(channel.getId(), channel);
     }
 
