@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -95,7 +96,8 @@ public class JavaApplication {
         };
         for (Message m : msgs) {
             messageService.createMsg(m);
-        };
+        }
+        ;
 
         // 메시지 전체 조회(목록)
         messageList(users);
@@ -111,7 +113,7 @@ public class JavaApplication {
     }
 
     //유저 전체 조회
-    public static void userList(){
+    public static void userList() {
         System.out.println("[유저 전체 조회]");
         for (User u : userService.readAllUser()) {
             System.out.println(u.getNickName());
@@ -119,7 +121,7 @@ public class JavaApplication {
     }
 
     //채널 전체 조회
-    public static void channelList(){
+    public static void channelList() {
         System.out.println("[채널 전체 조회]");
         for (Channel c : channelService.readAllChannels()) {
             System.out.println(c.getChanName());
@@ -127,14 +129,19 @@ public class JavaApplication {
     }
 
     //Message 조회
-    public static void messageList(User[] users){
-        System.out.println(users[0].getNickName() + "의 DM");
-        for (Message m : messageService.getAllMsg(users[0])) {
-            if (m.getInputMsg().isEmpty()) {
-                System.out.println("(대화없음)"); //지금 작동 안함
-            } else {
-                System.out.println((userService.readUser(m.getSendUser()).getNickName()) + " : " + m.getInputMsg());
-            }
+    public static void messageList(User[] users) {
+
+        List<Message> userMsg = messageService.getAllMsg(users[2]);
+
+        System.out.println(users[2].getNickName() + "의 DM");
+
+        if (userMsg.isEmpty()) {
+            System.out.println("(대화없음)");
+        }
+
+        for (Message m : messageService.getAllMsg(users[2])) {
+            String messageContnet = m.getInputMsg();
+            System.out.println((userService.readUser(m.getSendUser()).getNickName()) + " : " + messageContnet);
         }
     }
 
