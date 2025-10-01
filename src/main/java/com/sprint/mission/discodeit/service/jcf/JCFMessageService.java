@@ -24,7 +24,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public void sendMessageToChannel(UUID channelId, UUID senderId, String content) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
-        if (channelId == null || senderId == null || content == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (channelId == null || senderId == null || content == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
@@ -65,7 +65,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public List<Message> getAllMessagesOfChannel(UUID channelId) {
-        if (channelId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (channelId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelService.getChannel(channelId);
@@ -80,7 +80,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public Message getMessageById(UUID messageId) {
-        if (messageId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (messageId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return Optional.ofNullable(data.get(messageId)).orElseThrow(() -> new NoSuchElementException("메세지가 없습니다"));
@@ -88,7 +88,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public void updateMessage(UUID messageId, String content) {
-        if (messageId == null || content == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (messageId == null || content == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Message message = getMessageById(messageId);
@@ -102,7 +102,7 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public void deleteMessage(UUID messageId) {
-        if (messageId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (messageId == null) { // TODO: 컨트롤러
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         data.remove(messageId);

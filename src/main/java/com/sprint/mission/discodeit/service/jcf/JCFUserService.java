@@ -42,7 +42,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public User getUserById(UUID userId) {
-        if (userId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return Optional.ofNullable(data.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
@@ -50,7 +50,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public void deleteUser(UUID userId) {
-        if (userId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         data.remove(userId);
@@ -59,7 +59,7 @@ public class JCFUserService implements UserService {
     @Override
     public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
         if(userId == null){ // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
-            // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+            // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         User userById = null;
@@ -89,7 +89,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public List<User> getUsersByIds(List<UUID> userIds) {
-        if(userIds == null){ // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if(userIds == null){ // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return userIds.stream()
