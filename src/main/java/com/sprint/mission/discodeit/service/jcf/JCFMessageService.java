@@ -35,7 +35,7 @@ public class JCFMessageService implements MessageService {
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        Message message = new Message(content, senderId, null, channelId);
+        Message message = new Message(content, senderId, channelId);
         if (data.containsKey(message.getId())) {
             throw new IllegalStateException("이미 존재하는 메세지 ID가 있습니다.");
         }
@@ -54,13 +54,14 @@ public class JCFMessageService implements MessageService {
 
     }
 
-//    @Override
-//    public List<Message> getAllMessagesByIds(List<UUID> messageIds) {
-//        return messageIds.stream()
-//                .map(data::get)
-//                .filter(Objects::nonNull) // NOTE: nonNull 처리가 실제 서비스에서 필요한지 아니면 다른 처리가 필요한지 고려
-//                .toList();
-//    }
+
+    @Override
+    public List<Message> getAllMessages() {
+        return data.values()
+                .stream()
+                .sorted(Comparator.comparing(Message::getCreatedAt))
+                .toList();
+    }
 
     @Override
     public List<Message> getAllMessagesOfChannel(UUID channelId) {
@@ -73,7 +74,38 @@ public class JCFMessageService implements MessageService {
                 .stream()
                 .map(data::get)
                 .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Message::getCreatedAt))
                 .toList();
+    }
+
+    @Override
+    public Message getMessageById(UUID messageId) {
+        if (messageId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        return Optional.ofNullable(data.get(messageId)).orElseThrow(() -> new NoSuchElementException("메세지가 없습니다"));
+    }
+
+    @Override
+    public void updateMessage(UUID messageId, String content) {
+        if (messageId == null || content == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        Message message = getMessageById(messageId);
+        boolean isUpdated = message.updateContent(content);
+        if (isUpdated) {
+            message.setUpdatedAt(System.currentTimeMillis());
+        }
+
+
+    }
+
+    @Override
+    public void deleteMessage(UUID messageId) {
+        if (messageId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        data.remove(messageId);
     }
 
 

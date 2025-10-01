@@ -2,28 +2,26 @@ package com.sprint.mission.discodeit.entity;
 
 import java.util.UUID;
 
-public class Message extends BasicEntity{
+public class Message extends BasicEntity {
     private String content;
     private final UUID senderId;
-    private final UUID receiverId;
+    //    private final UUID receiverId; // 일단 dm 없으므로 제외
     private final UUID channelId; // TODO: Channel과 연관관계 체크할것
 
-    public Message(String content, UUID senderId, UUID receiverId, UUID channelId) {
-        if ( content == null){
-            throw new IllegalArgumentException("Content is null");
+    public Message(String content, UUID senderId, UUID channelId) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("Content is valid");
         }
-        if (senderId == null ){
+        if (senderId == null) {
             throw new IllegalArgumentException("SenderId is null");
         }
-        if (receiverId == null ){
-            throw new IllegalArgumentException("ReceiverId is null");
-        }
-        if (channelId == null ){
+
+        if (channelId == null) {
             throw new IllegalArgumentException("ChannelId is null");
         }
-        this.content = content;
+        this.content = content.trim();
         this.senderId = senderId;
-        this.receiverId = receiverId;
+//        this.receiverId = receiverId;
         this.channelId = channelId;
     }
 
@@ -36,12 +34,20 @@ public class Message extends BasicEntity{
         return senderId;
     }
 
-    public UUID getReceiverId() {
-        return receiverId;
-    }
+//    public UUID getReceiverId() {
+//        return receiverId;
+//    }
 
     public UUID getChannelId() {
         return channelId;
+    }
+
+    public boolean updateContent(String content) {
+        if (content == null) return false;
+        String trimmedContent = content.trim();
+        if (trimmedContent.isBlank() || trimmedContent.equals(this.content)) return false;
+        this.content = trimmedContent;
+        return true;
     }
 
 
@@ -51,10 +57,10 @@ public class Message extends BasicEntity{
                 "id='" + getId() + '\'' +
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
-                "content='" + content + '\'' +
+                ", content='" + content + '\'' +
                 ", senderId=" + senderId +
-                ", receiverId=" + receiverId +
+//                ", receiverId=" + receiverId +
                 ", channelId=" + channelId +
-                '}';
+                "}\n";
     }
 }
