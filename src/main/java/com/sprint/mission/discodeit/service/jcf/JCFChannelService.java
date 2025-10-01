@@ -19,8 +19,8 @@ public class JCFChannelService implements ChannelService {
 
 
     @Override
-    public void createChannel(String title, String description, UUID createdByUserId) {
-        if (title == null || title.isBlank() || description == null || description.isBlank()) {
+    public void createChannel(String title, String description, UUID createdByUserId) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+        if (title == null || title.isBlank() || description == null || description.isBlank()) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         userService.getUserById(createdByUserId);
@@ -29,8 +29,8 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void updateChannel(UUID channelId, String title, String description) {
-        if (channelId == null) {
+    public void updateChannel(UUID channelId, String title, String description) {// TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+        if (channelId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channelById = null;
@@ -54,7 +54,7 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void deleteChannel(UUID channelId) {
-        if (channelId == null) { // TODO: 인메모리라 Null 체크하는지 실제에선 안해도되는지 고려
+        if (channelId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         data.remove(channelId);
@@ -62,10 +62,10 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public Channel getChannel(UUID channelId) {
-        if (channelId == null) {
+        if (channelId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
-        Channel channel = data.get(channelId);
+        Channel channel = data.get(channelId); // TODO: 레포지토리로 바뀔부분
         if (channel == null) {
             throw new IllegalStateException("채널이 없습니다");
         }

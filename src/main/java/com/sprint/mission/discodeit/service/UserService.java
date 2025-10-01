@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface UserService {
     // 회원가입
-    public void signUp(String nickname, String email, String password, String phoneNumber);
+    public void signUp(String nickname, String email, String password, String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
     // 회원정보 읽기
     public User getUserById(UUID userId);
@@ -16,7 +16,7 @@ public interface UserService {
     public void deleteUser(UUID userId);
 
     // 정보수정
-    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber);
+    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
     // 모든 유저리스트 읽기(관리측면 메서드)
     public List<User> getAllUsers();

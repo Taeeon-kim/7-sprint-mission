@@ -15,7 +15,7 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public void signUp(String nickname, String email, String password, String PhoneNumber) {
+    public void signUp(String nickname, String email, String password, String PhoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
             /*
                 서비스가 지금 경계(boundary) 이므로, 모든 public 서비스 메서드는 자기 파라미터를 직접 검증(널/형식)하는 걸 권장.
         	•	이후에 내부에서 userService.getUserById(userId)가 또 검증하더라도, 중복을 감수하고 입구에서 한 번 더 명시하는 쪽이 유지보수에 안전함.
@@ -42,7 +42,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public User getUserById(UUID userId) {
-        if (userId == null) {
+        if (userId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return Optional.ofNullable(data.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
@@ -50,15 +50,16 @@ public class JCFUserService implements UserService {
 
     @Override
     public void deleteUser(UUID userId) {
-        if (userId == null) {
+        if (userId == null) { // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         data.remove(userId);
     }
 
     @Override
-    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) {
+    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
         if(userId == null){ // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
+            // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         User userById = null;
@@ -88,7 +89,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public List<User> getUsersByIds(List<UUID> userIds) {
-        if(userIds == null){
+        if(userIds == null){ // TODO: 추후 레포지토리 생성시 책임을 레포지토리로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return userIds.stream()

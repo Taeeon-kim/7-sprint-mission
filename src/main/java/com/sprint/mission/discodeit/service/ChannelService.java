@@ -13,11 +13,11 @@ public interface ChannelService {
     // 채널 생성
     public void createChannel(
             String title, String description, UUID createdByUserId
-    );
+    ); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
     // 채널 수정 -> 어차피 DB없으니 넘겨주는 값보고 같은지 비교후 다르면 해당 부분수정(그래야 "" 이런것도 지운걸로 인식할테니)
     public void updateChannel(
-            UUID channelId, String title, String description);
+            UUID channelId, String title, String description); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
     // 채널 삭제
     public void deleteChannel(UUID channelId);
