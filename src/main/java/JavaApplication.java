@@ -1,4 +1,5 @@
 
+import com.sprint.mission.discodeit.config.AppConfig;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -7,19 +8,15 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
-
 import java.util.List;
 import java.util.UUID;
 
 public class JavaApplication {
     public static void main(String[] args) {
-
-        UserService userService = new JCFUserService();
-        ChannelService channelService = new JCFChannelService(userService);
-        MessageService messageService = new JCFMessageService(userService, channelService);
+        final AppConfig appConfig = new AppConfig();
+        final UserService userService = appConfig.userService();
+        final ChannelService channelService = appConfig.channelService();
+        final MessageService messageService = appConfig.messageService();
         List<User> allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
         // ---- 유저 만들기 (회원가입) ------
