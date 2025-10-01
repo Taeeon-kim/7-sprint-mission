@@ -82,6 +82,7 @@ public class JCFUserService implements UserService {
     public List<User> getAllUsers() {
         return data.values()
                 .stream()
+                .sorted(Comparator.comparing(User::getCreatedAt))
                 .toList();
     }
 
