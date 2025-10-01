@@ -1,8 +1,10 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Message extends BasicEntity {
+public class Message extends BasicEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String content;
     private final UUID senderId;
     //    private final UUID receiverId; // 일단 dm 없으므로 제외

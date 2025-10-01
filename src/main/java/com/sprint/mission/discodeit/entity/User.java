@@ -1,9 +1,11 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User extends BasicEntity {
+public class User extends BasicEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nickname;
     private String email;
     private String password;
@@ -12,7 +14,7 @@ public class User extends BasicEntity {
     private final List<User> friends;
 
 
-    public User() {
+    private User() {
         friends = new ArrayList<>();
     }
 
