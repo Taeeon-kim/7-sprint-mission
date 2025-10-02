@@ -42,8 +42,8 @@ public class FileUserService implements UserService {
         if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        Map<UUID, User> allUsers = Store.loadMap(Store.USER_DATA_FILE); // NOTE: map형식의 모든 user file 불러옴
-        return Optional.ofNullable(allUsers.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
+
+        return userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
     }
 
     @Override

@@ -16,7 +16,6 @@ public class FileUserRepository implements UserRepository {
         Store.saveMap(Store.USER_DATA_FILE, allUsers);
     }
 
-
     @Override
     public void deleteById(UUID id) {
         Map<UUID, User> allUsers = findAllMap();
