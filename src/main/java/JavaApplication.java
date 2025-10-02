@@ -23,8 +23,10 @@ public class JavaApplication {
         userService.signUp("youngble", "email@example.com", "password123", "010-1234-5678");
         userService.signUp("zzzz", "zzzz@example.com", "zzzz1123", "010-3334-44444");
         userService.signUp("Hong", "test@example.com", "wssss123123", "010-1122-3333");
-
+        System.out.println("=============================== ");
         allUsers = userService.getAllUsers();
+        System.out.println("allUsers = " + allUsers);
+        System.out.println("=============================== ");
 
         // ---- 유저 지우기 (회원 탈퇴) ------
         userService.deleteUser(allUsers.get(0).getId());
@@ -32,11 +34,12 @@ public class JavaApplication {
         allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
 
-
+        System.out.println("===========update user==================== ");
         //--- 유저 수정하기(정보 업데이트) -------
         // ----- 클라이언트 요청 api 데이터, 실제 dto 형식으로 받아서 dto.nickname 같은식으로 넘겨줌 ---
         userService.updateUser(allUsers.get(0).getId(), "changedName!!", null, "changedPassword!!", "");
 //        User userById = userService.getUserById(user2.getId());
+        allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
 
         // ------- 채널 조회 ----
