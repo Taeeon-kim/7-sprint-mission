@@ -13,7 +13,6 @@ public class Store {
     public static final Path CHANNEL_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "channels.ser");
     public static final Path MESSAGE_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "messages.ser");
 
-
     public static <K extends Serializable, V extends Serializable> void saveMap(Path file, Map<K, V> map) {
         try {
             Path parent = file.getParent();
