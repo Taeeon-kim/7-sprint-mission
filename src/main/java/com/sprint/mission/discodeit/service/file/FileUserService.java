@@ -31,9 +31,8 @@ public class FileUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
         User user = new User(nickname, email, password, USER, phoneNumber);
-        if (userRepository.findById(user.getId()).isPresent()) {
-            throw new IllegalStateException("이미 존재하는 사용자 입니다.: " + user.getId());
-        }
+
+        // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
         userRepository.save(user); // create userRepository 사용 책임 분리
     }
 
@@ -60,22 +59,18 @@ public class FileUserService implements UserService {
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        User userById = null;
-        try {
-            userById = userRepository.findById(userId)
-                    .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));//  repository 사용 책임 분리
-            boolean changeFlag = false;
-            changeFlag |= userById.updateNickname(nickname);
-            changeFlag |= userById.updateEmail(email);
-            changeFlag |= userById.updatePassword(password);
-            changeFlag |= userById.updatePhoneNumber(phoneNumber);
-            if (changeFlag) {
-                userById.setUpdatedAt(System.currentTimeMillis());
-                userRepository.save(userById); // user repository 사용 책임 분리
-            }
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(e);
+        User userById = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));//  repository 사용 책임 분리
+        boolean changeFlag = false;
+        changeFlag |= userById.updateNickname(nickname);
+        changeFlag |= userById.updateEmail(email);
+        changeFlag |= userById.updatePassword(password);
+        changeFlag |= userById.updatePhoneNumber(phoneNumber);
+        if (changeFlag) {
+            userById.setUpdatedAt(System.currentTimeMillis());
+            userRepository.save(userById); // user repository 사용 책임 분리
         }
+
     }
 
     @Override
