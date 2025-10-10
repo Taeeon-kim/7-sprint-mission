@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -28,10 +29,11 @@ public class FileChannelService implements ChannelService {
                         description.isBlank() ||
                         createdByUserId == null
         ) {
-            userService.getUserById(createdByUserId);
-            Channel channel = new Channel(title, description, createdByUserId, false);
-            channelRepository.save(channel);
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
+        userService.getUserById(createdByUserId);
+        Channel channel = new Channel(title, description, createdByUserId, false);
+        channelRepository.save(channel);
     }
 
     @Override
@@ -49,6 +51,15 @@ public class FileChannelService implements ChannelService {
             channelRepository.save(channelById);
         }
 
+    }
+
+    @Override
+    public void addMessageToChannel(Channel channel, UUID messageId) {
+        if (channel == null || messageId == null) {
+            throw new IllegalArgumentException("전달값을 확인해주세요.");
+        }
+        channel.addMessageId(messageId);
+        channelRepository.save(channel);
     }
 
     @Override
