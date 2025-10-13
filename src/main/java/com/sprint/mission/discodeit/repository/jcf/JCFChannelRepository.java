@@ -17,26 +17,28 @@ public class JCFChannelRepository implements ChannelRepository {
 
     @Override
     public void save(Channel channel) {
-
+        data.put(channel.getId(), channel);
     }
 
     @Override
     public Optional<Channel> findById(UUID channelId) {
-        return Optional.empty();
+        return Optional.ofNullable(data.get(channelId));
     }
 
     @Override
     public Map<UUID, Channel> findAllMap() {
-        return Map.of();
+        return data;
     }
 
     @Override
     public List<Channel> findAll() {
-        return List.of();
+        return data.values()
+                .stream()
+                .toList();
     }
 
     @Override
     public void deleteById(UUID channelId) {
-
+        data.remove(channelId);
     }
 }
