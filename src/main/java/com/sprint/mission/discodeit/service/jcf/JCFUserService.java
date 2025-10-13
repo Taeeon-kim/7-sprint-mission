@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.jcf;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.reader.UserReader;
 
 import java.util.*;
 
@@ -10,9 +11,11 @@ import static com.sprint.mission.discodeit.entity.RoleType.USER;
 
 public class JCFUserService implements UserService {
     private final UserRepository userRepository;
+    private final UserReader userReader;
 
-    public JCFUserService(UserRepository userRepository) {
+    public JCFUserService(UserRepository userRepository, UserReader userReader) {
         this.userRepository = userRepository;
+        this.userReader = userReader;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public User getUserById(UUID userId) {
-        return findUserOrThrow(userId);
+        return userReader.findUserOrThrow(userId);
     }
 
     @Override
@@ -61,7 +64,7 @@ public class JCFUserService implements UserService {
         }
         User userById = null;
         try {
-            userById = findUserOrThrow(userId);
+            userById = userReader.findUserOrThrow(userId);
             boolean changeFlag = false;
             changeFlag |= userById.updateNickname(nickname);
             changeFlag |= userById.updateEmail(email);
@@ -89,14 +92,6 @@ public class JCFUserService implements UserService {
         return userRepository.findAllByIds(userIds);
     }
 
-    // private helper
-    private User findUserOrThrow(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
-    }
 
 
 }
