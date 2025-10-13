@@ -5,21 +5,22 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.reader.UserReader;
 
 import java.util.*;
 
 public class JCFMessageService implements MessageService {
     private final Map<UUID, Message> data;
 
-    private final UserService userService;
+    private final UserReader userReader;
     private final ChannelService channelService;
 
-    public JCFMessageService(UserService userService, ChannelService channelService) {
-        this.userService = Objects.requireNonNull(userService, "userService must not be null");
-        this.channelService = Objects.requireNonNull(channelService, "channelService must not be null");
+    public JCFMessageService(ChannelService channelService, UserReader userReader) {
 
-        data = new HashMap<>();
+        this.channelService = Objects.requireNonNull(channelService, "channelService must not be null");
+        this.userReader = userReader;
+
+        data = new HashMap<>(); // TODO: Repository 형식으로 수정
     }
 
     @Override
@@ -28,7 +29,7 @@ public class JCFMessageService implements MessageService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
-        User sender = userService.getUserById(senderId);
+        User sender = userReader.findUserOrThrow(senderId);
         // NOTE: 2. 보내려는 채널이있는지 확인
         Channel channel = channelService.getChannel(channelId);
         boolean isMember = channel.isMember(sender.getId());
