@@ -15,12 +15,16 @@ import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
 import com.sprint.mission.discodeit.service.file.FileUserService;
+import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
+import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
+import com.sprint.mission.discodeit.service.jcf.JCFUserService;
+import com.sprint.mission.discodeit.service.reader.ChannelReader;
+import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 
 public class AppConfig {
     // Service Config
     // NOTE: 싱글톤을 유지하기위해 private final로 한번 생성
-
 
 
     // --- File 디스크 메모리 레포지토리------
@@ -35,9 +39,20 @@ public class AppConfig {
     private final ChannelRepository channelRepository = new JCFChannelRepository(store.channels);
     private final MessageRepository messageRepository = new JCFMessageRepository(store.messages);
 
-    private final UserService userService = new FileUserService(userRepository);
-    private final ChannelService channelService = new FileChannelService(userService, channelRepository, messageRepository);
-    private final MessageService messageService = new FileMessageService(userService, channelService, messageRepository, channelRepository);
+    // helper
+    private final UserReader userReader = new UserReader(userRepository);
+    private final ChannelReader channelReader = new ChannelReader(channelRepository);
+
+    // --- File 디스크 메모리 서비스 ------
+//    private final UserService userService = new FileUserService(userRepository, userReader);
+//    private final ChannelService channelService = new FileChannelService(channelRepository, messageRepository, userReader);
+//    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader);
+
+
+    // --- JCF 인메모리 서비스 ------
+    private final UserService userService = new JCFUserService(userRepository, userReader);
+    private final ChannelService channelService = new JCFChannelService(channelRepository, messageRepository, userReader, channelReader);
+    private final MessageService messageService = new JCFMessageService(channelService, userReader);
 
 
     // User
