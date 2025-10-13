@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.file;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.store.Store;
+import com.sprint.mission.discodeit.service.reader.UserReader;
 
 import java.util.*;
 
@@ -12,9 +12,11 @@ import static com.sprint.mission.discodeit.entity.RoleType.USER;
 public class FileUserService implements UserService {
 
     private final UserRepository userRepository;
+    private final UserReader userReader;
 
-    public FileUserService(UserRepository userRepository) {
+    public FileUserService(UserRepository userRepository, UserReader userReader) {
         this.userRepository = userRepository;
+        this.userReader = userReader;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class FileUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
-        return userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
+        return userReader.findUserOrThrow(userId);
     }
 
     @Override
@@ -59,8 +61,7 @@ public class FileUserService implements UserService {
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        User userById = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));//  repository 사용 책임 분리
+        User userById = userReader.findUserOrThrow(userId);
         boolean changeFlag = false;
         changeFlag |= userById.updateNickname(nickname);
         changeFlag |= userById.updateEmail(email);
@@ -80,9 +81,7 @@ public class FileUserService implements UserService {
 
     @Override
     public List<User> getUsersByIds(List<UUID> userIds) {
-        if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        return userRepository.findAllByIds(userIds);
+
+        return userReader.findUsersByIds(userIds);
     }
 }
