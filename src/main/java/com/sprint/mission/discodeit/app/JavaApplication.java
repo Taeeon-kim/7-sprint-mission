@@ -5,13 +5,10 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.ServiceFactory;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 프로그램 실행 테스트
@@ -20,9 +17,12 @@ import java.util.UUID;
 public class JavaApplication {
 
     // 서비스 객체 생성
-    static UserService userService = new JCFUserService();
-    static ChannelService channelService = new JCFChannelService();
-    static MessageService messageService = new JCFMessageService();
+//    static UserService userService = new JCFUserService();
+    static UserService userService = ServiceFactory.getUserService();
+//    static ChannelService channelService = new JCFChannelService();
+    static ChannelService channelService = ServiceFactory.getChannelService();
+//    static MessageService messageService = new JCFMessageService();
+    static MessageService messageService = ServiceFactory.getMessageService();
 
     public static void main(String[] args) {
 
@@ -112,6 +112,12 @@ public class JavaApplication {
         messageList(users);
     }
 
+
+    // 유저 등록
+    public static void createUser(User[] user) {
+
+    }
+
     //유저 전체 조회
     public static void userList() {
         System.out.println("[유저 전체 조회]");
@@ -131,15 +137,15 @@ public class JavaApplication {
     //Message 조회
     public static void messageList(User[] users) {
 
-        List<Message> userMsg = messageService.getAllMsg(users[2]);
+        List<Message> userMsg = messageService.getAllMsg(users[0]);
 
-        System.out.println(users[2].getNickName() + "의 DM");
+        System.out.println(users[0].getNickName() + "의 DM");
 
         if (userMsg.isEmpty()) {
             System.out.println("(대화없음)");
         }
 
-        for (Message m : messageService.getAllMsg(users[2])) {
+        for (Message m : userMsg) {
             String messageContnet = m.getInputMsg();
             System.out.println((userService.readUser(m.getSendUser()).getNickName()) + " : " + messageContnet);
         }

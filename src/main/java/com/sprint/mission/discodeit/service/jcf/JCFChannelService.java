@@ -8,6 +8,16 @@ import java.util.*;
 public class JCFChannelService implements ChannelService {
     private final Map<UUID, Channel> channels = new HashMap<>();
 
+    private JCFChannelService() {
+        System.out.println("생성자");
+    }
+
+    private static final JCFChannelService INSTANCE = new JCFChannelService();
+
+    public static JCFChannelService getInstance(){
+        return INSTANCE;
+    }
+
     @Override
     public void createChannel(Channel channel) {
         channels.put(channel.getId(), channel);
