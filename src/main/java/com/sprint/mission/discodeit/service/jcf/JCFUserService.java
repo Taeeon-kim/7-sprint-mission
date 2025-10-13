@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.*;
@@ -8,10 +9,10 @@ import java.util.*;
 import static com.sprint.mission.discodeit.entity.RoleType.USER;
 
 public class JCFUserService implements UserService {
-    private final Map<UUID, User> data;
+    private final UserRepository userRepository;
 
-    public JCFUserService() {
-        data = new HashMap<>();
+    public JCFUserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -33,19 +34,15 @@ public class JCFUserService implements UserService {
         ) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
-        User user = new User(nickname, email, password, USER, phoneNumber);
+        User newUser = new User(nickname, email, password, USER, phoneNumber);
 
-        if (data.putIfAbsent(user.getId(), user) != null) {
-            throw new IllegalStateException("이미 존재하는 사용자 입니다.: " + user.getId());
-        }
+        // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
+        userRepository.save(newUser);
     }
 
     @Override
     public User getUserById(UUID userId) {
-        if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        return Optional.ofNullable(data.get(userId)).orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
+        return findUserOrThrow(userId);
     }
 
     @Override
@@ -53,18 +50,18 @@ public class JCFUserService implements UserService {
         if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        data.remove(userId);
+        userRepository.deleteById(userId);
     }
 
     @Override
     public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
-        if(userId == null){ // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
+        if (userId == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         User userById = null;
         try {
-            userById = getUserById(userId);
+            userById = findUserOrThrow(userId);
             boolean changeFlag = false;
             changeFlag |= userById.updateNickname(nickname);
             changeFlag |= userById.updateEmail(email);
@@ -81,21 +78,24 @@ public class JCFUserService implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return data.values()
-                .stream()
-                .sorted(Comparator.comparing(User::getCreatedAt))
-                .toList();
+        return userRepository.findAll();
     }
 
     @Override
     public List<User> getUsersByIds(List<UUID> userIds) {
-        if(userIds == null){ // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        return userIds.stream()
-                .map(data::get)
-                .filter(Objects::nonNull)
-                .toList();
+        return userRepository.findAllByIds(userIds);
+    }
+
+    // private helper
+    private User findUserOrThrow(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
     }
 
 
