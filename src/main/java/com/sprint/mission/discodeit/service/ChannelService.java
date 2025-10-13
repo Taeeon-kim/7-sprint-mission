@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
@@ -19,8 +18,6 @@ public interface ChannelService {
      void updateChannel(
             UUID channelId, String title, String description); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
-    // 채널 메세지 추가
-    void addMessageToChannel(Channel channel, UUID messageId);
     // 채널 삭제
      void deleteChannel(UUID channelId);
 

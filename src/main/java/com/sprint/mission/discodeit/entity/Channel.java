@@ -66,6 +66,13 @@ public class Channel extends BasicEntity implements Serializable {
         }
     }
 
+    public void removeMessageId(UUID messageId) {
+        if(messageId == null){
+            throw new IllegalArgumentException("메세지정보가 잘못 되었습니다.");
+        }
+        messageIds.remove(messageId);
+    }
+
     public void addMessageId(UUID messageId) {
         if (messageId == null){
             throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");

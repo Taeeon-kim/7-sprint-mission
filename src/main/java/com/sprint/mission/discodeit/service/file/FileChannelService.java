@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.file;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
 
@@ -14,10 +15,12 @@ public class FileChannelService implements ChannelService {
 
     private final UserService userService;
     private final ChannelRepository channelRepository;
+    private final MessageRepository messageRepository;
 
-    public FileChannelService(UserService userService, ChannelRepository channelRepository) {
+    public FileChannelService(UserService userService, ChannelRepository channelRepository, MessageRepository messageRepository) {
         this.userService = userService;
         this.channelRepository = channelRepository;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -53,20 +56,19 @@ public class FileChannelService implements ChannelService {
 
     }
 
-    @Override
-    public void addMessageToChannel(Channel channel, UUID messageId) {
-        if (channel == null || messageId == null) {
-            throw new IllegalArgumentException("전달값을 확인해주세요.");
-        }
-        channel.addMessageId(messageId);
-        channelRepository.save(channel);
-    }
 
     @Override
     public void deleteChannel(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
+        Channel channel = getChannel(channelId);
+        // 메세지 레포지토리에서 삭제 로직
+        List<UUID> channelMessageIds = channel.getMessageIds();
+        for (UUID messageId : channelMessageIds) {
+            messageRepository.deleteById(messageId);
+        }
+        // 채널삭제
         channelRepository.deleteById(channelId);
     }
 
