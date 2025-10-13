@@ -12,7 +12,7 @@ public class Message extends BasicEntity implements Serializable {
 
     public Message(String content, UUID senderId, UUID channelId) {
         if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content is valid");
+            throw new IllegalArgumentException("Content is invalid");
         }
         if (senderId == null) {
             throw new IllegalArgumentException("SenderId is null");
@@ -47,7 +47,7 @@ public class Message extends BasicEntity implements Serializable {
     public boolean updateContent(String content) {
         if (content == null) return false;
         String trimmedContent = content.trim();
-        if (trimmedContent.isBlank() || trimmedContent.equals(this.content)) return false;
+        if (trimmedContent.isEmpty() || trimmedContent.equals(this.content)) return false;
         this.content = trimmedContent;
         return true;
     }
