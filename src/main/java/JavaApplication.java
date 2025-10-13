@@ -58,10 +58,12 @@ public class JavaApplication {
         System.out.println("=============================== ");
 
         channelService.updateChannel(allChannels.get(0).getId(), "changed title", "changed description");
+        allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel :" + allChannels);
         System.out.println("=============================== ");
 
         channelService.updateChannel(allChannels.get(0).getId(), null, "changed description");
+        allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel2 :" + allChannels);
         System.out.println("=============================== ");
 
@@ -77,7 +79,7 @@ public class JavaApplication {
         allUsers
                 .forEach(member -> {
                     channelService.joinChannel(chId, member.getId());
-                } );
+                });
 
         allMembers = channelService.getAllMembers(chId);
         System.out.println("all members of channel after join channel: " + allMembers);
@@ -92,12 +94,13 @@ public class JavaApplication {
         allMembers = channelService.getAllMembers(chId);
         System.out.println("all members of channel after leave channel: " + allMembers);
         System.out.println("=============================== ");
-        System.out.println("user's channel: " + channelService.getChannelsByUserId(allUsers.get(0).getId()));
+        System.out.println("user's channel after leave: " + channelService.getChannelsByUserId(allUsers.get(0).getId()));
 
         System.out.println("=============================== ");
 
         // --- 채널의 모든 메세지 확인 ---
         List<Message> allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        System.out.println("chId 1 = " + chId);
         System.out.println("all messages of channel before send message: " + allMessagesOfChannel);
 
         System.out.println("=============================== ");
@@ -106,10 +109,11 @@ public class JavaApplication {
 
         messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "첫번째 message메세지입니다");
         allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        System.out.println("chId 2 = " + chId);
         System.out.println("all messages of channel after send message: " + allMessagesOfChannel);
 
         System.out.println("=============================== ");
-        System.out.println("user's channel: " + channelService.getChannelsByUserId(allUsers.get(1).getId()));
+        System.out.println("user's channel: " + channelService.getChannelsByUserId(allMembers.get(0).getId()));
         System.out.println("=============================== ");
 
 
@@ -120,7 +124,7 @@ public class JavaApplication {
         messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "두번째 message메세지입니다");
         messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "세번째 message메세지입니다");
         allMessages = messageService.getAllMessages();
-        System.out.println("allMessages = " + allMessages);
+        System.out.println("allMessages after send Message = " + allMessages);
         System.out.println("=============================== ");
 
         // -- 단일 특정 메세지 보기 --
@@ -130,15 +134,21 @@ public class JavaApplication {
 
         // -- 메세지 업데이트하기 --
         messageService.updateMessage(messageById.getId(), "updated message!!");
-        System.out.println("messageById = " + messageById);
+        messageById = messageService.getMessageById(messageById.getId());
+        System.out.println("updated messageById = " + messageById);
+        allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        System.out.println("allMessagesOfChannel = " + allMessagesOfChannel);
         // -- 메세지 제거하기 --
         messageService.deleteMessage(messageById.getId());
         allMessages = messageService.getAllMessages();
-        System.out.println("allMessages = " + allMessages);
+        System.out.println("allMessages after delecting a message= " + allMessages);
+        allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        System.out.println("allMessagesOfChannel after delecting a message= " + allMessagesOfChannel);
         // -- 채널 제거하기 ---
         channelService.deleteChannel(allChannels.get(0).getId());
         allChannels = channelService.getAllChannels();
-        System.out.println("all channels after deleting channel :" + allChannels);
-
+        System.out.println("all channels after deleting the channel :" + allChannels);
+        allMessages = messageService.getAllMessages();
+        System.out.println("allMessages after delecting the channel = " + allMessages);
     }
 }
