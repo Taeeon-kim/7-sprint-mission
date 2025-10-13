@@ -23,8 +23,8 @@ public class AppConfig {
     private final MessageRepository messageRepository = new FileMessageRepository();
 
     private final UserService userService = new FileUserService(userRepository);
-    private final ChannelService channelService = new FileChannelService(userService, channelRepository);
-    private final MessageService messageService = new FileMessageService(userService, channelService, messageRepository);
+    private final ChannelService channelService = new FileChannelService(userService, channelRepository, messageRepository);
+    private final MessageService messageService = new FileMessageService(userService, channelService, messageRepository, channelRepository);
 
 
     // User
