@@ -31,6 +31,7 @@ public class JCFUserRepository implements UserRepository {
     public List<User> findAll() {
         return data.values()
                 .stream()
+                .sorted(Comparator.comparing(User::getCreatedAt))
                 .toList();
     }
 

@@ -35,6 +35,7 @@ public class FileUserRepository implements UserRepository {
         return findAllMap()
                 .values()
                 .stream()
+                .sorted(Comparator.comparing(User::getCreatedAt))
                 .toList();
     }
 
