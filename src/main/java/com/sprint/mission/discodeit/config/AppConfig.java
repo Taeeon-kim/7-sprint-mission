@@ -6,21 +6,34 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
 import com.sprint.mission.discodeit.service.file.FileUserService;
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
+import com.sprint.mission.discodeit.store.InMemoryStore;
 
 public class AppConfig {
     // Service Config
     // NOTE: 싱글톤을 유지하기위해 private final로 한번 생성
-    private final UserRepository userRepository = new FileUserRepository();
-    private final ChannelRepository channelRepository = new FileChannelRepository();
-    private final MessageRepository messageRepository = new FileMessageRepository();
+
+
+
+    // --- File 디스크 메모리 레포지토리------
+//    private final UserRepository userRepository = new FileUserRepository();
+//    private final ChannelRepository channelRepository = new FileChannelRepository();
+//    private final MessageRepository messageRepository = new FileMessageRepository();
+
+    // --- JCF 인메모리 레포지토리 ------
+    private final InMemoryStore store = new InMemoryStore(); // JCF용 인메모리
+
+    private final UserRepository userRepository = new JCFUserRepository(store.users);
+    private final ChannelRepository channelRepository = new JCFChannelRepository(store.channels);
+    private final MessageRepository messageRepository = new JCFMessageRepository(store.messages);
 
     private final UserService userService = new FileUserService(userRepository);
     private final ChannelService channelService = new FileChannelService(userService, channelRepository, messageRepository);
