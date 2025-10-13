@@ -5,7 +5,8 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.reader.ChannelReader;
+import com.sprint.mission.discodeit.service.reader.UserReader;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -13,29 +14,30 @@ import java.util.UUID;
 
 public class FileChannelService implements ChannelService {
 
-    private final UserService userService;
+
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
+    private final UserReader userReader;
+    private final ChannelReader channelReader;
 
-    public FileChannelService(UserService userService, ChannelRepository channelRepository, MessageRepository messageRepository) {
-        this.userService = userService;
+    public FileChannelService(ChannelRepository channelRepository,
+                              MessageRepository messageRepository,
+                              UserReader userReader, ChannelReader
+                                      channelReader) {
+
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
+        this.userReader = userReader;
+        this.channelReader = channelReader;
     }
 
     @Override
     public void createChannel(String title, String description, UUID createdByUserId) {
-        if (
-                title == null ||
-                        title.isBlank() ||
-                        description == null ||
-                        description.isBlank() ||
-                        createdByUserId == null
-        ) {
+        if (title == null || title.isBlank() || description == null || description.isBlank() || createdByUserId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        userService.getUserById(createdByUserId);
-        Channel channel = new Channel(title, description, createdByUserId, false);
+        User user = userReader.findUserOrThrow(createdByUserId);
+        Channel channel = new Channel(title, description, user.getId(), false);
         channelRepository.save(channel);
     }
 
@@ -69,14 +71,12 @@ public class FileChannelService implements ChannelService {
             messageRepository.deleteById(messageId);
         }
         // 채널삭제
-        channelRepository.deleteById(channelId);
+        channelRepository.deleteById(channel.getId());
     }
 
     @Override
     public Channel getChannel(UUID channelId) {
-        return channelRepository
-                .findById(channelId)
-                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
+        return channelReader.findChannelOrThrow(channelId);
     }
 
     @Override
@@ -84,13 +84,12 @@ public class FileChannelService implements ChannelService {
         if (channelId == null || userId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
-        Channel channel = channelRepository
-                .findById(channelId)
-                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
+        Channel channel = channelReader.findChannelOrThrow(channelId);
 
-        userService.getUserById(userId);
-        channel.addUser(userId);
+        User user = userReader.findUserOrThrow(userId);
+        channel.addUser(user.getId());
         channelRepository.save(channel);
+        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
 
     }
 
@@ -100,13 +99,12 @@ public class FileChannelService implements ChannelService {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
 
-        Channel channel = channelRepository
-                .findById(channelId)
-                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다"));
+        Channel channel = channelReader.findChannelOrThrow(channelId);
 
-        userService.getUserById(userId);
-        channel.removeUserId(userId);
+        User user = userReader.findUserOrThrow(userId);
+        channel.removeUserId(user.getId());
         channelRepository.save(channel);
+        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
 
     }
 
@@ -116,12 +114,10 @@ public class FileChannelService implements ChannelService {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
 
-        Channel channel = channelRepository
-                .findById(channelId)
-                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
+        Channel channel = channelReader.findChannelOrThrow(channelId);
 
         List<UUID> userIds = channel.getUserIds();
-        return userService.getUsersByIds(userIds);
+        return userReader.findUsersByIds(userIds);
     }
 
     @Override
@@ -131,10 +127,9 @@ public class FileChannelService implements ChannelService {
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
-        User userById = userService.getUserById(userId);
+        User userById = userReader.findUserOrThrow(userId);
+        ;
         List<Channel> allChannels = getAllChannels();
-        return allChannels.stream()
-                .filter(channel -> channel.isMember(userById.getId()))
-                .toList();
+        return allChannels.stream().filter(channel -> channel.isMember(userById.getId())).toList();
     }
 }
