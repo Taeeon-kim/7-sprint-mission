@@ -12,6 +12,9 @@ import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import com.sprint.mission.discodeit.service.basic.BasicMessageService;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
 import com.sprint.mission.discodeit.service.file.FileUserService;
@@ -51,9 +54,15 @@ public class AppConfig {
 //    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
 
     // --- JCF 인메모리 서비스 ------
-    private final UserService userService = new JCFUserService(userRepository, userReader);
-    private final ChannelService channelService = new JCFChannelService(channelRepository, messageRepository, userReader, channelReader);
-    private final MessageService messageService = new JCFMessageService(channelService, userReader, messageRepository, channelReader, messageReader);
+//    private final UserService userService = new JCFUserService(userRepository, userReader);
+//    private final ChannelService channelService = new JCFChannelService(channelRepository, messageRepository, userReader, channelReader);
+//    private final MessageService messageService = new JCFMessageService(channelService, userReader, messageRepository, channelReader, messageReader);
+
+
+    // --- Basic 서비스 ------
+    private final UserService userService = new BasicUserService(userRepository, userReader);
+    private final ChannelService channelService = new BasicChannelService(channelRepository, messageRepository, userReader, channelReader);
+    private final MessageService messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
 
 
     // User
