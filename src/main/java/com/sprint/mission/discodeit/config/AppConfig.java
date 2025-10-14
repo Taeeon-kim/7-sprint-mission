@@ -43,7 +43,7 @@ public class AppConfig {
     private final ChannelRepository channelRepository = new JCFChannelRepository(store.channels);
     private final MessageRepository messageRepository = new JCFMessageRepository(store.messages);
 
-    // helper
+    // public helper/component
     private final UserReader userReader = new UserReader(userRepository);
     private final ChannelReader channelReader = new ChannelReader(channelRepository);
     private final MessageReader messageReader = new MessageReader(messageRepository);
