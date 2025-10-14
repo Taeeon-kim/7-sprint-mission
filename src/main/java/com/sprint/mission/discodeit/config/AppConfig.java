@@ -47,9 +47,8 @@ public class AppConfig {
 
     // --- File 디스크 메모리 서비스 ------
 //    private final UserService userService = new FileUserService(userRepository, userReader);
-//    private final ChannelService channelService = new FileChannelService(channelRepository, messageRepository, userReader);
+//    private final ChannelService channelService = new FileChannelService(channelRepository, messageRepository, userReader, channelReader);
 //    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
-
 
     // --- JCF 인메모리 서비스 ------
     private final UserService userService = new JCFUserService(userRepository, userReader);
