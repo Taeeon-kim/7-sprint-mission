@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
+import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 
 import java.util.*;
@@ -14,23 +15,24 @@ import java.util.*;
 public class FileMessageService implements MessageService {
 
 
-
     private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
+    private final MessageReader messageReader;
 
     public FileMessageService(
-                              MessageRepository messageRepository,
-                              ChannelRepository channelRepository,
-                              UserReader userReader,
-                              ChannelReader channelReader) {
+            MessageRepository messageRepository,
+            ChannelRepository channelRepository,
+            UserReader userReader,
+            ChannelReader channelReader, MessageReader messageReader) {
 
 
         this.messageRepository = messageRepository;
         this.channelRepository = channelRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
+        this.messageReader = messageReader;
     }
 
 
@@ -60,7 +62,7 @@ public class FileMessageService implements MessageService {
 
     @Override
     public Message getMessageById(UUID messageId) {
-        return loadMessageOrThrow(messageId);
+        return messageReader.findMessageOrThrow(messageId);
     }
 
 
@@ -77,12 +79,25 @@ public class FileMessageService implements MessageService {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
         Message message = new Message(content, sender.getId(), channel.getId());
-
-        // NOTE: 3. 메세지를 전역 Message 저장소에 저장
-        messageRepository.save(message);
-        // NOTE: 4. 해당 채널에 messageId 추가 및 업데이트
         channel.addMessageId(message.getId());
-        channelRepository.save(channel);
+        boolean messageSaved = false;
+        try {
+            // NOTE: 3. 메세지를 전역 Message 저장소에 저장
+            messageRepository.save(message);
+            messageSaved = true;
+            // NOTE: 4. 해당 채널에 messageId 추가 및 업데이트
+            channelRepository.save(channel);
+        } catch (Exception e) {
+            channel.removeMessageId(message.getId());
+            if (messageSaved) {
+                try {
+                    messageRepository.deleteById(message.getId());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw new RuntimeException(e);
+        }
 
 //        channel.setUpdatedAt(System.currentTimeMillis()); // NOTE: 보통 메타정보와 메세지 변경을 분리해야하지만 일단 모두 변경으로 인식
 
@@ -94,7 +109,7 @@ public class FileMessageService implements MessageService {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        Message message = getMessageById(messageId);
+        Message message = messageReader.findMessageOrThrow(messageId);
         boolean isUpdated = false;
         if (!content.equals(message.getContent())) {
             isUpdated = message.updateContent(content);
@@ -111,7 +126,7 @@ public class FileMessageService implements MessageService {
         if (messageId == null) {
             throw new IllegalArgumentException("전달값이 잘못되었습니다.");
         }
-        Message message = getMessageById(messageId);
+        Message message = messageReader.findMessageOrThrow(messageId);
         boolean isDeleted = messageRepository.deleteById(message.getId());
         if (isDeleted) {
             Channel channel = channelReader.findChannelOrThrow(message.getChannelId());
@@ -120,9 +135,4 @@ public class FileMessageService implements MessageService {
         }
     }
 
-    private Message loadMessageOrThrow(UUID messageId) {
-        if (messageId == null) throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        return messageRepository.findById(messageId)
-                .orElseThrow(() -> new NoSuchElementException("메세지가 없습니다."));
-    }
 }

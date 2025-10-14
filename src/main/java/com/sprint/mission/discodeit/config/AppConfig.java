@@ -19,6 +19,7 @@ import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
+import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 
@@ -42,17 +43,18 @@ public class AppConfig {
     // helper
     private final UserReader userReader = new UserReader(userRepository);
     private final ChannelReader channelReader = new ChannelReader(channelRepository);
+    private final MessageReader messageReader = new MessageReader(messageRepository);
 
     // --- File 디스크 메모리 서비스 ------
 //    private final UserService userService = new FileUserService(userRepository, userReader);
 //    private final ChannelService channelService = new FileChannelService(channelRepository, messageRepository, userReader);
-//    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader);
+//    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
 
 
     // --- JCF 인메모리 서비스 ------
     private final UserService userService = new JCFUserService(userRepository, userReader);
     private final ChannelService channelService = new JCFChannelService(channelRepository, messageRepository, userReader, channelReader);
-    private final MessageService messageService = new JCFMessageService(channelService, userReader);
+    private final MessageService messageService = new JCFMessageService(channelService, userReader, messageRepository, channelReader, messageReader);
 
 
     // User
