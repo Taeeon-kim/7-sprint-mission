@@ -8,11 +8,11 @@ import java.util.*;
 
 public class FileUserService implements UserService {
 
-    // 파일 이름 정의
+    // 파일 저장 경로
     private static final String FILENAME
             = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\users.sav";
 
-    // 메모리 캐시
+    // 임시저장
     private final Map<UUID, User> users = new HashMap<>();
 
     //싱글톤
