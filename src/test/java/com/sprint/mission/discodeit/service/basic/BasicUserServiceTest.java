@@ -145,11 +145,11 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
             UUID id = UUID.randomUUID();
             User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010");
-            when(userReader.findUserOrThrow(id)).thenReturn(user);
+            when(userReader.findUserOrThrow(id)).thenReturn(user); // 행위검증
 
-            User result = userService.getUserById(id);
+            User result = userService.getUserById(id); // 흐름 검증
 
-            assertEquals(user, result);
+            assertEquals(user, result); // 분기 검증
             verify(userReader).findUserOrThrow(id);
         }
 
