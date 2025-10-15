@@ -68,6 +68,7 @@ public class BasicUserService implements UserService {
             changeFlag |= userById.updatePhoneNumber(phoneNumber);
             if (changeFlag) {
                 userById.setUpdatedAt(System.currentTimeMillis());
+                userRepository.save(userById); // user repository 사용 책임 분리
             }
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(e);
