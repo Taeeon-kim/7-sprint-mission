@@ -9,7 +9,7 @@ import java.util.*;
 public class FileChannelService implements ChannelService {
     //파일 저장 경로
     private static final String FILENAME
-            = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\channels.sav";
+            = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\service\\file\\channels.sav";
 
     // 임시저장
     private final Map<UUID, Channel> channels = new HashMap<>();
