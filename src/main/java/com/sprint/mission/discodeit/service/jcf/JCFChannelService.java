@@ -8,9 +8,7 @@ import java.util.*;
 public class JCFChannelService implements ChannelService {
     private final Map<UUID, Channel> channels = new HashMap<>();
 
-    private JCFChannelService() {
-        System.out.println("생성자");
-    }
+    private JCFChannelService() { }
 
     private static final JCFChannelService INSTANCE = new JCFChannelService();
 

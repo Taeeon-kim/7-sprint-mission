@@ -7,8 +7,11 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.ServiceFactory;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 프로그램 실행 테스트
@@ -17,11 +20,8 @@ import java.util.List;
 public class JavaApplication {
 
     // 서비스 객체 생성
-//    static UserService userService = new JCFUserService();
     static UserService userService = ServiceFactory.getUserService();
-//    static ChannelService channelService = new JCFChannelService();
     static ChannelService channelService = ServiceFactory.getChannelService();
-//    static MessageService messageService = new JCFMessageService();
     static MessageService messageService = ServiceFactory.getMessageService();
 
     public static void main(String[] args) {
@@ -56,7 +56,6 @@ public class JavaApplication {
         // 전체 조회
         userList();
 
-
         System.out.println("───────────────────────────────────────────────────────────");
 
         // 채널 생성
@@ -73,8 +72,8 @@ public class JavaApplication {
         System.out.println("[채널 검색] : " + channelService.readChannel(channels[0].getId()));
 
         // 채널명 수정
-        channels[0].setChanName("공지 및 이벤트");
-        channels[1].setChanName("Q & A");
+        channelService.updateChannel(channels[0].getId(), "공지 및 이벤트");
+        channelService.updateChannel(channels[1].getId(), "Q & A");
 
         // 채널 전체 조회
         channelList();
@@ -96,8 +95,7 @@ public class JavaApplication {
         };
         for (Message m : msgs) {
             messageService.createMsg(m);
-        }
-        ;
+        };
 
         // 메시지 전체 조회(목록)
         messageList(users);
@@ -112,25 +110,29 @@ public class JavaApplication {
         messageList(users);
     }
 
-
-    // 유저 등록
-    public static void createUser(User[] user) {
-
-    }
-
     //유저 전체 조회
     public static void userList() {
         System.out.println("[유저 전체 조회]");
+//        for (User u : userService.readAllUser()) {
+//            System.out.println(u.getNickName());
+//        }
+        Set<String> userSet = new HashSet<>();
         for (User u : userService.readAllUser()) {
-            System.out.println(u.getNickName());
+            if (userSet.add(u.getUserId())) { // userId 기준
+                System.out.println("ID: " + u.getUserId() + " / Name: " + u.getNickName());
+            }
         }
     }
 
     //채널 전체 조회
     public static void channelList() {
         System.out.println("[채널 전체 조회]");
+        Set<String> channelSet = new HashSet<>();
         for (Channel c : channelService.readAllChannels()) {
-            System.out.println(c.getChanName());
+//            System.out.println(c.getChanName());
+            if(channelSet.add(c.getChanName())){
+                System.out.println("채널명: " + c.getChanName());
+            }
         }
     }
 
