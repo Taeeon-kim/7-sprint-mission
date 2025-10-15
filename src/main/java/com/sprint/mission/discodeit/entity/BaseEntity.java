@@ -1,8 +1,9 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class BaseEntity {
+public class BaseEntity implements Serializable {
 
     private final UUID uuid; //객체 식별 id
     private final long createAt; //객체 생성 시간 //유닉스 타임스탬프. 눈으로보는 시간X

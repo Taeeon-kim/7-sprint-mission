@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
@@ -9,7 +10,7 @@ public class ServiceFactory {
     private ServiceFactory() {}
 
     public static UserService getUserService(){
-        return JCFUserService.getInstance();
+        return FileUserService.getInstance();
     }
 
     public static ChannelService getChannelService(){
