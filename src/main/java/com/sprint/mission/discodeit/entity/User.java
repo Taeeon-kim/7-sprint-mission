@@ -8,7 +8,7 @@ public class User extends BaseEntity implements Serializable {
     //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
     private static final long serialVersionUID = 1L;
     private final String userId;  //아이디 string
-    private transient String userPassword;    //비밀번호 string 수정가능
+    private String userPassword;    //비밀번호 string 수정가능
     private String nickName;    //닉네임 = 사용자명 = 별명 string, 수정가능
 
     public User(String userId, String userPassword, String nickName) {
