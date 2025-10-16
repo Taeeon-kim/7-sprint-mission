@@ -129,7 +129,7 @@ class BasicUserServiceTest {
 
         @Test
         @DisplayName("[Branch][Negative] 회원가입 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생 및 repository.save()미호출")
-        void signUp_shouldThrowException_whenValidInput() {
+        void signUp_shouldThrowException_whenInValidInput() {
             // isBlank
             assertThrows(IllegalArgumentException.class, () ->
                     userService.signUp("", "a@b.com", "123", "0101111"));
