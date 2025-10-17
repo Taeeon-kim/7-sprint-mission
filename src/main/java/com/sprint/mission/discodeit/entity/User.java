@@ -11,11 +11,10 @@ public class User extends BasicEntity implements Serializable {
     private String password;
     private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
     private String phoneNumber;
-    private final List<User> friends;
+//    private final List<User> friends;
 
 
     private User() {
-        friends = new ArrayList<>();
     }
 
     public User(String nickname, String email, String password, RoleType role, String phoneNumber) {
@@ -43,7 +42,7 @@ public class User extends BasicEntity implements Serializable {
         this.password = other.password;
         this.role = other.role;
         this.phoneNumber = other.phoneNumber;
-        this.friends = new ArrayList<>(other.friends);
+//        this.friends = new ArrayList<>(other.friends);
     }
 
 
@@ -101,13 +100,7 @@ public class User extends BasicEntity implements Serializable {
     }
 
 
-    public List<User> getFriends() {
-        return friends;
-    }
 
-    public void addFriend(User friend) {
-        friends.add(friend);
-    }
 
     @Override
     public String toString() {
@@ -119,8 +112,7 @@ public class User extends BasicEntity implements Serializable {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", friends=" + friends +
+                ", phoneNumber='" + phoneNumber +
                 '}';
     }
 }
