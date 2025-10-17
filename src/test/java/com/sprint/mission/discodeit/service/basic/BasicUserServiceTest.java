@@ -201,7 +201,7 @@ class BasicUserServiceTest {
         void getUserById_shouldThrowException_whenIdIsInvalid() {
             when(userReader.findUserOrThrow(null)).thenThrow(new IllegalArgumentException("not found"));
             assertThrows(IllegalArgumentException.class, () -> userService.getUserById(null));
-            verify(userRepository, never()).findById(any());
+            verify(userReader).findUserOrThrow(null);
         }
     }
 
@@ -229,6 +229,22 @@ class BasicUserServiceTest {
     @Nested
     @DisplayName("updateUser")
     class UpdateUser {
+
+        @Test
+        @DisplayName("[Exception] 회원수정 - 미존재 유저 일경우 NoSuchElementException 전파")
+        void updateUser_shouldThrowException_whenUserNotFound() {
+            //given
+            UUID id = UUID.randomUUID();
+            when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
+
+            //when+then
+            assertThrows(NoSuchElementException.class, () -> userService.updateUser(id, "new", null, null, null));
+
+            //then
+            verify(userReader).findUserOrThrow(id);
+            verify(userRepository, never()).save(any());
+        }
+
         @Test
         @DisplayName("[Behavior + Branch] 회원수정 - 닉네임 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenNicknameChanged() {
