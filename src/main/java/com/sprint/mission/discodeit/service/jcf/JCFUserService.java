@@ -19,7 +19,7 @@ public class JCFUserService implements UserService {
     }
 
     @Override
-    public void signUp(String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+    public UUID signUp(String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
             /*
                 서비스가 지금 경계(boundary) 이므로, 모든 public 서비스 메서드는 자기 파라미터를 직접 검증(널/형식)하는 걸 권장.
         	•	이후에 내부에서 userService.getUserById(userId)가 또 검증하더라도, 중복을 감수하고 입구에서 한 번 더 명시하는 쪽이 유지보수에 안전함.
@@ -41,6 +41,7 @@ public class JCFUserService implements UserService {
 
         // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
         userRepository.save(newUser);
+        return newUser.getId();
     }
 
     @Override

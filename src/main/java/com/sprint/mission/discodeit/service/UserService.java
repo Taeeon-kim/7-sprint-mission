@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface UserService {
     // 회원가입
-    void signUp(String nickname, String email, String password, String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+    UUID signUp(String nickname, String email, String password, String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
 
     // 회원정보 읽기
     User getUserById(UUID userId);

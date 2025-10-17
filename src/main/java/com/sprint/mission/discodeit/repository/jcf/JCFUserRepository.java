@@ -44,6 +44,7 @@ public class JCFUserRepository implements UserRepository {
     public List<User> findAllByIds(List<UUID> ids) {
         return ids.stream()
                 .map(data::get)
+                .filter(Objects::nonNull)
                 .toList();
     }
 }

@@ -20,7 +20,7 @@ public class FileUserService implements UserService {
     }
 
     @Override
-    public void signUp(String nickname, String email, String password, String phoneNumber) {
+    public UUID signUp(String nickname, String email, String password, String phoneNumber) {
         if (
                 nickname == null ||
                         nickname.isBlank() ||
@@ -36,6 +36,7 @@ public class FileUserService implements UserService {
 
         // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
         userRepository.save(newUser); // create userRepository 사용 책임 분리
+        return newUser.getId();
     }
 
     @Override

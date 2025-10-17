@@ -13,7 +13,7 @@ class UserTest {
     }
 
     @Nested
-    @DisplayName(" User 생성")
+    @DisplayName("User 생성")
     class ConstructorInvariant {
 
         @Test
@@ -43,11 +43,12 @@ class UserTest {
         @DisplayName("[Invariant][Positive] 유효한 인자면 정상 생성")
         void constructor_shouldCreate_whenValid() {
             User u = newUser();
+
             assertEquals("name", u.getNickname());
-            assertEquals("a@b.com", u.getEmail());
-            assertEquals("pw", u.getPassword());
+            assertEquals("example@email.com", u.getEmail());
+            assertEquals("password123", u.getPassword());
             assertEquals(RoleType.USER, u.getRole());
-            assertEquals("010", u.getPhoneNumber());
+            assertEquals("010-1111-1111", u.getPhoneNumber());
             assertNotNull(u.getId());
             assertNotNull(u.getCreatedAt());
             assertNotNull(u.getUpdatedAt());
@@ -109,18 +110,18 @@ class UserTest {
         void updateEmail_shouldNotChange_whenNullOrBlank() {
             User u = newUser();
             assertFalse(u.updateEmail(null));
-            assertEquals("a@b.com", u.getEmail());
+            assertEquals("example@email.com", u.getEmail());
 
             assertFalse(u.updateEmail(""));
-            assertEquals("a@b.com", u.getEmail());
+            assertEquals("example@email.com", u.getEmail());
         }
 
         @Test
         @DisplayName("[Rule][Negative] 이메일이 동일하면 변경되지 않는다")
         void updateEmail_shouldNotChange_whenSame() {
             User u = newUser();
-            assertFalse(u.updateEmail("a@b.com"));
-            assertEquals("a@b.com", u.getEmail());
+            assertFalse(u.updateEmail("example@email.com"));
+            assertEquals("example@email.com", u.getEmail());
         }
     }
 
@@ -140,18 +141,18 @@ class UserTest {
         void updatePassword_shouldNotChange_whenNullOrBlank() {
             User u = newUser();
             assertFalse(u.updatePassword(null));
-            assertEquals("pw", u.getPassword());
+            assertEquals("password123", u.getPassword());
 
             assertFalse(u.updatePassword(""));
-            assertEquals("pw", u.getPassword());
+            assertEquals("password123", u.getPassword());
         }
 
         @Test
         @DisplayName("[Rule][Negative] 비밀번호가 동일하면 변경되지 않는다")
         void updatePassword_shouldNotChange_whenSame() {
             User u = newUser();
-            assertFalse(u.updatePassword("pw"));
-            assertEquals("pw", u.getPassword());
+            assertFalse(u.updatePassword("password123"));
+            assertEquals("password123", u.getPassword());
         }
     }
 
@@ -171,18 +172,18 @@ class UserTest {
         void updatePhone_shouldNotChange_whenNullOrBlank() {
             User u = newUser();
             assertFalse(u.updatePhoneNumber(null));
-            assertEquals("010", u.getPhoneNumber());
+            assertEquals("010-1111-1111", u.getPhoneNumber());
 
             assertFalse(u.updatePhoneNumber(""));
-            assertEquals("010", u.getPhoneNumber());
+            assertEquals("010-1111-1111", u.getPhoneNumber());
         }
 
         @Test
         @DisplayName("[Rule][Negative] 전화번호가 동일하면 변경되지 않는다")
         void updatePhone_shouldNotChange_whenSame() {
             User u = newUser();
-            assertFalse(u.updatePhoneNumber("010"));
-            assertEquals("010", u.getPhoneNumber());
+            assertFalse(u.updatePhoneNumber("010-1111-1111"));
+            assertEquals("010-1111-1111", u.getPhoneNumber());
         }
     }
 
