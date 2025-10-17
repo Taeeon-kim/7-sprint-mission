@@ -17,7 +17,7 @@ class UserTest {
     class ConstructorInvariant {
 
         @Test
-        @DisplayName("[Invariant] 필수입력값 유효하지않으면 예외")
+        @DisplayName("[Invariant][Negative] 필수입력값 유효하지않으면 예외")
         void constructor_shouldThrowException_whenRequiredFieldsInvalid() {
             assertThrows(IllegalArgumentException.class,
                     () -> new User(null, null, null, null, null));
@@ -97,7 +97,7 @@ class UserTest {
     @DisplayName("User 이메일 변경 규칙")
     class EmailRule {
         @Test
-        @DisplayName("[Rule][Positive] 유효하고 기존과 다르면 변경된다")
+        @DisplayName("[Rule][Positive] 이메일이 유효하고 기존과 다르면 변경된다")
         void updateEmail_shouldChange_whenValidAndDifferent() {
             User u = newUser();
             assertTrue(u.updateEmail("b@c.com"));
