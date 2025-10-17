@@ -1,12 +1,16 @@
     /*
         Service 테스트 범위(목적)
         ──────────────────────
-        ▣ 테스트 철학 (Intent-Oriented)
-          - 서비스 단위 테스트는 “의도 중심(Intent-Oriented)”으로 작성하며,
-            그중에서도 “행위(Behavior)”를 중심 축으로 삼는다.
+        ▣ 테스트 철학 (Mockist / Intent-Oriented)
+          - 서비스 단위 테스트는 Mockist 접근법을 따르며, 
+            “의도 중심(Intent-Oriented)”과 “행위(Behavior)”를 검증에 초점을 둔다.
           - 즉, 서비스의 주요 역할이 ‘협력자 간 행위 조율’이므로,
+            Mock/Stub을 활용해 호출·분기·전파를 검증.
             테스트는 행위가 언제(Branch), 어떤 순서로(Flow),
             어떤 예외 상황에서(Propagation) 발생하는지를 함께 검증한다.
+
+            즉, 도메인 테스트가 "상태(Classicist)" 중심이라면,
+            서비스 테스트는 "행위(Mockist)" 중심이다.
 
         1) 행위(Behavior)
            - 올바른 협력자를 호출/미호출 하는가? 위임이 일어났는지 확인
