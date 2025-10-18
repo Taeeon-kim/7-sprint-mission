@@ -48,6 +48,6 @@ public class FileChannelService implements ChannelService {
     @Override
     public void deleteChannel(UUID uuid) {
         channelRepository.deleteChannel(uuid);
-        System.out.println("[Channel 삭제] : " + channelRepository.findByChannel(uuid));
+        System.out.println("[채널 삭제]");
     }
 }
