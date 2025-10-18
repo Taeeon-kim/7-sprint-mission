@@ -1,12 +1,16 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 import java.util.*;
 
 public class JCFChannelService implements ChannelService {
-    private final Map<UUID, Channel> channels = new HashMap<>();
+
+    //저장소
+    private final ChannelRepository repository = JCFChannelRepository.getInstance();
 
     private JCFChannelService() { }
 
@@ -18,29 +22,29 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void createChannel(Channel channel) {
-        channels.put(channel.getId(), channel);
+        repository.save(channel);
         System.out.println("[Channel 생성] : " + channel);
     }
 
     @Override
     public Channel readChannel(UUID uuid) {
-        return channels.get(uuid);
+        return repository.findByChannel(uuid);
     }
 
     @Override
     public List<Channel> readAllChannels() {
-        return new ArrayList<>(channels.values());
+        return repository.findAll();
     }
 
     @Override
     public void updateChannel(UUID uuid, String newName) {
-        Channel ch = channels.get(uuid);
-        if (ch!=null) ch.setChanName(newName);
+        repository.updateChannel(uuid, newName);
+        System.out.println("[채널명 수정] : " + newName);
     }
 
     @Override
     public void deleteChannel(UUID uuid) {
-        Channel removed = channels.remove(uuid);
-        System.out.println("[Channel 삭제] : " + removed);
+        repository.deleteChannel(uuid);
+        System.out.println("[채널 삭제]");
     }
 }
