@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserTest {
+public class UserTest {
 
     private User newUser() {
         return new User("name", "example@email.com", "password123", RoleType.USER, "010-1111-1111");
