@@ -21,7 +21,7 @@ public class UserIntegrationTest {
     private UserService userService;
     private UserRepository userRepository;
     private UserReader userReader;
-
+    // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
     void setUp() {
         userRepository = new JCFUserRepository(store.users);
