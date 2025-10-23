@@ -1,29 +1,20 @@
-package com.sprint.mission.discodeit.service.file;
+package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.UUID;
 
-public class FileMessageSerivce implements MessageService {
+public class BasicMessageService implements MessageService {
 
     //의존성 주입
-    private final MessageRepository messageRepository = FileMessageRepository.getInstance();
+    private final MessageRepository messageRepository;
 
-    //싱글톤
-    private static final FileMessageSerivce INSTANCE = new FileMessageSerivce();
-
-    private FileMessageSerivce(){
-
-    }
-
-    public static FileMessageSerivce getInstance(){
-        return INSTANCE;
+    public BasicMessageService(MessageRepository messageRepository){
+        this.messageRepository = messageRepository;
     }
 
     @Override
