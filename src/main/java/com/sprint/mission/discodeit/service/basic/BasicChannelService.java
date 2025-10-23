@@ -7,11 +7,13 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Service
 public class BasicChannelService implements ChannelService {
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;

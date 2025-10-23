@@ -9,9 +9,11 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
