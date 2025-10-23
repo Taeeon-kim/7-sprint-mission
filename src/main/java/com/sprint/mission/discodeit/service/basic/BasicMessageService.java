@@ -72,7 +72,7 @@ public class BasicMessageService implements MessageService {
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        Message message = new Message(content, sender.getId(), channel.getId());
+        Message message = new Message(content, sender.getId(), channel.getId(), null);
         channel.addMessageId(message.getId());
         boolean messageSaved = false;
         try {

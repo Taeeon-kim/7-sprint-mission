@@ -37,7 +37,7 @@ public class JCFUserService implements UserService {
         ) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
-        User newUser = new User(nickname, email, password, USER, phoneNumber);
+        User newUser = new User(nickname, email, password, USER, phoneNumber, null);
 
         // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
         userRepository.save(newUser);
