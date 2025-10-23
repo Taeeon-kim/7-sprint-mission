@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
+
 /**
  * 프로그램 실행 테스트
  * - User, Channel, 1:1 DM 테스트
@@ -60,9 +62,9 @@ public class JavaApplication {
 
         // 채널 생성
         Channel[] channels = {
-                new Channel("이벤트"),
-                new Channel("공지"),
-                new Channel("자유게시판")
+                new Channel(PUBLIC, "이벤트"),
+                new Channel(PUBLIC, "공지"),
+                new Channel(PUBLIC,"자유게시판")
         };
         for (Channel c : channels) {
             channelService.createChannel(c);

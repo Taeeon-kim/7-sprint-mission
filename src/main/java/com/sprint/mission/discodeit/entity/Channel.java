@@ -3,10 +3,12 @@ package com.sprint.mission.discodeit.entity;
 public class Channel extends BaseEntity {
     //채널 id, 생성, 수정은 BaseEntity에
 
+    private ChannelType type;
     private String chanName; //채널 이름String
 
-    public Channel(String chanName /*, List<Message> messages*/) {
+    public Channel(ChannelType type, String chanName) {
         super();
+        this.type = type;
         this.chanName = chanName;
     }
 
