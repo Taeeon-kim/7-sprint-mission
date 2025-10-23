@@ -2,12 +2,14 @@ package com.sprint.mission.discodeit.service.reader;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 // User 헬퍼
+@Component
 public class UserReader {
 
     private final UserRepository userRepository;

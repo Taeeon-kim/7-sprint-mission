@@ -2,11 +2,13 @@ package com.sprint.mission.discodeit.service.reader;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class MessageReader {
     private final MessageRepository messageRepository;
 

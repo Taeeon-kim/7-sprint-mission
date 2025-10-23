@@ -2,10 +2,12 @@ package com.sprint.mission.discodeit.service.reader;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Component
 public class ChannelReader {
 
     private final ChannelRepository channelRepository;
