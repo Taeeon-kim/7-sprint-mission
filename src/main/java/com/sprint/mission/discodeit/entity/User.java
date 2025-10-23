@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class User extends BaseEntity implements Serializable {
+public class User extends BaseEntity {
 
     //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
     private static final long serialVersionUID = 1L;
