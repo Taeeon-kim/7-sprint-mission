@@ -22,9 +22,9 @@ import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 public class JavaApplication {
 
     // 서비스 객체 생성
-    static UserService userService = ServiceFactory.getUserService();
-    static ChannelService channelService = ServiceFactory.getChannelService();
-    static MessageService messageService = ServiceFactory.getMessageService();
+    static UserService userService;
+    static ChannelService channelService;
+    static MessageService messageService;
 
     public static void main(String[] args) {
 

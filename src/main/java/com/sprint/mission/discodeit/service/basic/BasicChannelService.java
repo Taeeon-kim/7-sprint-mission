@@ -1,27 +1,19 @@
-package com.sprint.mission.discodeit.service.file;
+package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.io.*;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
-public class FileChannelService implements ChannelService {
+public class BasicChannelService implements ChannelService {
 
     //의존성 주입
-    private final ChannelRepository channelRepository = FileChannelRepository.getInstance();
+    private final ChannelRepository channelRepository;
 
-    // 싱글톤
-    private static final FileChannelService INSTANCE = new FileChannelService();
-
-    private FileChannelService(){
-
-    }
-
-    public static FileChannelService getInstance(){
-        return INSTANCE;
+    private BasicChannelService(ChannelRepository channelRepository){
+        this.channelRepository = channelRepository;
     }
 
     @Override
@@ -50,4 +42,5 @@ public class FileChannelService implements ChannelService {
         channelRepository.deleteChannel(uuid);
         System.out.println("[채널 삭제]");
     }
+
 }
