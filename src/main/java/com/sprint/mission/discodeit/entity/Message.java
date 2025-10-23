@@ -1,10 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import lombok.ToString;
 
+import java.time.Instant;
 import java.util.UUID;
 
-@Getter
+@Getter @ToString
 public class Message extends BaseEntity {
 
     private final UUID sendUser; //보내는 사람
@@ -18,34 +20,11 @@ public class Message extends BaseEntity {
         this.inputMsg = inputMsg;
     }
 
-//    public UUID getSendUser() {
-//        return sendUser;
-//    }
-//
-//    public UUID getReceiverUser() {
-//        return receiverUser;
-//    }
-//
-//    public String getInputMsg() {
-//        return inputMsg;
-//    }
-
     public void setInputMsg(String inputMsg) {
         if(inputMsg != null || !inputMsg.equals(this.inputMsg)) {
             this.inputMsg = inputMsg;
-            setUpdatedAt(System.currentTimeMillis()); //변경 시 갱신
+            setUpdatedAt(Instant.now()); //변경 시 갱신
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "sendUser='" + sendUser + '\'' +
-                ", receiverUser='" + receiverUser + '\'' +
-                ", inputMsg='" + inputMsg + '\'' +
-                ", createAt='" + getCreateAt() + '\'' +
-                ", updateAt='" + getUpdatedAt() + '\'' +
-                '}';
     }
 }
 

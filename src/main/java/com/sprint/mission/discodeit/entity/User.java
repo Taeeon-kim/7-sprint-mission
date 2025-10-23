@@ -1,8 +1,11 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import lombok.ToString;
 
-@Getter
+import java.time.Instant;
+
+@Getter @ToString
 public class User extends BaseEntity {
 
     //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
@@ -17,34 +20,13 @@ public class User extends BaseEntity {
         this.nickName = nickName;
     }
 
-//    public String getUserId() {
-//        return userId;
-//    }
-
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
-        setUpdatedAt(System.currentTimeMillis()); //변경 시 시간 갱신
+        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
     }
-
-//    public String getUserPassword() {
-//        return userPassword;
-//    }
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
-        setUpdatedAt(System.currentTimeMillis()); //변경 시 시간 갱신
-    }
-
-//    public String getNickName() {
-//        return nickName;
-//    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "userId='" + userId + '\'' +
-                ", userPassword='" + userPassword + '\'' +
-                ", nickName='" + nickName + '\'' +
-                '}';
+        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
     }
 }

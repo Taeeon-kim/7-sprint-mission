@@ -33,7 +33,7 @@ public class JCFMessageRepository implements MessageRepository {
     public List<Message> findAll(User userId) {
         return messages.values().stream()
                 .filter(m->m.getSendUser().equals(userId.getUuid()) || m.getReceiverUser().equals(userId.getUuid()))
-                .sorted(Comparator.comparingLong(Message::getCreateAt))
+                .sorted(Comparator.comparing(Message::getCreateAt))
                 .collect(Collectors.toList());
     }
 
