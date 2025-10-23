@@ -2,18 +2,21 @@ package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
-public class Message extends BasicEntity implements Serializable {
+public class Message extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String content;
     private final UUID senderId;
     //    private final UUID receiverId; // 일단 dm 없으므로 제외
     private final UUID channelId; // TODO: Channel과 연관관계 체크할것
+    private List<UUID> attachmentIds;
 
-    public Message(String content, UUID senderId, UUID channelId) {
+    public Message(String content, UUID senderId, UUID channelId, List<UUID> attachmentIds) {
+
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content is invalid");
         }
@@ -28,8 +31,8 @@ public class Message extends BasicEntity implements Serializable {
         this.senderId = senderId;
 //        this.receiverId = receiverId;
         this.channelId = channelId;
+        this.attachmentIds = (attachmentIds == null || attachmentIds.isEmpty()) ? new ArrayList<>() : attachmentIds;
     }
-
 
 
     public boolean updateContent(String content) {
