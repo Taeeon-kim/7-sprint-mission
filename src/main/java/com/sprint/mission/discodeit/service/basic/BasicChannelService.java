@@ -5,8 +5,12 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 
 @Service
 public class BasicChannelService implements ChannelService {
@@ -43,6 +47,44 @@ public class BasicChannelService implements ChannelService {
     public void deleteChannel(UUID uuid) {
         channelRepository.deleteChannel(uuid);
         System.out.println("[채널 삭제]");
+    }
+
+    public void runChannelService() {
+        // 채널 생성
+        Channel[] channels = {
+                new Channel(PUBLIC, "이벤트"),
+                new Channel(PUBLIC, "공지"),
+                new Channel(PUBLIC, "자유게시판")
+        };
+        for (Channel c : channels) {
+            createChannel(c);
+        }
+
+        // 채널 조회
+        System.out.println("[채널 검색] : " + readChannel(channels[0].getId()));
+
+        // 채널명 수정
+        updateChannel(channels[1].getId(), "Q & A");
+        updateChannel(channels[0].getId(), "공지 및 이벤트");
+
+        // 채널 전체 조회
+        channelList();
+
+        // 채널 삭제
+        deleteChannel(channels[1].getId());
+        // 채널 전체 조회
+        channelList();
+    }
+
+    //채널 전체 조회
+    public void channelList() {
+        System.out.println("[채널 전체 조회]");
+        Set<String> channelSet = new HashSet<>();
+        for (Channel c : channelRepository.findAll()) {
+            if (channelSet.add(c.getChanName())) {
+                System.out.println("채널명: " + c.getChanName());
+            }
+        }
     }
 
 }

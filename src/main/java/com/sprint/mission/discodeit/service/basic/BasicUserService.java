@@ -5,7 +5,9 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -18,6 +20,7 @@ public class BasicUserService implements UserService {
         this.userRepository = userRepository;
     }
 
+    //CRUD
     @Override
     public void createUser(User user) {
         if(userRepository.findById(user.getId()) != null){
@@ -50,5 +53,51 @@ public class BasicUserService implements UserService {
     @Override
     public void deleteUser(UUID uuid) {
         userRepository.delete(uuid);
+    }
+
+    //작동 테스트
+    public User[] runUserService(){
+        // User 등록
+        User[] users = {
+                new User("test00", "pass123", "Alice"),
+                new User("test02", "0000pass", "Bob"),
+                new User("test03", "12341234", "Chily"),
+                new User("test05", "pw123456", "Tom")
+        };
+        for (User u : users) {
+            createUser(u);
+        }
+
+        // 유저 전체 조회
+        userList();
+
+        // 유저 닉네임 수정 Bob->Minsu
+        updateUser(users[1].getId(), "Minsu");
+
+        // 유저 password 수정 Bob : 0000pass -> 012456pw
+        updatePassword(users[1].getId(), "012456pw");
+
+        // 유저 단건 조회
+        System.out.println("[유저 검색] : " + readUser(users[1].getId()));
+
+        // 유저 삭제
+        deleteUser(users[3].getId());
+        System.out.println("탈퇴 : " + users[3].getNickName() + "님");
+
+        // 전체 조회
+        userList();
+
+        return users;
+    }
+
+    //유저 전체 조회
+    public void userList() {
+        System.out.println("[유저 전체 조회]");
+        Set<String> userSet = new HashSet<>();
+        for (User u : readAllUser()) {
+            if (userSet.add(u.getUserId())) { // userId 기준
+                System.out.println("ID: " + u.getUserId() + " / Name: " + u.getNickName());
+            }
+        }
     }
 }
