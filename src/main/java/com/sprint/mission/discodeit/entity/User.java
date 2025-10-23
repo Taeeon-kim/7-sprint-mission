@@ -1,9 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class User extends BasicEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     private String nickname;
@@ -43,27 +46,6 @@ public class User extends BasicEntity implements Serializable {
         this.role = other.role;
         this.phoneNumber = other.phoneNumber;
 //        this.friends = new ArrayList<>(other.friends);
-    }
-
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public RoleType getRole() {
-        return role;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
     }
 
     public boolean updateNickname(String nickname) {

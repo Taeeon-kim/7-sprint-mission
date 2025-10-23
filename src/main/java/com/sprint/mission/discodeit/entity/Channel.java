@@ -1,8 +1,11 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.*;
 
+@Getter
 public class Channel extends BasicEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     private String title;
@@ -33,17 +36,6 @@ public class Channel extends BasicEntity implements Serializable {
         this.messageIds = new ArrayList<>();
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public List<UUID> getUserIds() {
-        return userIds.stream().toList();
-    }
 
     public void addUser(UUID userId) {
         if(userId == null){
@@ -93,9 +85,6 @@ public class Channel extends BasicEntity implements Serializable {
         return createdByUserId;
     }
 
-    public boolean isPrivate() {
-        return isPrivate;
-    }
 
 
     // TODO: Users 에대한 업데이트는 좀더 고려할것 일반적으로 값만 대입하는게 아닌 List로 User를 지우는지,추가하는지 에대한 내용
