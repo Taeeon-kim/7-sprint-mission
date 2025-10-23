@@ -105,7 +105,7 @@ public class JCFChannelService implements ChannelService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        List<UUID> userIds = channel.getUserIds();
+        List<UUID> userIds = List.copyOf(channel.getUserIds());
         return userReader.findUsersByIds(userIds);
     }
 

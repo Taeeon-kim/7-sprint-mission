@@ -111,8 +111,7 @@ public class BasicChannelService implements ChannelService {
         }
 
         Channel channel = channelReader.findChannelOrThrow(channelId);
-
-        List<UUID> userIds = channel.getUserIds();
+        List<UUID> userIds = List.copyOf(channel.getUserIds());
         return userReader.findUsersByIds(userIds);
     }
 
