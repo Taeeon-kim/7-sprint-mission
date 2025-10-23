@@ -41,16 +41,16 @@ public class JavaApplication {
         userList();
 
         // 유저 닉네임 수정 Bob->Minsu
-        userService.updateUser(users[1].getId(), "Minsu");
+        userService.updateUser(users[1].getUuid(), "Minsu");
 
         // 유저 password 수정 Bob : 0000pass -> 012456pw
-        userService.updatePassword(users[1].getId(), "012456pw");
+        userService.updatePassword(users[1].getUuid(), "012456pw");
 
         // 유저 단건 조회
-        System.out.println("[유저 검색] : " + userService.readUser(users[1].getId()));
+        System.out.println("[유저 검색] : " + userService.readUser(users[1].getUuid()));
 
         // 유저 삭제
-        userService.deleteUser(users[3].getId());
+        userService.deleteUser(users[3].getUuid());
         System.out.println("탈퇴 : " + users[3].getNickName() + "님");
 
         // 전체 조회
@@ -69,17 +69,17 @@ public class JavaApplication {
         }
 
         // 채널 조회
-        System.out.println("[채널 검색] : " + channelService.readChannel(channels[0].getId()));
+        System.out.println("[채널 검색] : " + channelService.readChannel(channels[0].getUuid()));
 
         // 채널명 수정
-        channelService.updateChannel(channels[0].getId(), "공지 및 이벤트");
-        channelService.updateChannel(channels[1].getId(), "Q & A");
+        channelService.updateChannel(channels[0].getUuid(), "공지 및 이벤트");
+        channelService.updateChannel(channels[1].getUuid(), "Q & A");
 
         // 채널 전체 조회
         channelList();
 
         // 채널 삭제
-        channelService.deleteChannel(channels[1].getId());
+        channelService.deleteChannel(channels[1].getUuid());
         // 채널 전체 조회
         channelList();
 
@@ -87,11 +87,11 @@ public class JavaApplication {
 
         // 메시지 전송
         Message[] msgs = {
-                new Message(users[0].getId(), users[1].getId(), "안녕!"),
-                new Message(users[1].getId(), users[0].getId(), "응, 안녕!"),
-                new Message(users[1].getId(), users[0].getId(), "오늘 뭐해?"),
-                new Message(users[0].getId(), users[1].getId(), "오늘 아무것도 안 해!"),
-                new Message(users[1].getId(), users[0].getId(), "그럼 영화보러갈래?"),
+                new Message(users[0].getUuid(), users[1].getUuid(), "안녕!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "응, 안녕!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "오늘 뭐해?"),
+                new Message(users[0].getUuid(), users[1].getUuid(), "오늘 아무것도 안 해!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "그럼 영화보러갈래?"),
         };
         for (Message m : msgs) {
             messageService.createMsg(m);
@@ -101,10 +101,10 @@ public class JavaApplication {
         messageList(users);
 
         //메시지 수정
-        messageService.updateMsg(msgs[3].getId(), "산책할 거 같아!" + "(수정됨)");
+        messageService.updateMsg(msgs[3].getUuid(), "산책할 거 같아!" + "(수정됨)");
 
         //메시지 삭제
-        messageService.deleteMsg(msgs[4].getId());
+        messageService.deleteMsg(msgs[4].getUuid());
 
         //다시 조회
         messageList(users);

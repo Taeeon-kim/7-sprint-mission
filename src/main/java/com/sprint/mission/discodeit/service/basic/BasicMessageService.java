@@ -53,11 +53,11 @@ public class BasicMessageService implements MessageService {
     public void runMessageService(User[] users){
         // 메시지 전송
         Message[] msgs = {
-                new Message(users[0].getId(), users[1].getId(), "안녕!"),
-                new Message(users[1].getId(), users[0].getId(), "응, 안녕!"),
-                new Message(users[1].getId(), users[0].getId(), "오늘 뭐해?"),
-                new Message(users[0].getId(), users[1].getId(), "오늘 아무것도 안 해!"),
-                new Message(users[1].getId(), users[0].getId(), "그럼 영화보러갈래?"),
+                new Message(users[0].getUuid(), users[1].getUuid(), "안녕!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "응, 안녕!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "오늘 뭐해?"),
+                new Message(users[0].getUuid(), users[1].getUuid(), "오늘 아무것도 안 해!"),
+                new Message(users[1].getUuid(), users[0].getUuid(), "그럼 영화보러갈래?"),
         };
         for (Message m : msgs) {
             createMsg(m);
@@ -67,10 +67,10 @@ public class BasicMessageService implements MessageService {
         messageList(users);
 
         //메시지 수정
-        updateMsg(msgs[3].getId(), "산책할 거 같아!" + "(수정됨)");
+        updateMsg(msgs[3].getUuid(), "산책할 거 같아!" + "(수정됨)");
 
         //메시지 삭제
-        deleteMsg(msgs[4].getId());
+        deleteMsg(msgs[4].getUuid());
 
         //다시 조회
         messageList(users);

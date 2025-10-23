@@ -1,8 +1,10 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serializable;
+import lombok.Getter;
+
 import java.util.UUID;
 
+@Getter
 public class Message extends BaseEntity {
 
     private final UUID sendUser; //보내는 사람
@@ -16,17 +18,17 @@ public class Message extends BaseEntity {
         this.inputMsg = inputMsg;
     }
 
-    public UUID getSendUser() {
-        return sendUser;
-    }
-
-    public UUID getReceiverUser() {
-        return receiverUser;
-    }
-
-    public String getInputMsg() {
-        return inputMsg;
-    }
+//    public UUID getSendUser() {
+//        return sendUser;
+//    }
+//
+//    public UUID getReceiverUser() {
+//        return receiverUser;
+//    }
+//
+//    public String getInputMsg() {
+//        return inputMsg;
+//    }
 
     public void setInputMsg(String inputMsg) {
         if(inputMsg != null || !inputMsg.equals(this.inputMsg)) {

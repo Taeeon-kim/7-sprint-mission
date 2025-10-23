@@ -65,7 +65,7 @@ public class FileUserRepository implements UserRepository {
 
     @Override
     public void save(User user) {
-        users.put(user.getId(), user);
+        users.put(user.getUuid(), user);
         saveUserToFile();
     }
 

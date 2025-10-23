@@ -64,7 +64,7 @@ public class FileChannelRepository implements ChannelRepository {
 
     @Override
     public void save(Channel channel) {
-        channels.put(channel.getId(), channel);
+        channels.put(channel.getUuid(), channel);
         saveChannelToFile();
     }
 

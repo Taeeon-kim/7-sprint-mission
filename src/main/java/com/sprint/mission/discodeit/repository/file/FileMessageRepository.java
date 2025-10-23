@@ -66,7 +66,7 @@ public class FileMessageRepository implements MessageRepository {
 
     @Override
     public void save(Message message) {
-        messages.put(message.getId(), message);
+        messages.put(message.getUuid()  , message);
         saveMessageToFile();
     }
 
@@ -78,8 +78,8 @@ public class FileMessageRepository implements MessageRepository {
     @Override
     public List<Message> findAll(User userId) {
         return messages.values().stream()
-                .filter(m->m.getSendUser().equals(userId.getId())
-                || m.getReceiverUser().equals(userId.getId()))
+                .filter(m->m.getSendUser().equals(userId.getUuid())
+                || m.getReceiverUser().equals(userId.getUuid()))
                 .sorted(Comparator.comparingLong(Message::getCreateAt))
                 .collect(Collectors.toList());
     }

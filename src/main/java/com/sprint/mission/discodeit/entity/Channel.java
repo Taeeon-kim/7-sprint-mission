@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
+@Getter
 public class Channel extends BaseEntity {
     //채널 id, 생성, 수정은 BaseEntity에
 
@@ -17,9 +20,9 @@ public class Channel extends BaseEntity {
         setUpdatedAt(System.currentTimeMillis()); //채널 이름 변경 시
     }
 
-    public String getChanName() {
-        return chanName;
-    }
+//    public String getChanName() {
+//        return chanName;
+//    }
 
     @Override
     public String toString() {

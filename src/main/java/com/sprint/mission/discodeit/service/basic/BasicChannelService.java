@@ -61,17 +61,17 @@ public class BasicChannelService implements ChannelService {
         }
 
         // 채널 조회
-        System.out.println("[채널 검색] : " + readChannel(channels[0].getId()));
+        System.out.println("[채널 검색] : " + readChannel(channels[0].getUuid()));
 
         // 채널명 수정
-        updateChannel(channels[1].getId(), "Q & A");
-        updateChannel(channels[0].getId(), "공지 및 이벤트");
+        updateChannel(channels[1].getUuid(), "Q & A");
+        updateChannel(channels[0].getUuid(), "공지 및 이벤트");
 
         // 채널 전체 조회
         channelList();
 
         // 채널 삭제
-        deleteChannel(channels[1].getId());
+        deleteChannel(channels[1].getUuid());
         // 채널 전체 조회
         channelList();
     }

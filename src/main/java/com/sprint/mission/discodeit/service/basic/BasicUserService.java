@@ -23,7 +23,7 @@ public class BasicUserService implements UserService {
     //CRUD
     @Override
     public void createUser(User user) {
-        if(userRepository.findById(user.getId()) != null){
+        if(userRepository.findById(user.getUuid()) != null){
             return;
         }
         userRepository.save(user);
@@ -72,16 +72,16 @@ public class BasicUserService implements UserService {
         userList();
 
         // 유저 닉네임 수정 Bob->Minsu
-        updateUser(users[1].getId(), "Minsu");
+        updateUser(users[1].getUuid(), "Minsu");
 
         // 유저 password 수정 Bob : 0000pass -> 012456pw
-        updatePassword(users[1].getId(), "012456pw");
+        updatePassword(users[1].getUuid(), "012456pw");
 
         // 유저 단건 조회
-        System.out.println("[유저 검색] : " + readUser(users[1].getId()));
+        System.out.println("[유저 검색] : " + readUser(users[1].getUuid()));
 
         // 유저 삭제
-        deleteUser(users[3].getId());
+        deleteUser(users[3].getUuid());
         System.out.println("탈퇴 : " + users[3].getNickName() + "님");
 
         // 전체 조회
