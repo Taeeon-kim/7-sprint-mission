@@ -9,13 +9,11 @@ import java.util.UUID;
 @Getter
 public class UserStatus extends BasicEntity {
     private final UUID userId;
-    private UserStatus status;
     private Instant lastActiveAt;
 
 
-    public UserStatus(UUID userId, UserStatus status, Instant lastActiveAt) {
+    public UserStatus(UUID userId, Instant lastActiveAt) {
         this.userId = userId;
-        this.status = status;
         this.lastActiveAt = lastActiveAt;
     }
 
@@ -25,4 +23,5 @@ public class UserStatus extends BasicEntity {
 
         return recentlyActive ? UserActiveStatus.ONLINE : UserActiveStatus.OFFLINE;
     }
+
 }
