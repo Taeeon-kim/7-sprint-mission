@@ -29,8 +29,10 @@ public class Message extends BaseEntity {
     }
 
     public void setInputMsg(String inputMsg) {
-        this.inputMsg = inputMsg;
-        setUpdatedAt(System.currentTimeMillis()); //변경 시 갱신
+        if(inputMsg != null || !inputMsg.equals(this.inputMsg)) {
+            this.inputMsg = inputMsg;
+            setUpdatedAt(System.currentTimeMillis()); //변경 시 갱신
+        }
     }
 
     @Override
