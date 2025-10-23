@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -13,14 +14,11 @@ import java.util.UUID;
 import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 
 @Service
+@RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
 
     //의존성 주입
     private final ChannelRepository channelRepository;
-
-    public BasicChannelService(ChannelRepository channelRepository){
-        this.channelRepository = channelRepository;
-    }
 
     @Override
     public void createChannel(Channel channel) {

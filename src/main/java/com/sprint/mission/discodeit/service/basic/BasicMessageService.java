@@ -5,23 +5,19 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 
     //의존성 주입
     private final UserService userService;
     private final MessageRepository messageRepository;
-
-    public BasicMessageService(MessageRepository messageRepository,
-                               UserService userService) {
-        this.messageRepository = messageRepository;
-        this.userService = userService;
-    }
 
     @Override
     public void createMsg(Message msg) {
