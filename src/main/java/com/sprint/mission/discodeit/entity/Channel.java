@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @Getter
-public class Channel extends BasicEntity implements Serializable {
+public class Channel extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String title;
     private String description;
@@ -18,13 +18,13 @@ public class Channel extends BasicEntity implements Serializable {
 
     public Channel(String title, String description, UUID createdByUserId, boolean isPrivate) {
 
-        if (title == null || title.isBlank()){
+        if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("title is invalid");
         }
-        if (description == null){
+        if (description == null) {
             throw new IllegalArgumentException("description is null");
         }
-        if (createdByUserId == null){
+        if (createdByUserId == null) {
             throw new IllegalArgumentException("createdByUserId is null");
         }
 
@@ -38,11 +38,11 @@ public class Channel extends BasicEntity implements Serializable {
 
 
     public void addUser(UUID userId) {
-        if(userId == null){
+        if (userId == null) {
             throw new IllegalArgumentException("유저정보가 잘못 되었습니다.");
         }
         boolean isAdded = userIds.add(userId);
-        if  (!isAdded){ // NOTE: 중복체크
+        if (!isAdded) { // NOTE: 중복체크
             throw new IllegalStateException("이미 참여한 유저입니다.");
         }
     }
@@ -53,28 +53,28 @@ public class Channel extends BasicEntity implements Serializable {
         }
         boolean isRemoved = userIds.remove(userId);
 
-        if(!isRemoved){
+        if (!isRemoved) {
             throw new IllegalStateException("채널에서 유저가 없습니다.");
         }
     }
 
     public void removeMessageId(UUID messageId) {
-        if(messageId == null){
+        if (messageId == null) {
             throw new IllegalArgumentException("메세지정보가 잘못 되었습니다.");
         }
         messageIds.remove(messageId);
     }
 
     public void addMessageId(UUID messageId) {
-        if (messageId == null){
+        if (messageId == null) {
             throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");
         }
         messageIds.add(messageId);
 
     }
 
-    public boolean isMember(UUID userId){
-            return userIds.contains(userId);
+    public boolean isMember(UUID userId) {
+        return userIds.contains(userId);
     }
 
     public List<UUID> getMessageIds() {
@@ -84,7 +84,6 @@ public class Channel extends BasicEntity implements Serializable {
     public UUID getCreatedByUserId() {
         return createdByUserId;
     }
-
 
 
     // TODO: Users 에대한 업데이트는 좀더 고려할것 일반적으로 값만 대입하는게 아닌 List로 User를 지우는지,추가하는지 에대한 내용
