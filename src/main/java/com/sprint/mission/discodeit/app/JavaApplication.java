@@ -44,7 +44,7 @@ public class JavaApplication {
         userService.updateUser(users[1].getId(), "Minsu");
 
         // 유저 password 수정 Bob : 0000pass -> 012456pw
-        userService.updatePw(users[1].getId(), "012456pw");
+        userService.updatePassword(users[1].getId(), "012456pw");
 
         // 유저 단건 조회
         System.out.println("[유저 검색] : " + userService.readUser(users[1].getId()));
@@ -113,9 +113,6 @@ public class JavaApplication {
     //유저 전체 조회
     public static void userList() {
         System.out.println("[유저 전체 조회]");
-//        for (User u : userService.readAllUser()) {
-//            System.out.println(u.getNickName());
-//        }
         Set<String> userSet = new HashSet<>();
         for (User u : userService.readAllUser()) {
             if (userSet.add(u.getUserId())) { // userId 기준
@@ -129,7 +126,6 @@ public class JavaApplication {
         System.out.println("[채널 전체 조회]");
         Set<String> channelSet = new HashSet<>();
         for (Channel c : channelService.readAllChannels()) {
-//            System.out.println(c.getChanName());
             if(channelSet.add(c.getChanName())){
                 System.out.println("채널명: " + c.getChanName());
             }

@@ -41,7 +41,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public void updatePw(UUID uuid, String newPassword) {
+    public void updatePassword(UUID uuid, String newPassword) {
         userRepository.updatePassword(uuid, newPassword);
     }
 

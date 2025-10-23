@@ -15,7 +15,7 @@ public interface UserService {
 
     void updateUser(UUID uuid, String newName); //User 정보 수정
 
-    void updatePw(UUID uuid, String newPassword); //User 정보 수정
+    void updatePassword(UUID uuid, String newPassword); //User 정보 수정
 
     void deleteUser(UUID uuid); //UUID로 User삭제
 }
