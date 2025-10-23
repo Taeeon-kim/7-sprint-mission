@@ -3,19 +3,20 @@ package com.sprint.mission.discodeit.entity;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
 public abstract class BasicEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     private final UUID id;
-    private final Long createdAt;
-    private Long updatedAt;
+    private final Instant createdAt;
+    private Instant updatedAt;
 
     protected BasicEntity() { // NOTE: 직접 생성 불가 + 자식에서 호출하도록
         this.id = UUID.randomUUID();
-        this.createdAt = System.currentTimeMillis();
-        this.updatedAt = System.currentTimeMillis();
+        this.createdAt = Instant.ofEpochMilli(System.currentTimeMillis());
+        this.updatedAt = Instant.ofEpochMilli(System.currentTimeMillis());
 
     }
 
@@ -30,11 +31,11 @@ public abstract class BasicEntity implements Serializable {
             throw new IllegalArgumentException("updatedAt is null");
         }
 
-        if (updatedAt < this.updatedAt) {
+        if (Instant.ofEpochMilli(updatedAt).isBefore(this.updatedAt)) {
             throw new IllegalStateException("업데이트 날짜가 잘못되었습니다.");
         }
 
-        this.updatedAt = updatedAt;
+        this.updatedAt = Instant.ofEpochMilli(updatedAt);
     }
 
     @Override
