@@ -15,19 +15,20 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryContentIntegrationTest {
-    private InMemoryStore store;
+    private final InMemoryStore store = new InMemoryStore();
     private BinaryContentRepository binaryContentRepository;
     private BinaryContentService binaryContentService;
 
     @BeforeEach
     void setUp() {
-        store = new InMemoryStore();
+
         binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
         binaryContentService = new BasicBinaryContentService(binaryContentRepository);
     }
 
     @AfterEach
     void tearDown() {
+        store.binaryContents.clear();
     }
 
     @Nested
