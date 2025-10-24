@@ -19,13 +19,14 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public void deleteById(UUID id) {
+    public boolean deleteById(UUID id) {
         Map<UUID, User> allUsers = findAllMap();
         User remove = allUsers.remove(id);
         if (remove != null) {
             Store.saveMap(Store.USER_DATA_FILE, allUsers);
+            return true;
         }
-
+        return false;
     }
 
     @Override

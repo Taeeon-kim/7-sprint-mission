@@ -41,12 +41,12 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public void deleteById(UUID id) {
+    public boolean deleteById(UUID id) {
         Map<UUID, Channel> allChannels = findAllMap();
         Channel remove = allChannels.remove(id);
         if (remove != null) {
             Store.saveMap(Store.CHANNEL_DATA_FILE, allChannels);
-            return;
+            return true;
         }
         throw new IllegalStateException("failed to delete channel");
     }
