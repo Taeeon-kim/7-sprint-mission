@@ -16,12 +16,12 @@ import java.util.UUID;
 public class BinaryContent {
 
     private final UUID uuid;
-    private final UUID userId;
-    private final UUID messageId;
-    private final byte[] data;
-    private final String fileName;
-    private final String contentType;
-    private final Instant createdAt;
+    private final UUID userId; // 유저 프로필
+    private final UUID messageId; // 메시지 첨부 파일
+    private final byte[] data; // 실제 데이터 파일
+    private final String fileName; // 파일 이름
+    private final String contentType; // 이미지 타입
+    private final Instant createdAt; // 생성 시간
 
     public BinaryContent(UUID uuid, UUID userId, UUID messageId, byte[] data, String fileName, String contentType, Instant createdAt) {
         this.uuid = uuid;
