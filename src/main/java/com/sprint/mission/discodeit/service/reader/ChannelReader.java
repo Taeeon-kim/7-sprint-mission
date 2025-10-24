@@ -21,6 +21,6 @@ public class ChannelReader {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         return channelRepository.findById(channelId)
-                .orElseThrow(()-> new NoSuchElementException("채널이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
     }
 }

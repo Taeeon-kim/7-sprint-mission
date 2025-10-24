@@ -39,8 +39,6 @@ public class BasicUserService implements UserService {
         }
 
 
-
-
         User newUser = new User(request.getNickname(), request.getEmail(), request.getPassword(), USER, request.getPhoneNumber(), request.getProfileId());
 
         // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라

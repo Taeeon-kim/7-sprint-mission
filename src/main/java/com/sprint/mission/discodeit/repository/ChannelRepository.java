@@ -10,9 +10,13 @@ import java.util.UUID;
 public interface ChannelRepository {
 
     void save(Channel channel);
+
     Optional<Channel> findById(UUID channelId);
+
     Map<UUID, Channel> findAllMap();
+
     List<Channel> findAll();
+
     void deleteById(UUID channelId);
 
 }

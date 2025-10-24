@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public class ReadStatus extends BasicEntity{
+public class ReadStatus extends BasicEntity {
     UUID userId;
     UUID channelId;
     Instant readAt;
