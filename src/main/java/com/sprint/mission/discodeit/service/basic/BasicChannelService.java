@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class BasicChannelService implements ChannelService {
         changeFlag |= channelById.updateTitle(title);
         changeFlag |= channelById.updateDescription(description);
         if (changeFlag) {
-            channelById.setUpdatedAt(System.currentTimeMillis());
+            channelById.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
             channelRepository.save(channelById);
         }
 

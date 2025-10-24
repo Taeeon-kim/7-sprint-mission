@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -110,7 +111,7 @@ public class BasicMessageService implements MessageService {
         }
 
         if (isUpdated) {
-            message.setUpdatedAt(System.currentTimeMillis());
+            message.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
             messageRepository.save(message);
         }
     }

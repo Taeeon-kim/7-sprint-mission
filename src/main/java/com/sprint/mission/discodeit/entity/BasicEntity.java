@@ -26,16 +26,16 @@ public abstract class BasicEntity implements Serializable {
         this.updatedAt = user.updatedAt;
     }
 
-    public void setUpdatedAt(Long updatedAt) {
+    public void setUpdatedAt(Instant updatedAt) {
         if (updatedAt == null) {
             throw new IllegalArgumentException("updatedAt is null");
         }
 
-        if (Instant.ofEpochMilli(updatedAt).isBefore(this.updatedAt)) {
+        if (updatedAt.isBefore(this.updatedAt)) {
             throw new IllegalStateException("업데이트 날짜가 잘못되었습니다.");
         }
 
-        this.updatedAt = Instant.ofEpochMilli(updatedAt);
+        this.updatedAt = updatedAt;
     }
 
     @Override
