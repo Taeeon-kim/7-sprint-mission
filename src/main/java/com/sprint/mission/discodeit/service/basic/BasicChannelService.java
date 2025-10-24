@@ -49,7 +49,7 @@ public class BasicChannelService implements ChannelService {
         changeFlag |= channelById.updateTitle(title);
         changeFlag |= channelById.updateDescription(description);
         if (changeFlag) {
-            channelById.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
+            channelById.setUpdatedAt(Instant.now());
             channelRepository.save(channelById);
         }
 

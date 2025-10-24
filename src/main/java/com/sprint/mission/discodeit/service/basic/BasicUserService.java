@@ -74,7 +74,7 @@ public class BasicUserService implements UserService {
             changeFlag |= userById.updatePassword(password);
             changeFlag |= userById.updatePhoneNumber(phoneNumber);
             if (changeFlag) {
-                userById.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
+                userById.setUpdatedAt(Instant.now());
                 userRepository.save(userById); // user repository 사용 책임 분리
             }
         } catch (NoSuchElementException e) {

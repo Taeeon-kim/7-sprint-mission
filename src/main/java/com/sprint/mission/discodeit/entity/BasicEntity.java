@@ -15,8 +15,8 @@ public abstract class BasicEntity implements Serializable {
 
     protected BasicEntity() { // NOTE: 직접 생성 불가 + 자식에서 호출하도록
         this.id = UUID.randomUUID();
-        this.createdAt = Instant.ofEpochMilli(System.currentTimeMillis());
-        this.updatedAt = Instant.ofEpochMilli(System.currentTimeMillis());
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
 
     }
 

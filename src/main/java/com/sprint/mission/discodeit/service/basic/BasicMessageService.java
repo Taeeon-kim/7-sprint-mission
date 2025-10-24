@@ -111,7 +111,7 @@ public class BasicMessageService implements MessageService {
         }
 
         if (isUpdated) {
-            message.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
+            message.setUpdatedAt(Instant.now());
             messageRepository.save(message);
         }
     }
