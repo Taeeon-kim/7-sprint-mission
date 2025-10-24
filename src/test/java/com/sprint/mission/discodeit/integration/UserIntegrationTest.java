@@ -65,8 +65,38 @@ public class UserIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 잘못된 입력은 예외 & DB 변화 없음")
         void signUp_invalid_blocked() {
             assertThrows(IllegalArgumentException.class,
-                    () -> userService.signUp(new UserRequestDto("", "a@b.com", "pw", "010",null)));
+                    () -> userService.signUp(new UserRequestDto("", "a@b.com", "pw", "010", null)));
             assertEquals(0, userRepository.findAll().size());
+        }
+
+        @Test
+        @DisplayName("[Integration][Negative] 회원가입 - 중복된 이메일일 경우 예외")
+        void signup_whenDuplicate_email_thenThrows() {
+            // given
+            userService.signUp(new UserRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            int before = userRepository.findAll().size();
+
+            // when & then
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserRequestDto("different", "example@email.com", "password", "010-1111-2222", null)));
+
+            // then
+            int after = userRepository.findAll().size();
+            assertEquals(before, after);
+        }
+
+        @Test
+        @DisplayName("[Integration][Negative] 회원가입 - 중복된 이름일 경우 예외")
+        void signup_whenDuplicate_nickname_thenThrows() {
+            // given
+            userService.signUp(new UserRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            int before = userRepository.findAll().size();
+
+            // when & then
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserRequestDto("name", "different@email.com", "password", "010-1111-2222", null)));
+
+            // then
+            int after = userRepository.findAll().size();
+            assertEquals(before, after);
         }
 
     }
