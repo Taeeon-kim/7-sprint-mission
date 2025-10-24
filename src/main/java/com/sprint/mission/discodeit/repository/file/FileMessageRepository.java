@@ -13,10 +13,11 @@ import java.util.UUID;
 @Repository
 public class FileMessageRepository implements MessageRepository {
     @Override
-    public void save(Message message) {
+    public Message save(Message message) {
         Map<UUID, Message> allMessages = findAllMap();
         allMessages.put(message.getId(), message);
         Store.saveMap(Store.MESSAGE_DATA_FILE, allMessages);
+        return message;
     }
 
     @Override

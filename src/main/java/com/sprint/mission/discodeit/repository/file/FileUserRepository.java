@@ -12,10 +12,11 @@ public class FileUserRepository implements UserRepository {
 
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         Map<UUID, User> allUsers = findAllMap();
         allUsers.put(user.getId(), user);
         Store.saveMap(Store.USER_DATA_FILE, allUsers);
+        return user;
     }
 
     @Override

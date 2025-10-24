@@ -14,10 +14,11 @@ import java.util.UUID;
 public class FileChannelRepository implements ChannelRepository {
 
     @Override
-    public void save(Channel channel) {
+    public Channel save(Channel channel) {
         Map<UUID, Channel> allChannels = findAllMap();
         allChannels.put(channel.getId(), channel);
         Store.saveMap(Store.CHANNEL_DATA_FILE, allChannels);
+        return channel;
     }
 
     @Override
