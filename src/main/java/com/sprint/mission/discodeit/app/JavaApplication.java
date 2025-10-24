@@ -94,17 +94,17 @@ public class JavaApplication {
                 new Message(users[1].getUuid(), users[0].getUuid(), "그럼 영화보러갈래?"),
         };
         for (Message m : msgs) {
-            messageService.createMsg(m);
+            messageService.createMessage(m);
         };
 
         // 메시지 전체 조회(목록)
         messageList(users);
 
         //메시지 수정
-        messageService.updateMsg(msgs[3].getUuid(), "산책할 거 같아!" + "(수정됨)");
+        messageService.updateMessage(msgs[3].getUuid(), "산책할 거 같아!" + "(수정됨)");
 
         //메시지 삭제
-        messageService.deleteMsg(msgs[4].getUuid());
+        messageService.deleteMessage(msgs[4].getUuid());
 
         //다시 조회
         messageList(users);
@@ -135,7 +135,7 @@ public class JavaApplication {
     //Message 조회
     public static void messageList(User[] users) {
 
-        List<Message> userMsg = messageService.getAllMsg(users[0]);
+        List<Message> userMsg = messageService.getUserAllMessage(users[0]);
 
         System.out.println(users[0].getNickName() + "의 DM");
 
@@ -145,7 +145,7 @@ public class JavaApplication {
 
         for (Message m : userMsg) {
             String messageContnet = m.getInputMsg();
-            System.out.println((userService.readUser(m.getSendUser()).getNickName()) + " : " + messageContnet);
+            System.out.println((userService.readUser(m.getSenderId()).getNickName()) + " : " + messageContnet);
         }
     }
 

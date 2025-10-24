@@ -32,8 +32,8 @@ public class DiscodeitApplication {
         BasicMessageService messageService = ctx.getBean(BasicMessageService.class);
 
         User[] users = userService.runUserService();
-        channelService.runChannelService();
-        messageService.runMessageService(users);
+        Channel[] channels = channelService.runChannelService();
+        messageService.runMessageService(users, channels);
     }
 
 }

@@ -47,7 +47,7 @@ public class BasicChannelService implements ChannelService {
         System.out.println("[채널 삭제]");
     }
 
-    public void runChannelService() {
+    public Channel[] runChannelService() {
         // 채널 생성
         Channel[] channels = {
                 new Channel(PUBLIC, "이벤트"),
@@ -72,6 +72,8 @@ public class BasicChannelService implements ChannelService {
         deleteChannel(channels[1].getUuid());
         // 채널 전체 조회
         channelList();
+
+        return channels;
     }
 
     //채널 전체 조회

@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -30,11 +31,15 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<Message> findAll(User userId) {
+    public List<Message> findUserAll(User userId) {
         return messages.values().stream()
-                .filter(m->m.getSendUser().equals(userId.getUuid()) || m.getReceiverUser().equals(userId.getUuid()))
+                .filter(m->m.getSenderId().equals(userId.getUuid()))
                 .sorted(Comparator.comparing(Message::getCreateAt))
                 .collect(Collectors.toList());
+    }
+
+    public List<Message> findChannelAll(Channel channelId) {
+        return List.of();
     }
 
     @Override

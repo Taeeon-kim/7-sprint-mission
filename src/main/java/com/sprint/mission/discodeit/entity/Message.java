@@ -9,14 +9,14 @@ import java.util.UUID;
 @Getter @ToString
 public class Message extends BaseEntity {
 
-    private final UUID sendUser; //보내는 사람
-    private final UUID receiverUser; //받는 사람
-    private String inputMsg; //메시지 내용
+    private final UUID senderId; // 보낸 사람
+    private final UUID channelId; // 작성한 채널
+    private String inputMsg; // 내용
 
-    public Message(UUID sendUser, UUID receiverUser, String inputMsg) {
+    public Message(UUID senderId, UUID channelId, String inputMsg) {
         super();
-        this.sendUser = sendUser;
-        this.receiverUser = receiverUser;
+        this.senderId = senderId;
+        this.channelId = channelId;
         this.inputMsg = inputMsg;
     }
 
