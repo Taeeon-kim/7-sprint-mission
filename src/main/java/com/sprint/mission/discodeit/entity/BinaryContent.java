@@ -7,13 +7,16 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public class BinaryContent extends BasicEntity implements Serializable {
+public class BinaryContent implements Serializable {
     private static final long serialVersionUID = 1L;
     private UUID id;
     private String fileName;
     private byte[] bytes;
     private Instant createdAt;
-    private String contentType; // TODO: enum으로 필요한지
+    private String contentType;
 
+    public BinaryContent() {
+        this.id = UUID.randomUUID();
+    }
 
 }
