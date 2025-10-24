@@ -1,84 +1,22 @@
 package com.sprint.mission.discodeit.config;
 
-import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.basic.BasicChannelService;
-import com.sprint.mission.discodeit.service.basic.BasicMessageService;
-import com.sprint.mission.discodeit.service.basic.BasicUserService;
-import com.sprint.mission.discodeit.service.reader.ChannelReader;
-import com.sprint.mission.discodeit.service.reader.MessageReader;
-import com.sprint.mission.discodeit.service.reader.UserReader;
+
+import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.store.InMemoryStore;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+
+@Configuration
 public class AppConfig {
-    // Service Config
-    // NOTE: 싱글톤을 유지하기위해 private final로 한번 생성
 
-
-    // --- File 디스크 메모리 레포지토리------
-//    private final UserRepository userRepository = new FileUserRepository();
-//    private final ChannelRepository channelRepository = new FileChannelRepository();
-//    private final MessageRepository messageRepository = new FileMessageRepository();
-
-    // --- JCF 인메모리 레포지토리 ------
-    private final InMemoryStore store = new InMemoryStore(); // JCF용 인메모리
-
-    private final UserRepository userRepository = new JCFUserRepository(store.users);
-    private final ChannelRepository channelRepository = new JCFChannelRepository(store.channels);
-    private final MessageRepository messageRepository = new JCFMessageRepository(store.messages);
-
-    // public helper/component
-    private final UserReader userReader = new UserReader(userRepository);
-    private final ChannelReader channelReader = new ChannelReader(channelRepository);
-    private final MessageReader messageReader = new MessageReader(messageRepository);
-
-    // --- File 디스크 메모리 서비스 ------
-//    private final UserService userService = new FileUserService(userRepository, userReader);
-//    private final ChannelService channelService = new FileChannelService(channelRepository, messageRepository, userReader, channelReader);
-//    private final MessageService messageService = new FileMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
-
-    // --- JCF 인메모리 서비스 ------
-//    private final UserService userService = new JCFUserService(userRepository, userReader);
-//    private final ChannelService channelService = new JCFChannelService(channelRepository, messageRepository, userReader, channelReader);
-//    private final MessageService messageService = new JCFMessageService(channelService, userReader, messageRepository, channelReader, messageReader);
-
-
-    // --- Basic 서비스 ------
-    private final UserService userService = new BasicUserService(userRepository, userReader);
-    private final ChannelService channelService = new BasicChannelService(channelRepository, messageRepository, userReader, channelReader);
-    private final MessageService messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
-
-
-    // User
-    public UserService userService() {
-        return userService;
+    @Bean
+    public InMemoryStore inMemoryStore() {
+        return new InMemoryStore();
     }
 
-    public UserRepository userRepository() {
-        return userRepository;
-    }
-
-    // Channel
-    public ChannelService channelService() {
-        return channelService;
-    }
-
-    public ChannelRepository channelRepository() {
-        return channelRepository;
-    }
-
-    // Message
-    public MessageService messageService() {
-        return messageService;
+    @Bean
+    public JCFBinaryContentRepository jcfBinaryContentRepository(InMemoryStore store) {
+        return new JCFBinaryContentRepository(store.binaryContents);
     }
 }
