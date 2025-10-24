@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,19 +47,23 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public List<Message> getUserAllMessage(User user) {
-        if(user == null){
-            return List.of();
-        }
-        return messageRepository.findUserAll(user);
-    }
-
-    @Override
     public List<Message> getChannelAllMessage(Channel channel) {
         if(channel == null){
             return List.of();
         }
+        String channelName = channel.getChanName();
+        System.out.println("채널 [" + channelName + "] 의 메시지 출력");
         return messageRepository.findChannelAll(channel);
+    }
+
+    @Override
+    public List<Message> getUserAllMessage(User user) {
+        if(user == null){
+            return List.of();
+        }
+        String nickName = user.getNickName();
+        System.out.println( "[" + nickName + "] 의 메시지 출력");
+        return messageRepository.findUserAll(user);
     }
 
     @Override
@@ -97,8 +102,8 @@ public class BasicMessageService implements MessageService {
             createMessage(m);
         };
 
-        // 메시지 전체 조회(목록)
-//        messageList(users);
+        // 메시지 전체 조회(채널기준)
+        channelMessageList(channels[0]);
 
         //메시지 수정
         updateMessage(msgs[3].getUuid(), "관심이 없어졌어" + "(수정됨)");
@@ -106,24 +111,50 @@ public class BasicMessageService implements MessageService {
         //메시지 삭제
         deleteMessage(msgs[4].getUuid());
 
-        //다시 조회
-//        messageList(users);
+        // 메시지 전체 조회(채널기준)
+        channelMessageList(channels[0]);
+
+        // 메시지 전체 조회(유저기준)
+        userMessageList(users[0]);
+
     }
 
-    //Message 조회
-//    public void messageList(User[] users) {
-//
-//        List<Message> userMsg = getMessage();
-//
-//        System.out.println(users[0].getNickName() + "작성글");
-//
-//        if (userMsg.isEmpty()) {
-//            System.out.println("(대화없음)");
-//        }
-//
-//        for (Message m : userMsg) {
-//            String messageContnet = m.getInputMsg();
-//            System.out.println((userService.readUser(m.getSenderId()).getNickName()) + " : " + messageContnet);
-//        }
-//    }
+    public void channelMessageList(Channel channel){
+        List<Message> messages = getChannelAllMessage(channel);
+
+        if(messages.isEmpty()){
+            System.out.println("작성된 메시지가 없습니다.");
+            return;
+        }
+
+        for (Message m: messages) {
+            String nickName = userService.readUser(m.getSenderId()).getNickName();
+            String channelName = channelService.readChannel(m.getChannelId()).getChanName();
+            System.out.println(
+                    "[" + m.getCreateAt() + "] "
+                            + nickName + " - "
+                            + channelName + " : "
+                            + m.getInputMsg()
+            );
+        }
+    }
+
+    public void userMessageList(User user){
+        List<Message> messages = getUserAllMessage(user);
+        if(messages.isEmpty()){
+            System.out.println("작성된 메시지가 없습니다");
+            return;
+        }
+        for (Message m: messages) {
+            String nickName = userService.readUser(m.getSenderId()).getNickName();
+            String channelName = channelService.readChannel(m.getChannelId()).getChanName();
+            System.out.println(
+                    "[" + m.getCreateAt() + "] "
+                    + nickName + " - "
+                    + channelName + " : "
+                    + m.getInputMsg()
+            );
+        }
+    }
+
 }

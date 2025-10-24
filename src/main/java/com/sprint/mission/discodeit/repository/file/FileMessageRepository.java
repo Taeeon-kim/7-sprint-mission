@@ -85,7 +85,10 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     public List<Message> findChannelAll(Channel channelId) {
-        return List.of();
+        return messages.values().stream()
+                .filter(m->m.getChannelId().equals(channelId.getUuid()))
+                .sorted(Comparator.comparing(Message::getCreateAt))
+                .collect(Collectors.toList());
     }
 
 
