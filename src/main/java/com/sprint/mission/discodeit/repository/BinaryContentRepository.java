@@ -2,5 +2,7 @@ package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
 
-public interface BinaryContentRepository extends Repository<BinaryContent, String> {
+import java.util.UUID;
+
+public interface BinaryContentRepository extends Repository<BinaryContent, UUID> {
 }
