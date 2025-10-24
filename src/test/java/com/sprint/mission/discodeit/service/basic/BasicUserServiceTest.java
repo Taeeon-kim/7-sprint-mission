@@ -1,0 +1,340 @@
+package com.sprint.mission.discodeit.service.basic;
+
+import com.sprint.mission.discodeit.entity.RoleType;
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.reader.UserReader;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class BasicUserServiceTest {
+
+    private UserRepository userRepository;
+    private UserReader userReader;
+    private BasicUserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = mock(UserRepository.class);
+        userReader = mock(UserReader.class);
+        userService = new BasicUserService(userRepository, userReader);
+    }
+
+    // --- grouped by use-case with @Nested ---
+
+    @Nested
+    @DisplayName("signUp")
+    class SignUp {
+        @Test
+        @DisplayName("[Behavior] 회원가입 - 유효한 입력값일때 userRepository.save() 호출")
+        void signUp_shouldCallUserRepositorySave_whenValidInput() {
+            // given
+            String nickname = "Taeeon";
+            String email = "taeeon@test.com";
+            String password = "1234";
+            String phone = "01012345678";
+
+            // when
+            userService.signUp(nickname, email, password, phone); // 흐름검증
+
+            // then
+            verify(userRepository, times(1)).save(any(User.class)); // 행위 검증
+        }
+
+        @Test
+        @DisplayName("[Branch][Negative] 회원가입 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생 및 repository.save()미호출")
+        void signUp_shouldThrowException_whenInValidInput() {
+            // isBlank
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("", "a@b.com", "123", "0101111"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "", "pw", "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", "", "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", "pw", ""));
+
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp(" ", "a@b.com", "123", "0101111"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", " ", "pw", "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", " ", "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", "pw", " "));
+
+            // null
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp(null, "a@b.com", "123", "0101111"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", null, "pw", "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", null, "010"));
+            assertThrows(IllegalArgumentException.class, () ->
+                    userService.signUp("nick", "a@b.com", "pw", null));
+
+            verify(userRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("getUserById")
+    class GetUserById {
+        @Test
+        @DisplayName("[Behavior] 회원조회 - userReader.findUserOrThrow(id) 호출 (조회 위임 검증)")
+        void getUserById_shouldDelegateToUserReader_whenCalled() {
+            UUID id = UUID.randomUUID();
+            userService.getUserById(id);
+
+            verify(userReader).findUserOrThrow(id);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch][Positive] 회원조회 - Reader에 위임하고 결과 그대로 반환")
+        void getUserById_shouldReturnUser_whenFound() {
+            UUID id = UUID.randomUUID();
+            User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010");
+            when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
+
+            User result = userService.getUserById(id); // 흐름 검증
+            assertEquals(user, result); // 분기 검증
+            verify(userReader).findUserOrThrow(id); // 행위검증
+        }
+
+        @Test
+        @DisplayName("[Exception] 회원조회 - 기존 회원이 없다면 NoSuchElementException 예외 전파")
+        void getUserById_shouldPropagateException_whenReaderThrowNotFound() {
+            UUID id = UUID.randomUUID();
+            when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
+
+            assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
+        }
+
+        @Test
+        @DisplayName("[Branch][Negative] 회원조회 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생")
+        void getUserById_shouldThrowException_whenIdIsInvalid() {
+            when(userReader.findUserOrThrow(null)).thenThrow(new IllegalArgumentException("not found"));
+            assertThrows(IllegalArgumentException.class, () -> userService.getUserById(null));
+            verify(userReader).findUserOrThrow(null);
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteUser")
+    class DeleteUser {
+        @Test
+        @DisplayName("[Behavior] 회원삭제 - userRepository.deleteById() 위임 호출")
+        void deleteUser_shouldCallRepositoryDelete_whenValidId() {
+            UUID id = UUID.randomUUID();
+
+            userService.deleteUser(id);
+
+            verify(userRepository, times(1)).deleteById(id);
+        }
+
+        @Test
+        @DisplayName("[Branch][Negative] 회원삭제 - 유효하지않은 입력값일때 IllegalArgumentException 발생 및 Repository 미호출")
+        void deleteUser_shouldThrowException_whenIdIsNull() {
+            assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(null));
+            verify(userRepository, never()).deleteById(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUser")
+    class UpdateUser {
+
+        @Test
+        @DisplayName("[Exception] 회원수정 - 미존재 유저 일경우 NoSuchElementException 전파")
+        void updateUser_shouldThrowException_whenUserNotFound() {
+            //given
+            UUID id = UUID.randomUUID();
+            when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
+
+            //when+then
+            assertThrows(NoSuchElementException.class, () -> userService.updateUser(id, "new", null, null, null));
+
+            //then
+            verify(userReader).findUserOrThrow(id);
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch] 회원수정 - 닉네임 변경 시 userRepository.save() 호출")
+        void updateUser_shouldCallRepositorySave_whenNicknameChanged() {
+
+            // given (Stub 설정, 외부 협력자와 반환값 고정)
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            when(mockedUser.updateNickname("new")).thenReturn(true); // 도메인 변경 발생 가정, 실제 도메인 로직 체크하고싶다면 도메인 테스트에서 할것
+
+            // when (행위 실행 : 실제 서비스 호출)
+            userService.updateUser(id, "new", null, null, null);
+            InOrder inOrder = inOrder(userReader, userRepository);
+
+            // then (검증 : 협력자 호출/순서 확인)
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository).save(mockedUser);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch][Negative] 회원수정 - 닉네임 미변경시 userRepository.save() 미호출")
+        void updateUser_shouldNotCallRepositorySave_whenNicknameNotChanged() {
+
+            // given (Stub 설정, 외부 협력자와 반환값 고정)
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            when(mockedUser.updateNickname("same")).thenReturn(false); // 도메인 변경 발생 가정, 실제 도메인 로직 체크하고싶다면 도메인 테스트에서 할것
+
+            // when (행위 실행 : 실제 서비스 호출)
+            userService.updateUser(id, "same", null, null, null);
+            InOrder inOrder = inOrder(userReader, userRepository);
+
+            // then (검증 : 협력자 호출/순서 확인)
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository, never()).save(mockedUser);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch] 회원수정 - 이메일 변경 시 userRepository.save() 호출")
+        void updateUser_shouldCallRepositorySave_whenEmailChanged() {
+            // given
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            when(mockedUser.updateEmail("change@email.com")).thenReturn(true);
+
+            // when
+            userService.updateUser(id, null, "change@email.com", null, null);
+
+            // then (순서 + 위임 검증)
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository).save(mockedUser);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch] 회원수정 - 비밀번호 변경 시 userRepository.save() 호출")
+        void updateUser_shouldCallRepositorySave_whenPasswordChanged() {
+            // given
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            when(mockedUser.updatePassword("vjhsngr")).thenReturn(true);
+
+            // when
+            userService.updateUser(id, null, null, "vjhsngr", null);
+
+            // then
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository).save(mockedUser);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch] 회원수정 - 전화번호 변경 시 userRepository.save() 호출")
+        void updateUser_shouldCallRepositorySave_whenPhoneChanged() {
+            // given
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            when(mockedUser.updatePhoneNumber("010-9999-9999")).thenReturn(true);
+
+            // when
+            userService.updateUser(id, null, null, null, "010-9999-9999");
+
+            // then
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository).save(mockedUser);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch][Negative] 회원수정 - 변경 없음이면 userRepository.save() 미호출")
+        void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
+            // given
+            UUID id = UUID.randomUUID();
+            User mockedUser = mock(User.class);
+            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
+            // 모든 업데이트가 false (미변경)
+            when(mockedUser.updateNickname("name")).thenReturn(false);
+            when(mockedUser.updateEmail(null)).thenReturn(false);
+            when(mockedUser.updatePassword(null)).thenReturn(false);
+            when(mockedUser.updatePhoneNumber(null)).thenReturn(false);
+
+            // when
+            userService.updateUser(id, "name", null, null, null);
+
+            // then
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("getAllUsers")
+    class GetAllUsers {
+        @Test
+        @DisplayName("[Behavior + Flow] 모든회원조회 - 리포지토리 결과를 그대로 반환")
+        void getAllUsers_shouldReturnListFromRepository() {
+            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010"));
+            when(userRepository.findAll()).thenReturn(users);
+
+            List<User> result = userService.getAllUsers();
+
+            assertEquals(users, result); // flow 검증 (결과 전달이 잘 되었는가)
+            verify(userRepository).findAll(); // behavior 검증(호출/위임이 잘되었는가)
+        }
+    }
+
+    @Nested
+    @DisplayName("getUsersByIds")
+    class GetUsersByIds {
+        @Test
+        @DisplayName("[Branch][Negative] 특정 회원리스트 조회- 입력이 null이면 IllegalArgumentException 예외 발생")
+        void getUsersByIds_shouldThrowException_whenInputNull() {
+            assertThrows(IllegalArgumentException.class, () -> userService.getUsersByIds(null));
+            verify(userRepository, never()).findAllByIds(any());
+        }
+
+        @Test
+        @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 주어진 id 리스트에 해당하는 유저 목록 반환")
+        void getUsersByIds_shouldReturnUsers_whenIdsValid() {
+            List<UUID> ids = List.of(UUID.randomUUID());
+            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010"));
+            when(userRepository.findAllByIds(ids)).thenReturn(users);
+
+            List<User> result = userService.getUsersByIds(ids);
+
+            assertEquals(users, result);
+            verify(userRepository).findAllByIds(ids);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 빈 ID 목록시 빈 리스트 반환 ")
+        void getUsersByIds_ShouldReturnEmptyList_whenIdsEmpty() {
+            //given
+            List<UUID> ids = List.of();
+            List<User> users = List.of();
+            when(userRepository.findAllByIds(ids)).thenReturn(users);
+
+            //when
+            List<User> result = userService.getUsersByIds(ids);
+
+            //then
+            assertEquals(users, result);
+            verify(userRepository).findAllByIds(ids);
+        }
+    }
+}

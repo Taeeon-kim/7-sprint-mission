@@ -1,0 +1,98 @@
+package com.sprint.mission.discodeit.service.jcf;
+
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.reader.UserReader;
+
+import java.util.*;
+
+import static com.sprint.mission.discodeit.entity.RoleType.USER;
+
+public class JCFUserService implements UserService {
+    private final UserRepository userRepository;
+    private final UserReader userReader;
+
+    public JCFUserService(UserRepository userRepository, UserReader userReader) {
+        this.userRepository = userRepository;
+        this.userReader = userReader;
+    }
+
+    @Override
+    public UUID signUp(String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+            /*
+                서비스가 지금 경계(boundary) 이므로, 모든 public 서비스 메서드는 자기 파라미터를 직접 검증(널/형식)하는 걸 권장.
+        	•	이후에 내부에서 userService.getUserById(userId)가 또 검증하더라도, 중복을 감수하고 입구에서 한 번 더 명시하는 쪽이 유지보수에 안전함.
+        	•	이유: 미래에 리팩토링되면서 getUserById 호출이 빠질 수도 있고, 다른 경로에서 이 메서드를 재사용할 수도 있음. 그때 입구 가드가 없으면 취약해짐
+            •	성능 오버헤드는 사실상 무시해도 됨(널 체크는 O(1)).
+         */
+        if (
+                nickname == null ||
+                        nickname.isBlank() ||
+                        password == null ||
+                        password.isBlank() ||
+                        email == null || email.isBlank() ||
+                        phoneNumber == null ||
+                        phoneNumber.isBlank()
+        ) {
+            throw new IllegalArgumentException("입력값이 잘못되었습니다.");
+        }
+        User newUser = new User(nickname, email, password, USER, phoneNumber);
+
+        // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
+        userRepository.save(newUser);
+        return newUser.getId();
+    }
+
+    @Override
+    public User getUserById(UUID userId) {
+        return userReader.findUserOrThrow(userId);
+    }
+
+    @Override
+    public void deleteUser(UUID userId) {
+        if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void updateUser(UUID userId, String nickname, String email, String password, String phoneNumber) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+        if (userId == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
+            // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        User userById = null;
+        try {
+            userById = userReader.findUserOrThrow(userId);
+            boolean changeFlag = false;
+            changeFlag |= userById.updateNickname(nickname);
+            changeFlag |= userById.updateEmail(email);
+            changeFlag |= userById.updatePassword(password);
+            changeFlag |= userById.updatePhoneNumber(phoneNumber);
+            if (changeFlag) {
+                userById.setUpdatedAt(System.currentTimeMillis());
+            }
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(e);
+        }
+
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<UUID> userIds) {
+        if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        return userRepository.findAllByIds(userIds);
+    }
+
+
+
+}
