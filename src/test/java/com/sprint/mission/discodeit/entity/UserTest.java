@@ -4,12 +4,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
 
     private User newUser() {
-        return new User("name", "example@email.com", "password123", RoleType.USER, "010-1111-1111");
+        return new User("name", "example@email.com", "password123", RoleType.USER, "010-1111-1111", null);
     }
 
     @Nested
@@ -20,15 +22,15 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 필수입력값 유효하지않으면 예외")
         void constructor_shouldThrowException_whenRequiredFieldsInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new User(null, null, null, null, null));
+                    () -> new User(null, null, null, null, null, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> new User(null, "a@b.com", "pw", RoleType.USER, "010"));
+                    () -> new User(null, "a@b.com", "pw", RoleType.USER, "010", null));
             assertThrows(IllegalArgumentException.class,
-                    () -> new User("nick", "invalid", "pw", RoleType.USER, "010"));
+                    () -> new User("nick", "invalid", "pw", RoleType.USER, "010", null));
             assertThrows(IllegalArgumentException.class,
-                    () -> new User("nick", "a@b.com", "", RoleType.USER, "010"));
+                    () -> new User("nick", "a@b.com", "", RoleType.USER, "010", null));
             assertThrows(IllegalArgumentException.class,
-                    () -> new User("nick", "a@b.com", "pw", null, "010"));
+                    () -> new User("nick", "a@b.com", "pw", null, "010", null));
         }
 
 
@@ -36,7 +38,7 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 이메일 형식이 잘못되면 예외")
         void constructor_shouldThrow_whenEmailInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> new User("name", "invalid", "pw", RoleType.USER, "010"));
+                    () -> new User("name", "invalid", "pw", RoleType.USER, "010", null));
         }
 
         @Test
@@ -224,21 +226,21 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 과거 시각으로 설정 시 예외")
         void setUpdatedAt_shouldThrow_whenDecreasing() {
             User u = newUser();
-            Long now = u.getUpdatedAt();
-            assertThrows(IllegalStateException.class, () -> u.setUpdatedAt(now - 1));
+            Instant now = u.getUpdatedAt();
+            assertThrows(IllegalStateException.class, () -> u.setUpdatedAt(now.minusMillis(1)));
         }
 
         @Test
         @DisplayName("[Invariant][Positive] 동일/미래 시각은 허용 (현재 구현 기준)")
         void setUpdatedAt_shouldAllow_sameOrFuture() {
             User u = newUser();
-            Long now = u.getUpdatedAt();
+            Instant now = u.getUpdatedAt();
 
             u.setUpdatedAt(now);
             assertEquals(now, u.getUpdatedAt());
 
-            u.setUpdatedAt(now + 5_000);
-            assertEquals(now + 5_000, u.getUpdatedAt());
+            u.setUpdatedAt(now.plusMillis(5_000));
+            assertEquals(now.plusMillis(5_000), u.getUpdatedAt());
         }
     }
 

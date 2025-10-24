@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.user.UserRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 public interface UserService {
     // 회원가입
-    UUID signUp(String nickname, String email, String password, String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+    UUID signUp(UserRequestDto userRequestDto);
 
     // 회원정보 읽기
     User getUserById(UUID userId);

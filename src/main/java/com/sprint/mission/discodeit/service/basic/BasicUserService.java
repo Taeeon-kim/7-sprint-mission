@@ -1,11 +1,13 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.user.UserRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -23,19 +25,23 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UUID signUp(String nickname, String email, String password, String phoneNumber) {
+    public UUID signUp(UserRequestDto request) {
         if (
-                nickname == null ||
-                        nickname.isBlank() ||
-                        password == null ||
-                        password.isBlank() ||
-                        email == null || email.isBlank() ||
-                        phoneNumber == null ||
-                        phoneNumber.isBlank()
+                request.getNickname() == null ||
+                        request.getNickname().isBlank() ||
+                        request.getPassword() == null ||
+                        request.getPassword().isBlank() ||
+                        request.getEmail() == null || request.getEmail().isBlank() ||
+                        request.getPhoneNumber() == null ||
+                        request.getPhoneNumber().isBlank()
         ) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
-        User newUser = new User(nickname, email, password, USER, phoneNumber, null);
+
+
+
+
+        User newUser = new User(request.getNickname(), request.getEmail(), request.getPassword(), USER, request.getPhoneNumber(), request.getProfileId());
 
         // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
         userRepository.save(newUser);
@@ -70,7 +76,7 @@ public class BasicUserService implements UserService {
             changeFlag |= userById.updatePassword(password);
             changeFlag |= userById.updatePhoneNumber(phoneNumber);
             if (changeFlag) {
-                userById.setUpdatedAt(System.currentTimeMillis());
+                userById.setUpdatedAt(Instant.ofEpochMilli(System.currentTimeMillis()));
                 userRepository.save(userById); // user repository 사용 책임 분리
             }
         } catch (NoSuchElementException e) {

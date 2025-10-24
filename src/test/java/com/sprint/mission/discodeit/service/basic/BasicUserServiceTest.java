@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.user.UserRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -43,7 +44,7 @@ class BasicUserServiceTest {
             String phone = "01012345678";
 
             // when
-            userService.signUp(nickname, email, password, phone); // 흐름검증
+            userService.signUp(new UserRequestDto(nickname, email, password, phone, null)); // 흐름검증
 
             // then
             verify(userRepository, times(1)).save(any(User.class)); // 행위 검증
@@ -54,32 +55,32 @@ class BasicUserServiceTest {
         void signUp_shouldThrowException_whenInValidInput() {
             // isBlank
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("", "a@b.com", "123", "0101111"));
+                    userService.signUp(new UserRequestDto("", "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "", "pw", "010"));
+                    userService.signUp(new UserRequestDto("nick", "", "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", "", "010"));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", "", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", "pw", ""));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", "", null)));
 
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(" ", "a@b.com", "123", "0101111"));
+                    userService.signUp(new UserRequestDto(" ", "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", " ", "pw", "010"));
+                    userService.signUp(new UserRequestDto("nick", " ", "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", " ", "010"));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", " ", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", "pw", " "));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", " ", null)));
 
             // null
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(null, "a@b.com", "123", "0101111"));
+                    userService.signUp(new UserRequestDto(null, "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", null, "pw", "010"));
+                    userService.signUp(new UserRequestDto("nick", null, "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", null, "010"));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", null, "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp("nick", "a@b.com", "pw", null));
+                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", null, null)));
 
             verify(userRepository, never()).save(any());
         }
@@ -101,7 +102,7 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch][Positive] 회원조회 - Reader에 위임하고 결과 그대로 반환")
         void getUserById_shouldReturnUser_whenFound() {
             UUID id = UUID.randomUUID();
-            User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010");
+            User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
 
             User result = userService.getUserById(id); // 흐름 검증
@@ -288,7 +289,7 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Behavior + Flow] 모든회원조회 - 리포지토리 결과를 그대로 반환")
         void getAllUsers_shouldReturnListFromRepository() {
-            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010"));
+            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010", null));
             when(userRepository.findAll()).thenReturn(users);
 
             List<User> result = userService.getAllUsers();
@@ -312,7 +313,7 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 주어진 id 리스트에 해당하는 유저 목록 반환")
         void getUsersByIds_shouldReturnUsers_whenIdsValid() {
             List<UUID> ids = List.of(UUID.randomUUID());
-            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010"));
+            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010", null));
             when(userRepository.findAllByIds(ids)).thenReturn(users);
 
             List<User> result = userService.getUsersByIds(ids);

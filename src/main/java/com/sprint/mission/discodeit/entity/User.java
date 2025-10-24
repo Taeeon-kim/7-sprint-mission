@@ -25,7 +25,7 @@ public class User extends BasicEntity {
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
          */
-        // TODO: 아래 불변식검사 각 필드에 lomboK @NotBlank 으로 변경
+
         if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("nickname invalid");
         if (email == null || !email.contains("@")) throw new IllegalArgumentException("email invalid");
         if (password == null || password.isBlank()) throw new IllegalArgumentException("password invalid");

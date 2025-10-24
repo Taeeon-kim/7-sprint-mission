@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.dto.user.UserRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -17,23 +18,23 @@ import java.util.UUID;
 @SpringBootApplication
 public class DiscodeitApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
         ConfigurableApplicationContext context = SpringApplication.run(DiscodeitApplication.class, args);
         // 서비스 초기화
         // TODO context에서 Bean을 조회하여 각 서비스 구현체 할당 코드 작성하세요.
 
 
-        final UserService userService  = context.getBean(UserService.class);
+        final UserService userService = context.getBean(UserService.class);
         final ChannelService channelService = context.getBean(ChannelService.class);
         final MessageService messageService = context.getBean(MessageService.class);
 
         List<User> allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
         // ---- 유저 만들기 (회원가입) ------
-        userService.signUp("youngble", "email@example.com", "password123", "010-1234-5678");
-        userService.signUp("zzzz", "zzzz@example.com", "zzzz1123", "010-3334-44444");
-        userService.signUp("Hong", "test@example.com", "wssss123123", "010-1122-3333");
+        userService.signUp(new UserRequestDto("youngble", "email@example.com", "password123", "010-1234-5678", null));
+        userService.signUp(new UserRequestDto("zzzz", "zzzz@example.com", "zzzz1123", "010-3334-44444", null));
+        userService.signUp(new UserRequestDto("Hong", "test@example.com", "wssss123123", "010-1122-3333", null));
         System.out.println("=============================== ");
         allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
@@ -163,6 +164,6 @@ public class DiscodeitApplication {
         System.out.println("allMessages after delecting the channel = " + allMessages);
 
 
-	}
+    }
 
 }
