@@ -11,4 +11,8 @@ public interface UserRepository extends Repository<User, UUID> {
     Map<UUID, User> findAllMap();
 
     List<User> findAllByIds(List<UUID> ids);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByNickname(String nickname);
 }

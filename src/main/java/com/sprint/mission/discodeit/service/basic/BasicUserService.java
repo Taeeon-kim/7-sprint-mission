@@ -38,10 +38,17 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
+        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByNickname(request.getNickname())) {
+            throw new IllegalArgumentException("이미 사용 중 입니다.");
+        }
 
-        User newUser = new User(request.getNickname(), request.getEmail(), request.getPassword(), USER, request.getPhoneNumber(), request.getProfileId());
-
-        // TODO: 필요하다면 추후 email, phoneNumber 중복 체크하는 정도로, uuid는 결국 항상 false 일거라
+        User newUser = new User(request.getNickname(),
+                request.getEmail(),
+                request.getPassword(),
+                USER,
+                request.getPhoneNumber(),
+                request.getProfileId());
+        // TODO: userStatus 생성 추가
         userRepository.save(newUser);
         return newUser.getId();
     }

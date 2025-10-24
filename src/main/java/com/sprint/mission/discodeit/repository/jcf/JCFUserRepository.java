@@ -49,4 +49,20 @@ public class JCFUserRepository implements UserRepository {
                 .filter(Objects::nonNull)
                 .toList();
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getNickname().equals(nickname));
+    }
 }
