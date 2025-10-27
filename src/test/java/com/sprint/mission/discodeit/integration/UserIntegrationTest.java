@@ -1,17 +1,24 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
+import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,13 +29,17 @@ public class UserIntegrationTest {
     private UserService userService;
     private UserRepository userRepository;
     private UserReader userReader;
+    private UserStatusRepository userStatusRepository;
+    private UserStatusService userStatusService;
 
     // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
     void setUp() {
         userRepository = new JCFUserRepository(store.users);
         userReader = new UserReader(userRepository);
-        userService = new BasicUserService(userRepository, userReader);
+        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
+        userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository);
     }
 
     @AfterEach
@@ -99,6 +110,28 @@ public class UserIntegrationTest {
             assertEquals(before, after);
         }
 
+        @Test
+        @DisplayName("[Integraton][Flow][Positive] 회원가입 - UserStatus도 함께 생성된다.")
+        void signup_then_userStatus_persists_as_well() {
+
+            // given
+            UUID uuid = userService.signUp(
+                    new UserRequestDto("name",
+                            "example@email.com",
+                            "password",
+                            "010-1111-2222",
+                            null)
+            );
+
+            // when
+            Optional<UserStatus> userStatusbByUserId = userStatusRepository.findByUserId(uuid);
+
+            // then
+            assertTrue(userStatusbByUserId.isPresent());
+            assertEquals(uuid, userStatusbByUserId.get().getUserId());
+
+        }
+
     }
 
     @Nested
@@ -106,16 +139,17 @@ public class UserIntegrationTest {
     class GetUserById {
 
         @Test
-        @DisplayName("[Integration][Flow][Positive] 회원조회 - 저장후 조회 성공")
+        @DisplayName("[Integration][Flow][Positive] 회원조회 - 저장후 response DTO 반환 조회 성공")
         void getUserById_returns_saved_user() {
             //given
             UUID id = userService.signUp(new UserRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
 
             //when
-            User userById = userService.getUserById(id);
+            UserResponseDto userById = userService.getUserById(id);
 
             //then
             assertEquals("name", userById.getNickname());
+            assertEquals(id, userById.getUserStatus().getUserId());
         }
 
         @Test
@@ -124,6 +158,14 @@ public class UserIntegrationTest {
             assertThrows(NoSuchElementException.class,
                     () -> userService.getUserById(UUID.randomUUID()));
         }
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 회원조회 - 회원 상태 정보도 가져온다.")
+        void getUserById_returns_user_status() {
+
+        }
+
+
     }
 
     @Nested
@@ -139,10 +181,9 @@ public class UserIntegrationTest {
             userService.updateUser(id, null, "b@c.com", null, null);
 
             //then
-            User u = userService.getUserById(id);
+            UserResponseDto u = userService.getUserById(id);
             assertEquals("b@c.com", u.getEmail());
             assertEquals("nick", u.getNickname());
-            assertEquals("pw", u.getPassword());
             assertEquals("010", u.getPhoneNumber());
         }
 
@@ -152,16 +193,15 @@ public class UserIntegrationTest {
 
             //given
             UUID id = userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", "010", null));
-            User before = userService.getUserById(id);
+            UserResponseDto before = userService.getUserById(id);
 
             //when
             userService.updateUser(id, "nick", "a@b.com", "pw", "010");
 
             //then
-            User after = userService.getUserById(id);
+            UserResponseDto after = userService.getUserById(id);
             assertEquals(before.getNickname(), after.getNickname());
             assertEquals(before.getEmail(), after.getEmail());
-            assertEquals(before.getPassword(), after.getPassword());
             assertEquals(before.getPhoneNumber(), after.getPhoneNumber());
         }
 
@@ -170,10 +210,9 @@ public class UserIntegrationTest {
         void updateUser_updates_multiple_fields() {
             UUID id = userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", "010", null));
             userService.updateUser(id, "nick2", "b@c.com", "pw2", "011");
-            User u = userService.getUserById(id);
+            UserResponseDto u = userService.getUserById(id);
             assertEquals("nick2", u.getNickname());
             assertEquals("b@c.com", u.getEmail());
-            assertEquals("pw2", u.getPassword());
             assertEquals("011", u.getPhoneNumber());
         }
     }

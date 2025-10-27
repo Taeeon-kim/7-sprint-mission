@@ -1,9 +1,13 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +15,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,13 +25,18 @@ class BasicUserServiceTest {
 
     private UserRepository userRepository;
     private UserReader userReader;
+    private UserStatusRepository userStatusRepository;
+    private UserStatusService userStatusService;
     private BasicUserService userService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         userReader = mock(UserReader.class);
-        userService = new BasicUserService(userRepository, userReader);
+        userStatusRepository = mock(UserStatusRepository.class);
+        userStatusService = mock(UserStatusService.class);
+
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository);
     }
 
     // --- grouped by use-case with @Nested ---
@@ -42,6 +52,9 @@ class BasicUserServiceTest {
             String email = "taeeon@test.com";
             String password = "1234";
             String phone = "01012345678";
+            when(userRepository.save(any(User.class)))
+                    .thenReturn(new User(nickname, email, password, RoleType.USER, phone, null));
+
 
             // when
             userService.signUp(new UserRequestDto(nickname, email, password, phone, null)); // 흐름검증
@@ -92,7 +105,14 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Behavior] 회원조회 - userReader.findUserOrThrow(id) 호출 (조회 위임 검증)")
         void getUserById_shouldDelegateToUserReader_whenCalled() {
+            // given
             UUID id = UUID.randomUUID();
+            when(userStatusRepository
+                    .findByUserId(id))
+                    .thenReturn(Optional.of(new UserStatus(id, Instant.now())));
+            when(userReader.findUserOrThrow(id)).thenReturn(new User("nickname", "email@exa.com", "pwd", RoleType.USER, "010", null));
+
+            // when
             userService.getUserById(id);
 
             verify(userReader).findUserOrThrow(id);
@@ -101,12 +121,24 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Behavior + Branch][Positive] 회원조회 - Reader에 위임하고 결과 그대로 반환")
         void getUserById_shouldReturnUser_whenFound() {
+
+            // given
             UUID id = UUID.randomUUID();
             User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
+            when(userStatusRepository.findByUserId(id))
+                    .thenReturn(Optional.of(new UserStatus(id, Instant.now())));
 
-            User result = userService.getUserById(id); // 흐름 검증
-            assertEquals(user, result); // 분기 검증
+            // when
+            UserResponseDto result = userService.getUserById(id); // 흐름 검증
+
+            assertEquals(user.getNickname(), result.getNickname()); // 분기 검증
+            assertEquals(user.getEmail(), result.getEmail());
+            assertEquals(user.getPhoneNumber(), result.getPhoneNumber());
+            assertEquals(user.getRole(), result.getRole());
+            assertEquals(user.getProfileId(), result.getProfileId());
+
+            // then
             verify(userReader).findUserOrThrow(id); // 행위검증
         }
 
