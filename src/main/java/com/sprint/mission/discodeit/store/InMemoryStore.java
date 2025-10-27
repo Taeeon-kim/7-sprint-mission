@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.store;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.*;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -15,4 +12,5 @@ public class InMemoryStore {
     public final HashMap<UUID, Message> messages = new HashMap<>();
 
     public final HashMap<UUID, BinaryContent> binaryContents = new HashMap<>();
+    public final HashMap<UUID, UserStatus> userStatusses = new HashMap<>();
 }
