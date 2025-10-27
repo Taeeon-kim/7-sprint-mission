@@ -124,8 +124,9 @@ public class BasicChannelService implements ChannelService {
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
         User userById = userReader.findUserOrThrow(userId);
-        ;
         List<Channel> allChannels = getAllChannels();
-        return allChannels.stream().filter(channel -> channel.isMember(userById.getId())).toList();
+        return allChannels.stream()
+                .filter(channel -> channel.isMember(userById.getId()))
+                .toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface UserService {
     UUID signUp(UserRequestDto userRequestDto);
 
     // 회원정보 읽기
-    User getUserById(UUID userId);
+    UserResponseDto getUserById(UUID userId);
 
     // 회원탈퇴
     void deleteUser(UUID userId);
