@@ -4,22 +4,25 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter @ToString
 public class User extends BaseEntity {
 
     //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
     private final String userId;  //아이디 string
-    private final String email;
+    private final String email; // 이메일
     private String userPassword;    //비밀번호 string 수정가능
-    private String nickName;    //닉네임 = 사용자명 = 별명 string, 수정가능
+    private String nickName;    //닉네임 = 사용자명 string, 수정가능
+    private final UUID profileImageId;
 
-    public User(String userId, String email,String userPassword, String nickName) {
+    public User(String userId, String email, String userPassword, String nickName, UUID profileImageId) {
         super();
-        this.email = email;
         this.userId = userId;
+        this.email = email;
         this.userPassword = userPassword;
         this.nickName = nickName;
+        this.profileImageId = profileImageId;
     }
 
     public void setUserPassword(String userPassword) {
