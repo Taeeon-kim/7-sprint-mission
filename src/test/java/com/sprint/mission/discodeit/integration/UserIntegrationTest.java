@@ -45,6 +45,7 @@ public class UserIntegrationTest {
     @AfterEach
     void tearDown() {
         store.users.clear(); // 인메모리 초기화
+        store.userStatusses.clear();
     }
 
     @Nested

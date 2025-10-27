@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,11 +26,15 @@ public class BasicUserStatusService implements UserStatusService {
 
     @Override
     public UUID createUserStatus(UUID userId) {
-        if(userId == null){
+        if (userId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
         User user = userReader.findUserOrThrow(userId);
+        Optional<UserStatus> userStatusByUserId = userStatusRepository.findByUserId(user.getId());
+        if (userStatusByUserId.isPresent()) {
+            throw new IllegalArgumentException("해당 유저의 상태는 이미 등록되었습니다.");
+        }
 
         UserStatus userStatus = new UserStatus(user.getId(), Instant.now());
         UserStatus savedStatus = userStatusRepository.save(userStatus);
