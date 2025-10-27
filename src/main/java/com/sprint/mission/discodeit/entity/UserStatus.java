@@ -16,6 +16,7 @@ import java.util.UUID;
 @Getter @ToString
 public class UserStatus{
 
+    private StatusType status = StatusType.OFFLINE;
     private final UUID userId; // 접속 유저
     private Instant lastActiveAt; // 마지막 접속 시간
 

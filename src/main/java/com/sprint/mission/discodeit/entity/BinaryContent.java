@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Instant;
@@ -12,7 +13,7 @@ import java.util.UUID;
  * 수정 불가능한 도메인 모델로 간주함, 따라서 updateAt필드는 정의하지 않음
  * User, Message 도메인 모델과의 의존 관계 방향성을 고려해 id 참조 필드 추가
  */
-@Getter @ToString
+@Getter @Setter @ToString
 public class BinaryContent {
 
     private final UUID uuid;
