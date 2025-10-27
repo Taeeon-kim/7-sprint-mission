@@ -1,6 +1,10 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.entity.RoleType;
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
@@ -49,16 +53,38 @@ public class UserStatusIntegrationTest {
     @Nested
     @DisplayName("create")
     class Create {
-        // TODO: create - 해당 User id 로 유저 존재 안할시 예외
+
+
         @Test
-        @DisplayName("[Integration][negative] 유저상태 생성 - 넘겨받은 User id가 조회시 존재 안할시 예외 발생")
+        @DisplayName("[Integration][Flow][Positive] 유저상태 생성 - 생성후 조회시 동일 데이터 반환 ")
+        void create_persists_and_returns_same_data() {
+            // given
+            User user = new User("name", "emaile@example.com", "pwd", RoleType.USER, "010", null);
+            User savedUser = userRepository.save(user);
+            int before = userStatusRepository.findAll().size();
+
+            // when
+            UUID statusId = userStatusService.createUserStatus(savedUser.getId());
+            UserStatus userStatus = userStatusRepository.findById(statusId).orElseThrow(() -> new NoSuchElementException("해당 정보 없음"));
+
+            // then
+            int after = userStatusRepository.findAll().size();
+            assertAll(
+                    () -> assertEquals(before + 1, after),
+                    () -> assertEquals(savedUser.getId(), userStatus.getUserId()),
+                    () -> assertEquals(UserActiveStatus.ONLINE, userStatus.getUserStatus())
+            );
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][negative] 유저상태 생성 - 존재하지않는 유저로 등록시 예외 발생")
         void create_whenUserNotFound_thenThrows() {
             UUID id = UUID.randomUUID();
             assertThrows(NoSuchElementException.class, () -> userStatusService.createUserStatus(id));
         }
 
         @Test
-        @DisplayName("[Integration][negative] 유저상태 생성 - 해당 유저의 중복 상태 등록시 예외 발생")
+        @DisplayName("[Integration][Flow][negative] 유저상태 생성 - 이미 등록된 유저 중복 등록시 예외 발생")
         void create_whenDuplicate_thenThrows() {
             // given
             UUID signedUserId = userService.signUp(

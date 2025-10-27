@@ -38,6 +38,6 @@ public class BasicUserStatusService implements UserStatusService {
 
         UserStatus userStatus = new UserStatus(user.getId(), Instant.now());
         UserStatus savedStatus = userStatusRepository.save(userStatus);
-        return savedStatus.getUserId();
+        return savedStatus.getId();
     }
 }
