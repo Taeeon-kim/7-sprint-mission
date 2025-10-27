@@ -16,17 +16,21 @@ import java.util.UUID;
 @Getter @ToString
 public class UserStatus{
 
+    private final UUID uuid; //필드 고유 uuid
+    private final Instant createdAt;
     private StatusType status = StatusType.OFFLINE;
     private final UUID userId; // 접속 유저
     private Instant lastActiveAt; // 마지막 접속 시간
 
-    public UserStatus(UUID userId, Instant lastActiveAt) {
+    public UserStatus(UUID userId) {
+        this.uuid = UUID.randomUUID();
+        this.createdAt = Instant.now();
         this.userId = userId;
-        this.lastActiveAt = lastActiveAt;
+        this.lastActiveAt = Instant.now();
     }
 
-    public void updateLastActiveAt(Instant time) {
-        this.lastActiveAt = time;
+    public void updateLastActiveAt() {
+        this.lastActiveAt = Instant.now();
     }
 
     public boolean isOnline() {
