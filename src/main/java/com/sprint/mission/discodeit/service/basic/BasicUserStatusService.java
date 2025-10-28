@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -49,5 +50,17 @@ public class BasicUserStatusService implements UserStatusService {
                 .userId(userStatus.getUserId())
                 .lastActiveAt(userStatus.getLastActiveAt())
                 .build();
+    }
+
+    @Override
+    public List<UserStatusResponseDto> getAllUserStatuses() {
+        List<UserStatus> userStatusList = userStatusRepository.findAll();
+        return userStatusList.stream()
+                .map(userStatus -> UserStatusResponseDto.builder()
+                        .id(userStatus.getId())
+                        .userId(userStatus.getUserId())
+                        .lastActiveAt(userStatus.getLastActiveAt())
+                        .build())
+                .toList();
     }
 }

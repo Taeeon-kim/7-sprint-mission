@@ -24,6 +24,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -153,6 +154,58 @@ public class UserStatusIntegrationTest {
             assertThrows(NoSuchElementException.class, () -> userStatusService.getUserStatusById(id));
         }
 
+    }
+
+    @Nested
+    @DisplayName("getAllUserStatuses")
+    class GetAllUserStatuses {
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 전체 유저상태 조회 - 데이터 없으면 빈 조회")
+        void getAllUserStatuses_returns_emptyList_whenNoUserStatuses() {
+
+            // when
+            List<UserStatusResponseDto> allUserStatuses = userStatusService.getAllUserStatuses();
+
+            // then
+            assertTrue(allUserStatuses.isEmpty());
+
+
+        }
+
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 전체 유저상태 조회 - 여러 상태가 있으면 모두 반환")
+        void getAllUserStatuses_returns_expected_size() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            User user2 = User.builder()
+                    .nickname("name2")
+                    .email("email2@example.com")
+                    .phoneNumber("010-2222-4444")
+                    .role(RoleType.USER)
+                    .password("pwd2")
+                    .profileId(null)
+                    .build();
+
+            userStatusRepository.save(new UserStatus(user.getId()));
+            userStatusRepository.save(new UserStatus(user2.getId()));
+
+
+            // when
+            List<UserStatusResponseDto> allUserStatuses = userStatusService.getAllUserStatuses();
+            // then
+            assertEquals(2, allUserStatuses.size());
+
+
+        }
     }
 
 
