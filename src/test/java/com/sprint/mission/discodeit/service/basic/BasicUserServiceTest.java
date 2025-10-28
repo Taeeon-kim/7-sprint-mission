@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -57,7 +58,7 @@ class BasicUserServiceTest {
 
 
             // when
-            userService.signUp(new UserRequestDto(nickname, email, password, phone, null)); // 흐름검증
+            userService.signUp(new UserSignupRequestDto(nickname, email, password, phone, null)); // 흐름검증
 
             // then
             verify(userRepository, times(1)).save(any(User.class)); // 행위 검증
@@ -68,32 +69,32 @@ class BasicUserServiceTest {
         void signUp_shouldThrowException_whenInValidInput() {
             // isBlank
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("", "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto("", "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "", "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "", "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", "", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", "", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "", null)));
 
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto(" ", "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto(" ", "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", " ", "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", " ", "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", " ", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", " ", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", " ", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", " ", null)));
 
             // null
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto(null, "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto(null, "a@b.com", "123", "0101111", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", null, "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", null, "pw", "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", null, "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", null, "010", null)));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserRequestDto("nick", "a@b.com", "pw", null, null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", null, null)));
 
             verify(userRepository, never()).save(any());
         }
@@ -193,7 +194,18 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
 
             //when+then
-            assertThrows(NoSuchElementException.class, () -> userService.updateUser(id, "new", null, null, null));
+            assertThrows(
+                    NoSuchElementException.class,
+                    () -> userService.updateUser(
+                            new UserUpdateRequestDto(id,
+                                    "new",
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                            )
+                    )
+            );
 
             //then
             verify(userReader).findUserOrThrow(id);
@@ -206,17 +218,16 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            when(mockedUser.updateNickname("new")).thenReturn(true); // 도메인 변경 발생 가정, 실제 도메인 로직 체크하고싶다면 도메인 테스트에서 할것
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(id, "new", null, null, null);
+            userService.updateUser(new UserUpdateRequestDto(id, "new", null, null, null, null));
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
             inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository).save(mockedUser);
+            inOrder.verify(userRepository).save(real);
         }
 
         @Test
@@ -225,17 +236,17 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            when(mockedUser.updateNickname("same")).thenReturn(false); // 도메인 변경 발생 가정, 실제 도메인 로직 체크하고싶다면 도메인 테스트에서 할것
+            User real = new User("same", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+
 
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(id, "same", null, null, null);
+            userService.updateUser(new UserUpdateRequestDto(id, "same", null, null, null, null));
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
             inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository, never()).save(mockedUser);
+            inOrder.verify(userRepository, never()).save(real);
         }
 
         @Test
@@ -243,17 +254,16 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenEmailChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            when(mockedUser.updateEmail("change@email.com")).thenReturn(true);
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(id, null, "change@email.com", null, null);
+            userService.updateUser(new UserUpdateRequestDto(id, null, "change@email.com", null, null, null));
 
             // then (순서 + 위임 검증)
             InOrder inOrder = inOrder(userReader, userRepository);
             inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository).save(mockedUser);
+            inOrder.verify(userRepository).save(any(User.class));
         }
 
         @Test
@@ -261,17 +271,17 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenPasswordChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            when(mockedUser.updatePassword("vjhsngr")).thenReturn(true);
+
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(id, null, null, "vjhsngr", null);
+            userService.updateUser(new UserUpdateRequestDto(id, null, null, "vjhsngr", null, null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
             inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository).save(mockedUser);
+            inOrder.verify(userRepository).save(real);
         }
 
         @Test
@@ -279,34 +289,65 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenPhoneChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            when(mockedUser.updatePhoneNumber("010-9999-9999")).thenReturn(true);
+
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(id, null, null, null, "010-9999-9999");
+            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, "010-9999-9999", null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
             inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository).save(mockedUser);
+            inOrder.verify(userRepository).save(real);
         }
 
         @Test
-        @DisplayName("[Behavior + Branch][Negative] 회원수정 - 변경 없음이면 userRepository.save() 미호출")
+        @DisplayName("[Behavior + Branch] 회원수정 - 프로필이미지 id 변경 시 userRepository.save() 호출")
+        void updateUser_shouldCallRepositorySave_whenProfileIdChanged() {
+            // given
+            UUID id = UUID.randomUUID();
+
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UUID profileId = UUID.randomUUID();
+
+            // when
+            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, null, profileId));
+
+            // then
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository).save(real);
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch][Negative] 회원수정 - 모든필드 null일때 미변경 userRepository.save() 미호출")
+        void updateUser_shouldNotCallRepositorySave_whenAllFieldNull() {
+            // given
+            UUID id = UUID.randomUUID();
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+
+            // when
+            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, null, null));
+
+            // then
+            InOrder inOrder = inOrder(userReader, userRepository);
+            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("[Behavior + Branch][Negative] 회원수정 - 기존과 동일값 일때 userRepository.save() 미호출")
         void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User mockedUser = mock(User.class);
-            when(userReader.findUserOrThrow(id)).thenReturn(mockedUser);
-            // 모든 업데이트가 false (미변경)
-            when(mockedUser.updateNickname("name")).thenReturn(false);
-            when(mockedUser.updateEmail(null)).thenReturn(false);
-            when(mockedUser.updatePassword(null)).thenReturn(false);
-            when(mockedUser.updatePhoneNumber(null)).thenReturn(false);
+            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(id, "name", null, null, null);
+            userService.updateUser(new UserUpdateRequestDto(id, "nick", "a@b.com", "pw", "010", null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
