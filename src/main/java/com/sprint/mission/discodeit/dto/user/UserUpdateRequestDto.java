@@ -9,12 +9,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequestDto {
-
+public class UserUpdateRequestDto {
+    private UUID id;
     private String nickname;
     private String email;
     private String password;
     private String phoneNumber;
     private UUID profileId;
-
 }

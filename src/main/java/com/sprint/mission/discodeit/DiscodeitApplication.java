@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit;
 
-import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -32,9 +33,9 @@ public class DiscodeitApplication {
         List<User> allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
         // ---- 유저 만들기 (회원가입) ------
-        userService.signUp(new UserRequestDto("youngble", "email@example.com", "password123", "010-1234-5678", null));
-        userService.signUp(new UserRequestDto("zzzz", "zzzz@example.com", "zzzz1123", "010-3334-44444", null));
-        userService.signUp(new UserRequestDto("Hong", "test@example.com", "wssss123123", "010-1122-3333", null));
+        userService.signUp(new UserSignupRequestDto("youngble", "email@example.com", "password123", "010-1234-5678", null));
+        userService.signUp(new UserSignupRequestDto("zzzz", "zzzz@example.com", "zzzz1123", "010-3334-44444", null));
+        userService.signUp(new UserSignupRequestDto("Hong", "test@example.com", "wssss123123", "010-1122-3333", null));
         System.out.println("=============================== ");
         allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);
@@ -49,7 +50,8 @@ public class DiscodeitApplication {
         System.out.println("===========update user==================== ");
         //--- 유저 수정하기(정보 업데이트) -------
         // ----- 클라이언트 요청 api 데이터, 실제 dto 형식으로 받아서 dto.nickname 같은식으로 넘겨줌 ---
-        userService.updateUser(allUsers.get(0).getId(), "changedName!!", null, "changedPassword!!", "");
+        userService.updateUser(
+                new UserUpdateRequestDto(allUsers.get(0).getId(), "changedName", "changedName!!", null, "changedPassword!!", null));
 //        User userById = userService.getUserById(user2.getId());
         allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);

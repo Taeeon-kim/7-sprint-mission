@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
+import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 public interface UserService {
     // 회원가입
-    UUID signUp(UserRequestDto userRequestDto);
+    UUID signUp(UserSignupRequestDto userSignupRequestDto);
 
     // 회원정보 읽기
     UserResponseDto getUserById(UUID userId);
@@ -18,11 +19,7 @@ public interface UserService {
     void deleteUser(UUID userId);
 
     // 정보수정
-    void updateUser(UUID userId,
-                    String nickname,
-                    String email,
-                    String password,
-                    String phoneNumber); // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
+    void updateUser(UserUpdateRequestDto userUpdateRequestDto);
 
     // 모든 유저리스트 읽기(관리측면 메서드)
     List<User> getAllUsers();
