@@ -47,4 +47,11 @@ public class JCFUserStatusRepository implements UserStatusRepository {
                 .filter((userStatus) -> userStatus.getUserId().equals(userId))
                 .findFirst();
     }
+
+    @Override
+    public boolean existsByUserId(UUID userId) {
+        return data.values()
+                .stream()
+                .anyMatch((userStatus) -> userStatus.getUserId().equals(userId));
+    }
 }

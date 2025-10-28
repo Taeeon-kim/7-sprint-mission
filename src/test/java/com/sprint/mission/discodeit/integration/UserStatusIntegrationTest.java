@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -64,7 +65,7 @@ public class UserStatusIntegrationTest {
             int before = userStatusRepository.findAll().size();
 
             // when
-            UUID statusId = userStatusService.createUserStatus(savedUser.getId());
+            UUID statusId = userStatusService.createUserStatus(new UserStatusRequestDto(savedUser.getId()));
             UserStatus userStatus = userStatusRepository.findById(statusId).orElseThrow(() -> new NoSuchElementException("해당 정보 없음"));
 
             // then
@@ -80,7 +81,7 @@ public class UserStatusIntegrationTest {
         @DisplayName("[Integration][Flow][negative] 유저상태 생성 - 존재하지않는 유저로 등록시 예외 발생")
         void create_whenUserNotFound_thenThrows() {
             UUID id = UUID.randomUUID();
-            assertThrows(NoSuchElementException.class, () -> userStatusService.createUserStatus(id));
+            assertThrows(NoSuchElementException.class, () -> userStatusService.createUserStatus(new UserStatusRequestDto(id)));
         }
 
         @Test
@@ -99,7 +100,7 @@ public class UserStatusIntegrationTest {
 
             // when & then
             assertThrows(IllegalArgumentException.class,
-                    () -> userStatusService.createUserStatus(signedUserId));
+                    () -> userStatusService.createUserStatus(new UserStatusRequestDto(signedUserId)));
 
         }
 

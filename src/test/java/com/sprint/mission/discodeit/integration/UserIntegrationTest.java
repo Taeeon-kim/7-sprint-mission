@@ -125,11 +125,12 @@ public class UserIntegrationTest {
             );
 
             // when
-            Optional<UserStatus> userStatusbByUserId = userStatusRepository.findByUserId(uuid);
+            UserStatus userStatusbByUserId = userStatusRepository
+                    .findByUserId(uuid).orElseThrow(() -> new NoSuchElementException("회원정보없음"));
 
             // then
-            assertTrue(userStatusbByUserId.isPresent());
-            assertEquals(uuid, userStatusbByUserId.get().getUserId());
+            assertNotNull(userStatusbByUserId);
+            assertEquals(uuid, userStatusbByUserId.getUserId());
 
         }
 

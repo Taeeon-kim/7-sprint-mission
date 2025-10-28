@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.UserRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -60,8 +61,9 @@ public class BasicUserService implements UserService {
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
         // step1: user UUID 전달 userStatusService.createUserStatus(UUID)
-        userStatusService.createUserStatus(newUser.getId());
-
+        userStatusService.createUserStatus(
+                new UserStatusRequestDto(savedUser.getId())
+        );
         // TODO: step2: 실패시 처리해야되나? 한다면 유저등록은 되어있기때문에 어떻게 처리할지, 아래 나와있듯이 책임을 전가하여 구현할것
         // TODO: 여기서 이전에 알려준 dispatcher 사용? event 기반? 추후 리펙토링에 추가할것
         return savedUser.getId();
