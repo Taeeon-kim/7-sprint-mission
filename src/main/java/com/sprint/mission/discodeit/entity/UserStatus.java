@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
+
 public class UserStatus extends BasicEntity {
     private final UUID userId;
     private Instant lastActiveAt;
@@ -17,6 +17,11 @@ public class UserStatus extends BasicEntity {
     public void markAsActive() {
         this.lastActiveAt = Instant.now();
         setUpdatedAt(Instant.now());
+    }
+
+    public UserStatus(UUID userId) {
+        this.userId = userId;
+        this.lastActiveAt = Instant.now();
     }
 
     public UserActiveStatus getUserStatus() {

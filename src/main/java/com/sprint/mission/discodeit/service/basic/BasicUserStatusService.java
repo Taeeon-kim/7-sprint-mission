@@ -36,7 +36,7 @@ public class BasicUserStatusService implements UserStatusService {
             throw new IllegalArgumentException("해당 유저의 상태는 이미 등록되었습니다.");
         }
 
-        UserStatus userStatus = new UserStatus(user.getId(), Instant.now());
+        UserStatus userStatus = new UserStatus(user.getId());
         UserStatus savedStatus = userStatusRepository.save(userStatus);
         return savedStatus.getId();
     }
