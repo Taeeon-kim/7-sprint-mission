@@ -5,12 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Getter
 @AllArgsConstructor
 public class UserReponseDto {
+    private UUID userUuid;
     private String username;
     private String email;
     private String nickname;
     private String profileImagePath;
-    private UserStatus status;
+    private String profileContentType;
+    private boolean online;
+    private Instant createAt;
 }

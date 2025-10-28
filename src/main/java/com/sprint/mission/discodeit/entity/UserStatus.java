@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Duration;
@@ -13,16 +14,17 @@ import java.util.UUID;
  * 마지막 접속 시간을 기준으로 현재 로그인한 유저로 판단할 수 있는 메소드 정의
  * - 마지막 접속 시간이 현재 시간으로부터 5분 이내이면 현재 접속중인 유저로 간주함
  */
-@Getter @ToString
+@Getter @Setter @ToString
 public class UserStatus{
 
     private final UUID uuid; //필드 고유 uuid
     private final Instant createdAt;
-    private StatusType status = StatusType.OFFLINE;
+    private StatusType status;
     private final UUID userId; // 접속 유저
     private Instant lastActiveAt; // 마지막 접속 시간
 
     public UserStatus(UUID userId) {
+        this.status = StatusType.ONLINE;
         this.uuid = UUID.randomUUID();
         this.createdAt = Instant.now();
         this.userId = userId;

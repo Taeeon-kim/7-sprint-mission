@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.dto.request.UserCreateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -24,6 +25,19 @@ import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 @SpringBootApplication
 public class DiscodeitApplication {
 
+    static void runUser(UserService userService) {
+        // User 등록
+        UserCreateRequestDto[] userCreateRequestDtos = new UserCreateRequestDto[] {
+                new UserCreateRequestDto("test00", "alice123@gmail.com", "pass123", "Alice", null),
+                new UserCreateRequestDto("test02", "name000@gmail.com", "0000pass", "Bob", null),
+                new UserCreateRequestDto("test03", "chilysource@gmail.com", "12341234", "Chily", null),
+                new UserCreateRequestDto("test05", "tomtom00@gmail.com", "pw123456", "Tom", null)
+        };
+        for(UserCreateRequestDto userCreateRequestDto : userCreateRequestDtos) {
+            userService.createUser(userCreateRequestDto);
+        }
+    }
+
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = SpringApplication.run(DiscodeitApplication.class, args);
 
@@ -31,9 +45,11 @@ public class DiscodeitApplication {
         BasicChannelService channelService = ctx.getBean(BasicChannelService.class);
         BasicMessageService messageService = ctx.getBean(BasicMessageService.class);
 
-        User[] users = userService.runUserService();
+        runUser(userService);
+//        User[] users = runUser(userService);
         Channel[] channels = channelService.runChannelService();
-        messageService.runMessageService(users, channels);
+        messageService.runMessageService(userService.readAllUser().stream().map(u->new User(u.getUsername(), u.getEmail(), null, u.getNickname(), null))
+                .toArray(User[]::new), channels);
     }
 
 }

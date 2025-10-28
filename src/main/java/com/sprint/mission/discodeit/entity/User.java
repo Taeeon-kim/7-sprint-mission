@@ -14,7 +14,7 @@ public class User extends BaseEntity {
     private final String email; // 이메일
     private String userPassword;    //비밀번호 string 수정가능
     private String nickName;    //닉네임 = 사용자명 string, 수정가능
-    private final UUID profileImageId;
+    private UUID profileImageId; // 변경 가능
 
     public User(String userId, String email, String userPassword, String nickName, UUID profileImageId) {
         super();
@@ -33,5 +33,11 @@ public class User extends BaseEntity {
     public void setNickName(String nickName) {
         this.nickName = nickName;
         setUpdatedAt(Instant.now()); //변경 시 시간 갱신
+    }
+
+    // 프로필 이미지 교체
+    public void setProfileImage(UUID profileImageId) {
+        this.profileImageId = profileImageId;
+        setUpdatedAt(Instant.now());
     }
 }
