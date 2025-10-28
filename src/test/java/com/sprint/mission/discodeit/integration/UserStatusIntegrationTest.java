@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.integration;
 
-import com.sprint.mission.discodeit.dto.user.UserRequestDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
@@ -89,7 +89,7 @@ public class UserStatusIntegrationTest {
         void create_whenDuplicate_thenThrows() {
             // given
             UUID signedUserId = userService.signUp(
-                    new UserRequestDto(
+                    new UserSignupRequestDto(
                             "name",
                             "email@ee.com",
                             "pwd",
