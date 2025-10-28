@@ -1,10 +1,14 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
 import lombok.Getter;
+import lombok.ToString;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
+@ToString
 public class User extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String nickname;
@@ -50,6 +54,27 @@ public class User extends BasicEntity {
 //        this.friends = new ArrayList<>(other.friends);
     }
 
+    public boolean update(UserUpdateParams request) {
+        boolean changeFlag = false;
+        changeFlag |= this.updateNickname(request.getNickname());
+        changeFlag |= this.updateEmail(request.getEmail());
+        changeFlag |= this.updatePassword(request.getPassword());
+        changeFlag |= this.updatePhoneNumber(request.getPhoneNumber());
+        changeFlag |= this.updateProfileId(request.getProfileId());
+        if (changeFlag) {
+            this.setUpdatedAt(Instant.now());
+        }
+        return changeFlag;
+    }
+
+    private boolean updateProfileId(UUID profileId) {
+        if (profileId != null && !profileId.equals(this.profileId)) {
+            this.profileId = profileId;
+            return true;
+        }
+        return false;
+    }
+
     public boolean updateNickname(String nickname) {
         if (nickname != null && !nickname.isBlank() && !nickname.equals(this.nickname)) {
             this.nickname = nickname;
@@ -83,18 +108,4 @@ public class User extends BasicEntity {
         return false;
     }
 
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id='" + getId() + '\'' +
-                ", createdAt=" + getCreatedAt() +
-                ", updatedAt=" + getUpdatedAt() +
-                ",nickname='" + nickname + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", role=" + role +
-                ", phoneNumber='" + phoneNumber +
-                '}';
-    }
 }
