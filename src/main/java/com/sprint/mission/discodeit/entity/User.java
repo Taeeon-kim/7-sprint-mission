@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @Getter
 @ToString
+@Builder
 public class User extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String nickname;

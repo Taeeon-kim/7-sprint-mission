@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ public class JCFUserStatusRepository implements UserStatusRepository {
     public JCFUserStatusRepository(Map<UUID, UserStatus> data) {
         this.data = data;
     }
-
 
     @Override
     public UserStatus save(UserStatus userStatus) {

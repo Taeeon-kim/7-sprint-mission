@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -56,9 +58,8 @@ public class UserStatusIntegrationTest {
     }
 
     @Nested
-    @DisplayName("create")
-    class Create {
-
+    @DisplayName("createUserStatus")
+    class CreateUserStatus {
 
         @Test
         @DisplayName("[Integration][Flow][Positive] 유저상태 생성 - 생성후 조회시 동일 데이터 반환 ")
@@ -106,6 +107,50 @@ public class UserStatusIntegrationTest {
             assertThrows(IllegalArgumentException.class,
                     () -> userStatusService.createUserStatus(new UserStatusRequestDto(signedUserId)));
 
+        }
+
+    }
+
+    @Nested
+    @DisplayName("getUserStatusById")
+    class GetUserStatusById {
+
+        @Test
+        @DisplayName("[Integration][Flow][positive] 유저상태 조회 - id 조회시 UserStatusResponseDto로 유저상태정보 반환 성공")
+        void getUserStatusById_returns_userStatus() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("ab@email.com")
+                    .password("password")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .profileId(null)
+                    .build();
+
+            User savedUser = userRepository.save(user);
+
+            // when
+            UUID userStatusId = userStatusService.createUserStatus(new UserStatusRequestDto(savedUser.getId()));
+            UserStatusResponseDto userStatusById = userStatusService.getUserStatusById(userStatusId);
+            // then
+            assertAll(
+                    () -> assertNotNull(userStatusById),
+                    () -> assertEquals(userStatusId, userStatusById.id()),
+                    () -> assertEquals(savedUser.getId(), userStatusById.userId()),
+                    () -> assertNotNull(userStatusById.lastActiveAt()),
+                    () -> assertTrue(userStatusById.lastActiveAt().isBefore(Instant.now().plusSeconds(10)))
+            );
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 유저상태 조회 -존재하지 않는 id 조회시 NoSuchElementException 발생")
+        void getUserStatusById_throws_whenNotFound() {
+            // given
+            UUID id = UUID.randomUUID();
+
+            // when & then
+            assertThrows(NoSuchElementException.class, () -> userStatusService.getUserStatusById(id));
         }
 
     }

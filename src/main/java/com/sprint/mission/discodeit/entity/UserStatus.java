@@ -13,7 +13,6 @@ public class UserStatus extends BasicEntity {
     private final UUID userId;
     private Instant lastActiveAt;
 
-
     public void markAsActive() {
         this.lastActiveAt = Instant.now();
         setUpdatedAt(Instant.now());

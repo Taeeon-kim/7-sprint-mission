@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -9,7 +10,6 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -42,7 +42,12 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    public UserStatus getUserStatusById(UUID id) {
-        return userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+    public UserStatusResponseDto getUserStatusById(UUID id) {
+        UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+        return UserStatusResponseDto.builder()
+                .id(userStatus.getId())
+                .userId(userStatus.getUserId())
+                .lastActiveAt(userStatus.getLastActiveAt())
+                .build();
     }
 }
