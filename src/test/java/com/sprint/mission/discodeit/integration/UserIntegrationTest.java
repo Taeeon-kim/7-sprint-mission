@@ -3,10 +3,14 @@ package com.sprint.mission.discodeit.integration;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,10 +22,12 @@ import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -32,6 +38,7 @@ public class UserIntegrationTest {
     private UserReader userReader;
     private UserStatusRepository userStatusRepository;
     private UserStatusService userStatusService;
+    private BinaryContentRepository binaryContentRepository;
 
     // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
@@ -39,14 +46,16 @@ public class UserIntegrationTest {
         userRepository = new JCFUserRepository(store.users);
         userReader = new UserReader(userRepository);
         userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
+        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository);
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
     }
 
     @AfterEach
     void tearDown() {
         store.users.clear(); // 인메모리 초기화
         store.userStatusses.clear();
+        store.binaryContents.clear();
     }
 
     @Nested
@@ -240,10 +249,44 @@ public class UserIntegrationTest {
     class DeleteUser {
         @Test
         @DisplayName("[Integration][Flow] 회원삭제 - 삭제 후 조회 시 예외")
-        void deleteUser_delete_then_not_found() {
+        void deleteUser_then_not_found() {
             UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
             userService.deleteUser(id);
             assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow] 회원삭제 - 회원삭제시 해당 연관 프로필, 유저상태 데이터 삭제")
+        void deleteUser_then_deletes_profile_and_status() {
+            // given
+            // 결적적 픽스쳐 준비
+            byte[] payload = "fake-bytes".getBytes(UTF_8);
+            // 프로필이미지
+            BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", payload));
+            User user = new User("nick", "a@b.com", "pw", RoleType.USER, "010", savedBinarycontent.getId());
+            UserStatus userStatus = new UserStatus(user.getId());
+            //유저등록
+            User savedUser = userRepository.save(user);
+            // 유저상태
+            UserStatus savedUserStatus = userStatusRepository.save(userStatus);
+
+            // preconditions
+            assertAll(
+                    () -> assertTrue(userRepository.findById(savedUser.getId()).isPresent()),
+                    () -> assertTrue(userStatusRepository.findByUserId(savedUser.getId()).isPresent()),
+                    () -> assertTrue(binaryContentRepository.findById(savedBinarycontent.getId()).isPresent())
+                    );
+
+            // when
+            userService.deleteUser(savedUser.getId());
+
+            // then
+            assertAll(
+                    () -> assertTrue(userRepository.findById(savedUser.getId()).isEmpty()),
+                    () -> assertTrue(userStatusRepository.findByUserId(savedUser.getId()).isEmpty()),
+                    () -> assertTrue(userStatusRepository.findById(savedUserStatus.getId()).isEmpty()),
+                    () -> assertTrue(binaryContentRepository.findById(savedBinarycontent.getId()).isEmpty())
+            );
         }
     }
 

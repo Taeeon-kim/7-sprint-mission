@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
@@ -29,15 +30,15 @@ class BasicUserServiceTest {
     private UserStatusRepository userStatusRepository;
     private UserStatusService userStatusService;
     private BasicUserService userService;
-
+    private BinaryContentRepository binaryContentRepository;
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         userReader = mock(UserReader.class);
         userStatusRepository = mock(UserStatusRepository.class);
         userStatusService = mock(UserStatusService.class);
-
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository);
+        binaryContentRepository = mock(BinaryContentRepository.class);
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
     }
 
     // --- grouped by use-case with @Nested ---
@@ -110,7 +111,7 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
             when(userStatusRepository
                     .findByUserId(id))
-                    .thenReturn(Optional.of(new UserStatus(id, Instant.now())));
+                    .thenReturn(Optional.of(new UserStatus(id)));
             when(userReader.findUserOrThrow(id)).thenReturn(new User("nickname", "email@exa.com", "pwd", RoleType.USER, "010", null));
 
             // when
@@ -124,14 +125,13 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
 
             // given
-            UUID id = UUID.randomUUID();
             User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
-            when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
-            when(userStatusRepository.findByUserId(id))
-                    .thenReturn(Optional.of(new UserStatus(id, Instant.now())));
+            when(userReader.findUserOrThrow(user.getId())).thenReturn(user); // Stub
+            when(userStatusRepository.findByUserId(user.getId()))
+                    .thenReturn(Optional.of(new UserStatus(user.getId())));
 
             // when
-            UserResponseDto result = userService.getUserById(id); // 흐름 검증
+            UserResponseDto result = userService.getUserById(user.getId()); // 흐름 검증
 
             assertEquals(user.getNickname(), result.getNickname()); // 분기 검증
             assertEquals(user.getEmail(), result.getEmail());
@@ -140,7 +140,7 @@ class BasicUserServiceTest {
             assertEquals(user.getProfileId(), result.getProfileId());
 
             // then
-            verify(userReader).findUserOrThrow(id); // 행위검증
+            verify(userReader).findUserOrThrow(user.getId()); // 행위검증
         }
 
         @Test

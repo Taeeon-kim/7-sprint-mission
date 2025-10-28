@@ -6,8 +6,10 @@ import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -33,6 +35,7 @@ public class UserStatusIntegrationTest {
     private UserReader userReader;
     private UserStatusService userStatusService;
     private UserService userService;
+    private BinaryContentRepository binaryContentRepository;
 
     // 의존성 주입
 
@@ -41,9 +44,10 @@ public class UserStatusIntegrationTest {
     void setUp() {
         userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
         userRepository = new JCFUserRepository(store.users);
+        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
         UserReader userReader = new UserReader(userRepository);
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository);
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
     }
 
     @AfterEach
