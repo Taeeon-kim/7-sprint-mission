@@ -20,6 +20,6 @@ public interface BinaryContentRepository {
     List<BinaryContent> findByChannelId(UUID channelId);
 
     // 삭제
-    List<BinaryContent> delete(UUID uuid);
+    void delete(UUID uuid);
 
 }

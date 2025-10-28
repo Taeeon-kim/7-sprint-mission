@@ -86,7 +86,7 @@ public class BasicUserService implements UserService {
                 user.getNickName(),
                 (profile != null ? profile.getFilePath() : null),
                 (profile != null ? profile.getContentType() : null),
-                (status != null && status.isOnline()),
+                status != null && status.isOnline(),
                 user.getCreateAt()
         );
     }
@@ -107,7 +107,7 @@ public class BasicUserService implements UserService {
                             user.getNickName(),
                             (profile != null ? profile.getFilePath() : null),
                             (profile != null ? profile.getContentType() : null),
-                            (status != null && status.isOnline()),
+                            status != null && status.isOnline(),
                             user.getCreateAt()
                     );
                 })
@@ -122,18 +122,30 @@ public class BasicUserService implements UserService {
         }
 
         // 닉네임 변경
-        else if (userUpdateRequestDto.getNickName() != null
+        if (userUpdateRequestDto.getNickName() != null
                 && !userUpdateRequestDto.getNickName().isBlank()) {
             user.setNickName(userUpdateRequestDto.getNickName());
         }
 
         // 비밀번호 변경
-        else if (userUpdateRequestDto.getNewPassword() != null && !userUpdateRequestDto.getNewPassword().isBlank()) {
+        if (userUpdateRequestDto.getNewPassword() != null && !userUpdateRequestDto.getNewPassword().isBlank()) {
             user.setUserPassword(userUpdateRequestDto.getNewPassword());
         }
 
         // 프로필 이미지 교체
-        else if (userUpdateRequestDto.getProfileImagePath() != null && !userUpdateRequestDto.getProfileImagePath().isBlank()) {
+        if (userUpdateRequestDto.getProfileImagePath() != null && !userUpdateRequestDto.getProfileImagePath().isBlank()) {
+            UUID existingProfileId = user.getProfileImageId(); // 기존 프로필 UUID
+//            BinaryContent newProfile;
+//            if (existingProfileId != null) {
+//                // 기존 UUID 사용
+//                newProfile = new BinaryContent(existingProfileId, user.getUuid(),
+//                        userUpdateRequestDto.getProfileImagePath(), "image/png");
+//            } else {
+//                // 신규 UUID 생성
+//                newProfile = new BinaryContent(user.getUuid(), null,
+//                        userUpdateRequestDto.getProfileImagePath(), "image/png");
+//            }
+
             BinaryContent newProfile = new BinaryContent(
                     user.getUuid(),
                     null,
@@ -142,8 +154,11 @@ public class BasicUserService implements UserService {
             );
             binaryContentRepository.save(newProfile);
 
+            // user의 profileImageId 업데이트
+            user.setProfileImage(newProfile.getUuid());
+
             // 기존 프로필 삭제
-            if (user.getProfileImageId() != null) {
+            if (existingProfileId != null) {
                 try {
                     binaryContentRepository.delete(user.getProfileImageId());
                 } catch (Exception e) {
