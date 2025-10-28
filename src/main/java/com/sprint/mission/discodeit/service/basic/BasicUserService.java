@@ -13,10 +13,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,7 +81,7 @@ public class BasicUserService implements UserService {
                 : null;
         return new UserReponseDto(
                 user.getUuid(),
-                user.getNickName(),
+                user.getUserId(),
                 user.getEmail(),
                 user.getNickName(),
                 (profile != null ? profile.getFilePath() : null),
@@ -105,7 +102,7 @@ public class BasicUserService implements UserService {
 
                     return new UserReponseDto(
                             user.getUuid(),
-                            user.getNickName(),
+                            user.getUserId(),
                             user.getEmail(),
                             user.getNickName(),
                             (profile != null ? profile.getFilePath() : null),
@@ -162,42 +159,62 @@ public class BasicUserService implements UserService {
 
     @Override
     public void deleteUser(UUID uuid) {
+        User user = userRepository.findById(uuid);
+        if (user == null) throw new IllegalArgumentException("삭제하려는 유저가 존재하지 않습니다.");
 
+        // 상태 삭제
+        userStatusRepository.delete(uuid);
+
+        //프로필 삭제
+        if (user.getProfileImageId() != null) {
+            binaryContentRepository.delete(user.getProfileImageId());
+        }
+
+        // 유저 삭제
+        userRepository.delete(uuid);
+        System.out.println("[User 삭제 완료] uuid : " + uuid);
     }
 
+    public void runTest() {
+        // User 등록
+        UserCreateRequestDto[] userCreateRequestDtos = new UserCreateRequestDto[]{
+                new UserCreateRequestDto("test00", "alice123@gmail.com", "pass123", "Alice", null),
+                new UserCreateRequestDto("test02", "name000@gmail.com", "0000pass", "Bob", null),
+                new UserCreateRequestDto("test03", "chilysource@gmail.com", "12341234", "Chily", null),
+                new UserCreateRequestDto("test05", "tomtom00@gmail.com", "pw123456", "Tom", null)
+        };
 
-    //작동 테스트
-//    public User[] runUserService() {
-//
-//        // 유저 전체 조회
-//        userList();
-//
-//        // 유저 닉네임 수정 Bob->Minsu
-//        updateUser(users[1].getUuid(), "Minsu");
-//
-//        // 유저 password 수정 Bob : 0000pass -> 012456pw
-//        updatePassword(users[1].getUuid(), "012456pw");
-//
-//        // 유저 단건 조회
-//        System.out.println("[유저 검색] : " + readUser(users[1].getUuid()));
-//
-//        // 유저 삭제
-//        deleteUser(users[3].getUuid());
-//        System.out.println("탈퇴 : " + users[3].getNickName() + "님");
-//
-//        // 전체 조회
-//        userList();
-//
-//        return users;
-//    }
+        //유저 생성
+        for (UserCreateRequestDto userCreateRequestDto : userCreateRequestDtos) {
+            createUser(userCreateRequestDto);
+        }
+
+        // 전체 조회
+        userList();
+
+        // 유저 수정
+        User userUpdate = userRepository.findAll().stream()
+                .filter(u -> u.getUserId().equals("test02"))
+                .findFirst().orElseThrow(() -> new RuntimeException("수정할 유저를 찾을 수 없습니다."));
+        updateUser(userUpdate.getUuid(), new UserUpdateRequestDto("Minsu", "0123456pw", "고양이.png"));
+
+        // 수정 후 단건 조회
+        UserReponseDto userReponseDto = readUser(userUpdate.getUuid());
+        System.out.println("수정된 유저 : " + userReponseDto.getUserid()
+                + " / Name : " + userReponseDto.getNickname()
+                + " / Status : " + userReponseDto.isOnline()
+                + " / profile : " + userReponseDto.getProfileImagePath());
+        userList();
+
+    }
 
     //유저 전체 조회
     public void userList() {
         System.out.println("[유저 전체 조회]");
         Set<String> userSet = new HashSet<>();
         for (UserReponseDto u : readAllUser()) {
-            if (userSet.add(u.getUsername())) { // userId 기준
-                System.out.println("ID: " + u.getUsername() + " / Name: " + u.getNickname());
+            if (userSet.add(u.getUserid())) { // userId 기준
+                System.out.println("ID: " + u.getUserid() + " / Name: " + u.getNickname() + " / Status : " + u.isOnline());
             }
         }
     }

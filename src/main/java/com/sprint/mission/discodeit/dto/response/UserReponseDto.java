@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserReponseDto {
     private UUID userUuid;
-    private String username;
+    private String userid;
     private String email;
     private String nickname;
     private String profileImagePath;
