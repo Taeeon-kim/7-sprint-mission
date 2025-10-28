@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -14,7 +15,6 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -27,12 +27,14 @@ public class BasicUserService implements UserService {
     private final UserStatusRepository userStatusRepository;
     private final UserReader userReader;
     private final UserStatusService userStatusService;
+    private final BinaryContentRepository binaryContentRepository;
 
-    public BasicUserService(UserRepository userRepository, UserReader userReader, UserStatusService userStatusService, UserStatusRepository userStatusRepository) {
+    public BasicUserService(UserRepository userRepository, UserReader userReader, UserStatusService userStatusService, UserStatusRepository userStatusRepository, BinaryContentRepository binaryContentRepository) {
         this.userRepository = userRepository;
         this.userReader = userReader;
         this.userStatusService = userStatusService;
         this.userStatusRepository = userStatusRepository;
+        this.binaryContentRepository = binaryContentRepository;
     }
 
     @Override
@@ -95,7 +97,29 @@ public class BasicUserService implements UserService {
         if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        userRepository.deleteById(userId);
+
+        User user = userReader.findUserOrThrow(userId);
+        UserStatus statusByUserId = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 유저상태정보가 없습니다."));
+
+        // 정합성, Fk 이유로 유저상태부터 제거
+        boolean isRemovedStatus = userStatusRepository.deleteById(statusByUserId.getId());
+        if (isRemovedStatus) {
+            try {
+                boolean deleted = userRepository.deleteById(user.getId());
+                if (!deleted) {
+                    throw new IllegalStateException("해당 유저를 삭제 하지 못했습니다.");
+                }
+                if (user.getProfileId() != null) {
+                    binaryContentRepository.deleteById(user.getProfileId());
+                }
+
+            } catch (Exception e) {
+                // 보상로직
+                userStatusRepository.save(statusByUserId);
+                throw e;
+            }
+        }
+
     }
 
     @Override
