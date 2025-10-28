@@ -128,7 +128,7 @@ public class BasicMessageService implements MessageService {
         }
 
         for (Message m: messages) {
-            String nickName = userService.readUser(m.getSenderId()).getNickName();
+            String nickName = userService.readUser(m.getSenderId()).getNickname();//.getNickName();
             String channelName = channelService.readChannel(m.getChannelId()).getChanName();
             System.out.println(
                     "[" + m.getCreateAt() + "] "
@@ -146,7 +146,7 @@ public class BasicMessageService implements MessageService {
             return;
         }
         for (Message m: messages) {
-            String nickName = userService.readUser(m.getSenderId()).getNickName();
+            String nickName = userService.readUser(m.getSenderId()).getNickname(); //.getNickName();
             String channelName = channelService.readChannel(m.getChannelId()).getChanName();
             System.out.println(
                     "[" + m.getCreateAt() + "] "
