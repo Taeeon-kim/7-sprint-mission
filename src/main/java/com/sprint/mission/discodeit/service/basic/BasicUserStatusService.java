@@ -44,7 +44,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    public UserStatusResponseDto getUserStatusById(UUID id) {
+    public UserStatusResponseDto getUserStatus(UUID id) {
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
         return UserStatusResponseDto.builder()
                 .id(userStatus.getId())
@@ -90,5 +90,13 @@ public class BasicUserStatusService implements UserStatusService {
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }
+    }
+
+    @Override
+    public void deleteUserStatus(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        userStatusRepository.deleteById(id);
     }
 }

@@ -133,7 +133,7 @@ public class UserStatusIntegrationTest {
 
             // when
             UUID userStatusId = userStatusService.createUserStatus(new UserStatusRequestDto(savedUser.getId()));
-            UserStatusResponseDto userStatusById = userStatusService.getUserStatusById(userStatusId);
+            UserStatusResponseDto userStatusById = userStatusService.getUserStatus(userStatusId);
             // then
             assertAll(
                     () -> assertNotNull(userStatusById),
@@ -151,7 +151,7 @@ public class UserStatusIntegrationTest {
             UUID id = UUID.randomUUID();
 
             // when & then
-            assertThrows(NoSuchElementException.class, () -> userStatusService.getUserStatusById(id));
+            assertThrows(NoSuchElementException.class, () -> userStatusService.getUserStatus(id));
         }
 
     }
@@ -339,11 +339,42 @@ public class UserStatusIntegrationTest {
             // 예: 동일값이면 변화 없음(정책에 맞게 선택)
             assertEquals(savedStatus.getLastActiveAt(), after.getLastActiveAt());
         }
-
-
     }
 
+    @Nested
+    @DisplayName("DeleteUserStatus")
+    class DeleteUserStatus {
 
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 회원상태 삭제 - 삭제 후 조회 불가 & 개수 감소")
+        void deleteUserStatus_then_deleted() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
+            long before = userStatusRepository.findAll().size();
+
+            //when
+            userStatusService.deleteUserStatus(savedStatus.getId());
+
+            // then
+            long after = userStatusRepository.findAll().size();
+            assertAll(
+                    () -> assertEquals(before - 1, after),
+                    () -> assertThrows(
+                            NoSuchElementException.class,
+                            () -> userStatusRepository.findById(savedStatus.getId()).orElseThrow()
+                    )
+            );
+        }
+    }
 
 
 }

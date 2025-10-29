@@ -11,12 +11,14 @@ public interface UserStatusService {
 
     UUID createUserStatus(UserStatusRequestDto userId);
 
-    UserStatusResponseDto getUserStatusById(UUID id);
+    UserStatusResponseDto getUserStatus(UUID id);
 
     List<UserStatusResponseDto> getAllUserStatuses();
 
     void updateUserStatus(UUID id, UserStatusUpdateDto userStatusUpdateDto);
 
     void updateUserStatusByUserId(UUID userId, UserStatusUpdateDto userStatusUpdateDto);
+
+    void deleteUserStatus(UUID id);
 
 }
