@@ -64,12 +64,14 @@ public class BasicUserService implements UserService {
 
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
-        // step1: user UUID 전달 userStatusService.createUserStatus(UUID)
-        userStatusService.createUserStatus(
-                new UserStatusRequestDto(savedUser.getId()) // TODO: service 의존이 아닌 repository로 변경할 것
-        );
-        // TODO: step2: 실패시 처리해야되나? 한다면 유저등록은 되어있기때문에 어떻게 처리할지, 아래 나와있듯이 책임을 전가하여 구현할것
+
+        // NOTE: 일단 요구사항대로 책임분리 없이 signup에서 userStatus 등록
+        UserStatus userStatus = new UserStatus(savedUser.getId());
+        userStatusRepository.save(userStatus);
+        // TODO: step2: 실패시 처리해야되나? 한다면 유저등록은 되어있기때문에 어떻게 처리할지
+        // TODO: 추후 @Trnsactional전 보상로직 try catch 할거 생각
         // TODO: 여기서 이전에 알려준 dispatcher 사용? event 기반? 추후 리펙토링에 추가할것
+
         return savedUser.getId();
     }
 
