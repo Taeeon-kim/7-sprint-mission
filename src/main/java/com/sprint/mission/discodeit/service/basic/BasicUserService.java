@@ -135,17 +135,6 @@ public class BasicUserService implements UserService {
         // 프로필 이미지 교체
         if (userUpdateRequestDto.getProfileImagePath() != null && !userUpdateRequestDto.getProfileImagePath().isBlank()) {
             UUID existingProfileId = user.getProfileImageId(); // 기존 프로필 UUID
-//            BinaryContent newProfile;
-//            if (existingProfileId != null) {
-//                // 기존 UUID 사용
-//                newProfile = new BinaryContent(existingProfileId, user.getUuid(),
-//                        userUpdateRequestDto.getProfileImagePath(), "image/png");
-//            } else {
-//                // 신규 UUID 생성
-//                newProfile = new BinaryContent(user.getUuid(), null,
-//                        userUpdateRequestDto.getProfileImagePath(), "image/png");
-//            }
-
             BinaryContent newProfile = new BinaryContent(
                     user.getUuid(),
                     null,
@@ -187,7 +176,7 @@ public class BasicUserService implements UserService {
 
         // 유저 삭제
         userRepository.delete(uuid);
-        System.out.println("[User 삭제 완료] uuid : " + uuid);
+        System.out.println("[User 삭제 완료] UserID : " + user.getUserId());
     }
 
     public void runTest() {
@@ -221,6 +210,14 @@ public class BasicUserService implements UserService {
                 + " / profile : " + userReponseDto.getProfileImagePath());
         userList();
 
+        // 유저 삭제
+        User deleteUser = userRepository.findAll().stream()
+                .filter(u->u.getUserId().equals("test02"))
+                .findFirst().orElseThrow();
+        deleteUser(deleteUser.getUuid());
+
+        // 전체 조회
+        userList();
     }
 
     //유저 전체 조회

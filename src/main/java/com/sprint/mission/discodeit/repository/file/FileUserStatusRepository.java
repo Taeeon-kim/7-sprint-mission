@@ -12,11 +12,11 @@ import java.util.UUID;
 @Repository
 public class FileUserStatusRepository implements UserStatusRepository {
 
-    // 파일 저장 경로
-    private static final String FILE_PATH = "data/user_status.ser";
-
     // 메모리 저장소
     private final Map<UUID, UserStatus> statusMap = new HashMap<>();
+
+    // 파일 저장 경로
+    private static final String FILE_PATH = "data/user_status.ser";
 
     @Override
     public void save(UserStatus userStatus) {
@@ -41,6 +41,9 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
     @Override
     public void delete(UUID uuid) {
-
+        UserStatus removed = statusMap.remove(uuid);
+        if (removed != null) {
+            System.out.println("[상태 삭제] : " + removed.getStatus());
+        }
     }
 }
