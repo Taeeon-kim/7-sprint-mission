@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
-import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -66,13 +66,13 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    public void updateUserStatus(UUID id, UserStatusUpdateDto userStatusUpdateDto) {
+    public void updateUserStatus(UUID id, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (id == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateDto.lastActiveAt());
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.lastActiveAt());
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }
@@ -80,13 +80,13 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    public void updateUserStatusByUserId(UUID userId, UserStatusUpdateDto userStatusUpdateDto) {
+    public void updateUserStatusByUserId(UUID userId, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (userId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
         UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateDto.lastActiveAt());
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.lastActiveAt());
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }

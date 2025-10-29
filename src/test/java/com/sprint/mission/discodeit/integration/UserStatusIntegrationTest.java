@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.integration;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
-import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -226,7 +226,7 @@ public class UserStatusIntegrationTest {
 
             UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
             Instant before = savedStatus.getLastActiveAt(); // 스냅샷
-            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
 
             // when
             userStatusService.updateUserStatus(savedStatus.getId(), updateDto);
@@ -241,7 +241,7 @@ public class UserStatusIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 존재하지않는 id로 수정시 NoSuchElementException 예외")
         void updateUserStatus_throws_whenIdNotFound() {
             UUID id = UUID.randomUUID();
-            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
             assertThrows(NoSuchElementException.class,
                     () -> userStatusService.updateUserStatus(id, updateDto));
         }
@@ -261,7 +261,7 @@ public class UserStatusIntegrationTest {
 
             UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
 
-            UserStatusUpdateDto dto = new UserStatusUpdateDto(savedStatus.getLastActiveAt());
+            UserStatusUpdateRequestDto dto = new UserStatusUpdateRequestDto(savedStatus.getLastActiveAt());
 
             // when
             userStatusService.updateUserStatus(savedStatus.getId(), dto);
@@ -294,7 +294,7 @@ public class UserStatusIntegrationTest {
 
             UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
             Instant before = savedStatus.getLastActiveAt(); // 스냅샷
-            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
 
             // when
             userStatusService.updateUserStatusByUserId(savedStatus.getUserId(), updateDto);
@@ -309,7 +309,7 @@ public class UserStatusIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 존재하지않는 id로 수정시 NoSuchElementException 예외")
         void updateUserStatusByUserId_throws_whenIdNotFound() {
             UUID id = UUID.randomUUID();
-            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
             assertThrows(NoSuchElementException.class,
                     () -> userStatusService.updateUserStatusByUserId(id, updateDto));
         }
@@ -329,7 +329,7 @@ public class UserStatusIntegrationTest {
 
             UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
 
-            UserStatusUpdateDto dto = new UserStatusUpdateDto(savedStatus.getLastActiveAt());
+            UserStatusUpdateRequestDto dto = new UserStatusUpdateRequestDto(savedStatus.getLastActiveAt());
 
             // when
             userStatusService.updateUserStatusByUserId(savedStatus.getUserId(), dto);
