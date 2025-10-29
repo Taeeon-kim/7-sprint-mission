@@ -11,6 +11,7 @@ public interface BinaryContentService {
     UUID uploadBinaryContent(BinaryContentUploadCommand command);
 
     BinaryContent getBinaryContent(UUID id);
+
     List<BinaryContent> getBinaryContentsByIds();
 
     void deleteBinaryContent(UUID id);

@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -62,5 +63,32 @@ public class BasicUserStatusService implements UserStatusService {
                         .lastActiveAt(userStatus.getLastActiveAt())
                         .build())
                 .toList();
+    }
+
+    @Override
+    public void updateUserStatus(UUID id, UserStatusUpdateDto userStatusUpdateDto) {
+        if (id == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+
+        UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateDto.lastActiveAt());
+        if (isUpdated) {
+            userStatusRepository.save(userStatus);
+        }
+
+    }
+
+    @Override
+    public void updateUserStatusByUserId(UUID userId, UserStatusUpdateDto userStatusUpdateDto) {
+        if (userId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+
+        UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateDto.lastActiveAt());
+        if (isUpdated) {
+            userStatusRepository.save(userStatus);
+        }
     }
 }

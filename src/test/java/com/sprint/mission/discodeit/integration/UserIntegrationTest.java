@@ -190,7 +190,7 @@ public class UserIntegrationTest {
             UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
             //when
-            userService.updateUser(new UserUpdateRequestDto(id, null, "b@c.com", null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, "b@c.com", null, null, null));
             //then
             User after = userRepository.findById(id).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
@@ -211,8 +211,8 @@ public class UserIntegrationTest {
             Instant beforeTime = before.getUpdatedAt(); // 스냅샷
 
             //when
-            userService.updateUser(new UserUpdateRequestDto(id, "nick", "a@b.com", "pw", "010", null));
-            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", "010", null));
+            userService.updateUser(id,new UserUpdateRequestDto(null, null, null, null, null));
 
             //then
             User after = userRepository.findById(id).orElseThrow();
@@ -231,7 +231,7 @@ public class UserIntegrationTest {
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
             UUID profileId = UUID.randomUUID();
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, "nick2", "b@c.com", "pw2", "011", profileId));
+            userService.updateUser(id,new UserUpdateRequestDto("nick2", "b@c.com", "pw2", "011", profileId));
             User after = userRepository.findById(id).orElseThrow();
             assertEquals("nick2", after.getNickname());
             assertEquals("b@c.com", after.getEmail());
@@ -239,8 +239,6 @@ public class UserIntegrationTest {
             assertEquals(profileId, after.getProfileId());
 
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
-
-
         }
     }
 
@@ -275,7 +273,7 @@ public class UserIntegrationTest {
                     () -> assertTrue(userRepository.findById(savedUser.getId()).isPresent()),
                     () -> assertTrue(userStatusRepository.findByUserId(savedUser.getId()).isPresent()),
                     () -> assertTrue(binaryContentRepository.findById(savedBinarycontent.getId()).isPresent())
-                    );
+            );
 
             // when
             userService.deleteUser(savedUser.getId());

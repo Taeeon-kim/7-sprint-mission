@@ -25,7 +25,6 @@ public class DiscodeitApplication {
         // 서비스 초기화
         // TODO context에서 Bean을 조회하여 각 서비스 구현체 할당 코드 작성하세요.
 
-
         final UserService userService = context.getBean(UserService.class);
         final ChannelService channelService = context.getBean(ChannelService.class);
         final MessageService messageService = context.getBean(MessageService.class);
@@ -50,8 +49,8 @@ public class DiscodeitApplication {
         System.out.println("===========update user==================== ");
         //--- 유저 수정하기(정보 업데이트) -------
         // ----- 클라이언트 요청 api 데이터, 실제 dto 형식으로 받아서 dto.nickname 같은식으로 넘겨줌 ---
-        userService.updateUser(
-                new UserUpdateRequestDto(allUsers.get(0).getId(), "changedName", "changedName!!", null, "changedPassword!!", null));
+        userService.updateUser(allUsers.get(0).getId(),
+                new UserUpdateRequestDto("changedName", "changedName!!", null, "changedPassword!!", null));
 //        User userById = userService.getUserById(user2.getId());
         allUsers = userService.getAllUsers();
         System.out.println("allUsers = " + allUsers);

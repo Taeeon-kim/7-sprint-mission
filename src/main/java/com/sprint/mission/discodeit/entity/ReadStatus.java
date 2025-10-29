@@ -13,7 +13,7 @@ public class ReadStatus extends BasicEntity {
     UUID channelId;
     Instant readAt;
 
-    public void markAsRead(){
+    public void markAsRead() {
         this.readAt = Instant.now();
         setUpdatedAt(Instant.now());
     }

@@ -10,7 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserUpdateRequestDto {
-    private UUID id;
     private String nickname;
     private String email;
     private String password;

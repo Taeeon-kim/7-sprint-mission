@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.integration;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
+import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.entity.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -20,7 +21,6 @@ import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
@@ -204,9 +204,146 @@ public class UserStatusIntegrationTest {
             // then
             assertEquals(2, allUserStatuses.size());
 
-
         }
     }
+
+    @Nested
+    @DisplayName("updateUserStatusById")
+    class UpdateUserStatus {
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 회원상태 수정 - 기존과 다른값으로 변경 반영")
+        void updateUserStatus_then_changedValues() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
+            Instant before = savedStatus.getLastActiveAt(); // 스냅샷
+            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+
+            // when
+            userStatusService.updateUserStatus(savedStatus.getId(), updateDto);
+
+            // then
+            UserStatus userStatus = userStatusRepository.findById(savedStatus.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+            assertNotEquals(userStatus.getLastActiveAt(), before);
+            assertEquals(userStatus.getLastActiveAt(), updateDto.lastActiveAt());
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 존재하지않는 id로 수정시 NoSuchElementException 예외")
+        void updateUserStatus_throws_whenIdNotFound() {
+            UUID id = UUID.randomUUID();
+            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            assertThrows(NoSuchElementException.class,
+                    () -> userStatusService.updateUserStatus(id, updateDto));
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음 ")
+        void updateUserStatus_noop_whenSameValue() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
+
+            UserStatusUpdateDto dto = new UserStatusUpdateDto(savedStatus.getLastActiveAt());
+
+            // when
+            userStatusService.updateUserStatus(savedStatus.getId(), dto);
+
+            // then
+            UserStatus after = userStatusRepository.findById(savedStatus.getId()).orElseThrow();
+            // 예: 동일값이면 변화 없음(정책에 맞게 선택)
+            assertEquals(savedStatus.getLastActiveAt(), after.getLastActiveAt());
+        }
+
+
+    }
+
+    @Nested
+    @DisplayName("UpdateUserStatusByUserId")
+    class UpdateUserStatusByUserId {
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 회원상태 수정 - 기존과 다른값으로 변경 반영")
+        void updateUserStatusByUserId_then_changedValues() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
+            Instant before = savedStatus.getLastActiveAt(); // 스냅샷
+            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+
+            // when
+            userStatusService.updateUserStatusByUserId(savedStatus.getUserId(), updateDto);
+
+            // then
+            UserStatus userStatus = userStatusRepository.findByUserId(savedStatus.getUserId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
+            assertNotEquals(userStatus.getLastActiveAt(), before);
+            assertEquals(userStatus.getLastActiveAt(), updateDto.lastActiveAt());
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 존재하지않는 id로 수정시 NoSuchElementException 예외")
+        void updateUserStatusByUserId_throws_whenIdNotFound() {
+            UUID id = UUID.randomUUID();
+            UserStatusUpdateDto updateDto = new UserStatusUpdateDto(Instant.now());
+            assertThrows(NoSuchElementException.class,
+                    () -> userStatusService.updateUserStatusByUserId(id, updateDto));
+        }
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음 ")
+        void updateUserStatusByUserId_noop_whenSameValue() {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("emaile@example.com")
+                    .phoneNumber("010-1111-2222")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .profileId(null)
+                    .build();
+
+            UserStatus savedStatus = userStatusRepository.save(new UserStatus(user.getId()));
+
+            UserStatusUpdateDto dto = new UserStatusUpdateDto(savedStatus.getLastActiveAt());
+
+            // when
+            userStatusService.updateUserStatusByUserId(savedStatus.getUserId(), dto);
+
+            // then
+            UserStatus after = userStatusRepository.findByUserId(savedStatus.getUserId()).orElseThrow();
+            // 예: 동일값이면 변화 없음(정책에 맞게 선택)
+            assertEquals(savedStatus.getLastActiveAt(), after.getLastActiveAt());
+        }
+
+
+    }
+
+
 
 
 }

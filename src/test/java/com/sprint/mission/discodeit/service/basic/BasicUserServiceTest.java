@@ -31,6 +31,7 @@ class BasicUserServiceTest {
     private UserStatusService userStatusService;
     private BasicUserService userService;
     private BinaryContentRepository binaryContentRepository;
+
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -167,11 +168,30 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Behavior] 회원삭제 - userRepository.deleteById() 위임 호출")
         void deleteUser_shouldCallRepositoryDelete_whenValidId() {
-            UUID id = UUID.randomUUID();
 
-            userService.deleteUser(id);
+            // given
+            User user = User.builder()
+                    .nickname("taeeon")
+                    .role(RoleType.USER)
+                    .password("pwd")
+                    .email("dfds@exmap.com")
+                    .phoneNumber("010-1234-5678")
+                    .profileId(UUID.randomUUID())
+                    .build();
+            UserStatus userStatus = new UserStatus(user.getId());
+            when(userReader.findUserOrThrow(any())).thenReturn(user);
 
-            verify(userRepository, times(1)).deleteById(id);
+            when(userStatusRepository.findByUserId(any(UUID.class))).thenReturn(Optional.of(userStatus));
+            when(userStatusRepository.deleteById(any())).thenReturn(true);
+            when(userRepository.deleteById(user.getId())).thenReturn(true);
+//            when(binaryContentRepository);
+
+            // when
+            userService.deleteUser(user.getId());
+
+            // then
+            verify(userRepository, times(1)).deleteById(user.getId());
+            verify(binaryContentRepository).deleteById(any()); // 부수효과, 흐름상 원자적으로 binarycontent도 삭제
         }
 
         @Test
@@ -196,8 +216,8 @@ class BasicUserServiceTest {
             //when+then
             assertThrows(
                     NoSuchElementException.class,
-                    () -> userService.updateUser(
-                            new UserUpdateRequestDto(id,
+                    () -> userService.updateUser(id,
+                            new UserUpdateRequestDto(
                                     "new",
                                     null,
                                     null,
@@ -222,7 +242,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(new UserUpdateRequestDto(id, "new", null, null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto("new", null, null, null, null));
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
@@ -241,7 +261,7 @@ class BasicUserServiceTest {
 
 
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(new UserUpdateRequestDto(id, "same", null, null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto("same", null, null, null, null));
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
@@ -258,7 +278,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, null, "change@email.com", null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, "change@email.com", null, null, null));
 
             // then (순서 + 위임 검증)
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -276,7 +296,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, null, null, "vjhsngr", null, null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, null, "vjhsngr", null, null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -294,7 +314,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, "010-9999-9999", null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, "010-9999-9999", null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -313,7 +333,7 @@ class BasicUserServiceTest {
             UUID profileId = UUID.randomUUID();
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, null, profileId));
+            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, profileId));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -330,7 +350,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, null, null, null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -347,7 +367,7 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
-            userService.updateUser(new UserUpdateRequestDto(id, "nick", "a@b.com", "pw", "010", null));
+            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", "010", null));
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);

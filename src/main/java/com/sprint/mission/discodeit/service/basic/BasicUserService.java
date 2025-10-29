@@ -123,13 +123,13 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public void updateUser(UserUpdateRequestDto request) {
-        if (request.getId() == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
+    public void updateUser(UUID id, UserUpdateRequestDto request) {
+        if (id == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
-        User userById = userReader.findUserOrThrow(request.getId());
+        User userById = userReader.findUserOrThrow(id);
         UserUpdateParams params = UserUpdateParams.from(request); // 경계분리
         boolean updated = userById.update(params);
         if (updated) {

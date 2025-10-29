@@ -10,7 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSignupRequestDto {
-
     private String nickname;
     private String email;
     private String password;

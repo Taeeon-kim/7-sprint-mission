@@ -14,14 +14,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class UserUpdateParams {
-
-    private UUID id;
     private String nickname;
     private String email;
     private String password;
     private String phoneNumber;
     private UUID profileId;
-    
+
     public static UserUpdateParams from(UserUpdateRequestDto dto) {
         return UserUpdateParams.builder()
                 .nickname(dto.getNickname())

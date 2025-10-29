@@ -30,4 +30,15 @@ public class UserStatus extends BasicEntity {
         return recentlyActive ? UserActiveStatus.ONLINE : UserActiveStatus.OFFLINE;
     }
 
+    public boolean updateLastActiveAt(Instant lastActiveAt) {
+        if (lastActiveAt != null && !lastActiveAt.equals(this.lastActiveAt)) {
+            if (lastActiveAt.isAfter(Instant.now())) {
+                throw new IllegalArgumentException("해당 시간으로 변경할 수 없습니다.");
+            }
+            this.lastActiveAt = lastActiveAt;
+            return true;
+        }
+        return false;
+    }
+
 }
