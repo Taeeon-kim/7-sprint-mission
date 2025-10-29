@@ -15,5 +15,4 @@ public class UserSignupRequestDto {
     private String password;
     private String phoneNumber;
     private UUID profileId;
-
 }

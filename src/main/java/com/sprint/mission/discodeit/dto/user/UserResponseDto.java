@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Builder
 public class UserResponseDto {
-
+    private UUID id;
     private String nickname;
     private String email;
     private RoleType role;
