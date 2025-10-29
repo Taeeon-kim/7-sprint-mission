@@ -347,7 +347,7 @@ public class UserStatusIntegrationTest {
 
         @Test
         @DisplayName("[Integration][Flow][Positive] 회원상태 삭제 - 삭제 후 조회 불가 & 개수 감소")
-        void deleteUserStatus_then_deleted() {
+        void deleteUserStatus_then_not_found_and_size_decreased() {
             // given
             User user = User.builder()
                     .nickname("name")

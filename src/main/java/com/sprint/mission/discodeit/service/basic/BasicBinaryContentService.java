@@ -41,6 +41,9 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     @Override
     public void deleteBinaryContent(UUID id) {
-
+        if (id == null) {
+            throw new IllegalArgumentException("전달값이 잘못되었습니다.");
+        }
+        binaryContentRepository.deleteById(id);
     }
 }

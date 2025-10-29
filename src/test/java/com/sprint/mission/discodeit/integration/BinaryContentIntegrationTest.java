@@ -96,7 +96,7 @@ public class BinaryContentIntegrationTest {
     class getBinaryContentsByIds {
 
         @Test
-        @DisplayName("[Integration][Flow][Positive] 특정 ids 파일 조회 - 요청 ids에 해당하는 binaryContent List 반환")
+        @DisplayName("[Integration][Flow][Positive] 파일 다중 조회 - 요청 ids에 해당하는 binaryContent List 반환")
         void getBinaryContentsByIds_returns_saved_contents() {
             //given
             BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
@@ -123,7 +123,7 @@ public class BinaryContentIntegrationTest {
 
 
         @Test
-        @DisplayName("[Integration][Flow][Negative] 특정 ids 파일 조회 - 없는 ids로 조회시 빈배열 반환")
+        @DisplayName("[Integration][Flow][Negative] 파일 다중조회 - 없는 ids로 조회시 빈배열 반환")
         void getBinaryContentsByIds_returns_empty_list_when_not_found() {
             //given
             List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
@@ -134,5 +134,28 @@ public class BinaryContentIntegrationTest {
             // then
             assertTrue(binaryContentsByIds.isEmpty());
         }
+    }
+
+    @Nested
+    @DisplayName("deleteBinaryContent")
+    class deleteBinaryContent {
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 파일 삭제 - 삭제 후 조회 불가 & 개수 감소")
+        void deleteBinaryContent_then_not_found_and_size_decreased() {
+            // given
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent saved = binaryContentRepository.save(updateContent);
+            long before = binaryContentRepository.findAll().size();
+
+            // when
+            binaryContentService.deleteBinaryContent(saved.getId());
+
+            // then
+            long after = binaryContentRepository.findAll().size();
+            assertEquals(before - 1, after);
+            assertThrows(NoSuchElementException.class, ()-> binaryContentService.getBinaryContent(saved.getId()));
+        }
+
     }
 }
