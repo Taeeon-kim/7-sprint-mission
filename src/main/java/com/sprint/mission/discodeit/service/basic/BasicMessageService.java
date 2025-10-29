@@ -23,6 +23,7 @@ public class BasicMessageService implements MessageService {
     private final ChannelService channelService;
     private final MessageRepository messageRepository;
 
+
     @Override
     public void createMessage(Message message) {
         if(message == null){

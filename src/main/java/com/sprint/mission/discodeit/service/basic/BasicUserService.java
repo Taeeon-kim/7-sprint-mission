@@ -183,6 +183,10 @@ public class BasicUserService implements UserService {
         System.out.println("[User 삭제 완료] UserID : " + user.getUserId());
     }
 
+    public List<User> getReadUsers(){
+        return userRepository.findAll();
+    }
+
     public void runTest() {
         // User 등록
         UserCreateRequestDto[] userCreateRequestDtos = new UserCreateRequestDto[]{
