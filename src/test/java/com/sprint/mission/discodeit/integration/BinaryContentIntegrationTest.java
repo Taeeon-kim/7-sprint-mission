@@ -110,15 +110,29 @@ public class BinaryContentIntegrationTest {
             // then
 
             assertAll(
-                    ()-> assertEquals(2, binaryContentsByIds.size()),
-                    ()-> assertEquals(saved.getId(), binaryContentsByIds.get(0).getId()),
-                    ()-> assertEquals(saved2.getId(), binaryContentsByIds.get(1).getId()),
-                    ()-> assertEquals(saved.getFileName(), binaryContentsByIds.get(0).getFileName()),
-                    ()-> assertEquals(saved2.getFileName(), binaryContentsByIds.get(1).getFileName()),
-                    ()-> assertEquals(saved.getContentType(), binaryContentsByIds.get(0).getContentType()),
-                    ()-> assertEquals(saved2.getContentType(), binaryContentsByIds.get(1).getContentType())
+                    () -> assertEquals(2, binaryContentsByIds.size()),
+                    () -> assertEquals(saved.getId(), binaryContentsByIds.get(0).getId()),
+                    () -> assertEquals(saved2.getId(), binaryContentsByIds.get(1).getId()),
+                    () -> assertEquals(saved.getFileName(), binaryContentsByIds.get(0).getFileName()),
+                    () -> assertEquals(saved2.getFileName(), binaryContentsByIds.get(1).getFileName()),
+                    () -> assertEquals(saved.getContentType(), binaryContentsByIds.get(0).getContentType()),
+                    () -> assertEquals(saved2.getContentType(), binaryContentsByIds.get(1).getContentType())
             );
 
+        }
+
+
+        @Test
+        @DisplayName("[Integration][Flow][Negative] 특정 ids 파일 조회 - 없는 ids로 조회시 빈배열 반환")
+        void getBinaryContentsByIds_returns_empty_list_when_not_found() {
+            //given
+            List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+            // when
+            List<BinaryContent> binaryContentsByIds = binaryContentService.getBinaryContentsByIds(ids);
+
+            // then
+            assertTrue(binaryContentsByIds.isEmpty());
         }
     }
 }
