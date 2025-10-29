@@ -16,9 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.sprint.mission.discodeit.entity.StatusType.OFFLINE;
-import static com.sprint.mission.discodeit.entity.StatusType.ONLINE;
-
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
