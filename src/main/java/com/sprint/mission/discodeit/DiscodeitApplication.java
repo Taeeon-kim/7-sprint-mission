@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.basic.BasicAuthService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
@@ -30,8 +31,10 @@ public class DiscodeitApplication {
         BasicUserService userService = ctx.getBean(BasicUserService.class);
         BasicChannelService channelService = ctx.getBean(BasicChannelService.class);
         BasicMessageService messageService = ctx.getBean(BasicMessageService.class);
+        BasicAuthService  authService = ctx.getBean(BasicAuthService.class);
 
         userService.runTest();
+        authService.runAuthTest();
         Channel[] channels = channelService.runChannelService();
         messageService.runMessageService(userService.readAllUser().stream()
                 .map(u->new User(u.getUserid(), u.getEmail(), null,

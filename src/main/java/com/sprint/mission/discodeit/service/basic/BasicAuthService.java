@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BasicAuthService implements AuthService {
     private final UserRepository userRepository;
-    private final FileUserStatusRepository fileUserStatusRepository;
+    private final UserStatusRepository userStatusRepository;
 
     @Override
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
@@ -25,17 +25,36 @@ public class BasicAuthService implements AuthService {
                 && u.getUserPassword().equals(loginRequestDto.getPassword()))
                 .findFirst().orElseThrow(()->new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
 
-        UserStatus userStatus = fileUserStatusRepository.findByUserId(user.getUuid());
-        if(userStatus != null){
-            userStatus.updateLastActiveAt();
-            fileUserStatusRepository.save(userStatus);
+        UserStatus status = userStatusRepository.findByUserId(user.getUuid());
+        if(status != null){
+            status.updateLastActiveAt();
+            userStatusRepository.save(status);
+            System.out.println("[유저 정보]");
+            System.out.println("ID: " + user.getUserId());
+            System.out.println("Nickname: " + user.getNickName());
         }
 
         return new LoginResponseDto(
                 user.getUserId(),
                 user.getNickName(),
                 user.getEmail(),
-                userStatus != null ? userStatus.getStatus().name() : null
+                status != null ? status.getStatus() : null
         );
+    }
+
+    public void runAuthTest(){
+        System.out.println("-------AuthService-------");
+        loginTest("test00", "pass123");
+        loginTest("test01", "123456p");
+    }
+
+    private void loginTest(String userId,  String password){
+        System.out.println("로그인 시도 : " + userId + " / " + password);
+        try{
+            LoginResponseDto responseDto = login(new LoginRequestDto(userId,password));
+            System.out.println("로그인 성공");
+        } catch(Exception e){
+            System.out.println("로그인 실패" + e.getMessage());
+        }
     }
 }
