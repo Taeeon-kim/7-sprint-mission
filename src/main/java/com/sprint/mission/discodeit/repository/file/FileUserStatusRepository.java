@@ -16,17 +16,16 @@ public class FileUserStatusRepository implements UserStatusRepository {
     private final Map<UUID, UserStatus> statusMap = new HashMap<>();
 
     // 파일 저장 경로
-    private static final String FILE_PATH = "data/user_status.ser";
+//    private static final String FILE_PATH = "data/user_status.ser";
 
     @Override
     public void save(UserStatus userStatus) {
-        statusMap.put(userStatus.getUuid(), userStatus);
-//        saveToFile();
+        statusMap.put(userStatus.getUserId(), userStatus);
     }
 
     @Override
     public UserStatus findByUserId(UUID userId) {
-        return null;
+        return statusMap.get(userId);
     }
 
     @Override

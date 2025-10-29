@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.dto.response;
 
+import com.sprint.mission.discodeit.entity.StatusType;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,8 @@ public class UserReponseDto {
     private String nickname;
     private String profileImagePath;
     private String profileContentType;
-    private boolean online;
+//    private boolean online;
+    private StatusType status;
     private Instant createAt;
+
 }

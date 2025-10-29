@@ -18,6 +18,7 @@ import java.util.UUID;
 public class UserStatus{
 
     private final UUID uuid; //필드 고유 uuid
+    private User user;
     private final Instant createdAt;
     private StatusType status;
     private final UUID userId; // 접속 유저
@@ -31,12 +32,22 @@ public class UserStatus{
         this.lastActiveAt = Instant.now();
     }
 
+    private void updateStatus() {
+        this.status = isOnline() ? StatusType.ONLINE : StatusType.OFFLINE;
+    }
+
+    public StatusType getStatus() {
+        updateStatus();
+        return this.status;
+    }
+
     public void updateLastActiveAt() {
         this.lastActiveAt = Instant.now();
+        updateStatus(); // 자동 ONLINE
     }
 
     public boolean isOnline() {
-        return Duration.between(lastActiveAt, Instant.now()).toMinutes() <= 5;
+        return Duration.between(createdAt, Instant.now()).toMinutes() <= 5;
     }
 
 }

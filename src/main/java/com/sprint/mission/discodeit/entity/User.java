@@ -1,12 +1,13 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter @ToString
+@Getter @Setter @ToString
+//@NoArgsConstructor
+@AllArgsConstructor
 public class User extends BaseEntity {
 
     //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
@@ -15,15 +16,17 @@ public class User extends BaseEntity {
     private String userPassword;    //비밀번호 string 수정가능
     private String nickName;    //닉네임 = 사용자명 string, 수정가능
     private UUID profileImageId; // 변경 가능
+    private UserStatus userStatus;
 
-    public User(String userId, String email, String userPassword, String nickName, UUID profileImageId) {
-        super();
-        this.userId = userId;
-        this.email = email;
-        this.userPassword = userPassword;
-        this.nickName = nickName;
-        this.profileImageId = profileImageId;
-    }
+//    public User(String userId, String email, String userPassword, String nickName, UUID profileImageId, StatusType userStatus) {
+//        super();
+//        this.userId = userId;
+//        this.email = email;
+//        this.userPassword = userPassword;
+//        this.nickName = nickName;
+//        this.profileImageId = profileImageId;
+//        this.userStatus = userStatus;
+//    }
 
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;

@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.sprint.mission.discodeit.entity.StatusType.OFFLINE;
+import static com.sprint.mission.discodeit.entity.StatusType.ONLINE;
+
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
@@ -44,6 +47,7 @@ public class BasicUserService implements UserService {
                 userCreateRequestDto.getEmail(),
                 userCreateRequestDto.getPassword(),
                 userCreateRequestDto.getNickName(),
+                null,
                 null
         );
         userRepository.save(user);
@@ -86,7 +90,7 @@ public class BasicUserService implements UserService {
                 user.getNickName(),
                 (profile != null ? profile.getFilePath() : null),
                 (profile != null ? profile.getContentType() : null),
-                status != null && status.isOnline(),
+                status != null ? status.getStatus() : null,
                 user.getCreateAt()
         );
     }
@@ -107,7 +111,7 @@ public class BasicUserService implements UserService {
                             user.getNickName(),
                             (profile != null ? profile.getFilePath() : null),
                             (profile != null ? profile.getContentType() : null),
-                            status != null && status.isOnline(),
+                            status != null ? status.getStatus() : null,
                             user.getCreateAt()
                     );
                 })
@@ -167,7 +171,10 @@ public class BasicUserService implements UserService {
         if (user == null) throw new IllegalArgumentException("삭제하려는 유저가 존재하지 않습니다.");
 
         // 상태 삭제
-        userStatusRepository.delete(uuid);
+        UserStatus status = userStatusRepository.findByUserId(uuid);
+        if( status != null){
+            userStatusRepository.delete(uuid);
+        }
 
         //프로필 삭제
         if (user.getProfileImageId() != null) {
@@ -182,10 +189,10 @@ public class BasicUserService implements UserService {
     public void runTest() {
         // User 등록
         UserCreateRequestDto[] userCreateRequestDtos = new UserCreateRequestDto[]{
-                new UserCreateRequestDto("test00", "alice123@gmail.com", "pass123", "Alice", null),
-                new UserCreateRequestDto("test02", "name000@gmail.com", "0000pass", "Bob", null),
-                new UserCreateRequestDto("test03", "chilysource@gmail.com", "12341234", "Chily", null),
-                new UserCreateRequestDto("test05", "tomtom00@gmail.com", "pw123456", "Tom", null)
+                new UserCreateRequestDto("test00", "alice123@gmail.com", "pass123", "Alice", null, null),
+                new UserCreateRequestDto("test02", "name000@gmail.com", "0000pass", "Bob", null, null),
+                new UserCreateRequestDto("test03", "chilysource@gmail.com", "12341234", "Chily", null, null),
+                new UserCreateRequestDto("test05", "tomtom00@gmail.com", "pw123456", "Tom", null, null)
         };
 
         //유저 생성
@@ -206,7 +213,7 @@ public class BasicUserService implements UserService {
         UserReponseDto userReponseDto = readUser(userUpdate.getUuid());
         System.out.println("수정된 유저 : " + userReponseDto.getUserid()
                 + " / Name : " + userReponseDto.getNickname()
-                + " / Status : " + userReponseDto.isOnline()
+                + " / Status : " + userReponseDto.getStatus()
                 + " / profile : " + userReponseDto.getProfileImagePath());
         userList();
 
@@ -226,7 +233,8 @@ public class BasicUserService implements UserService {
         Set<String> userSet = new HashSet<>();
         for (UserReponseDto u : readAllUser()) {
             if (userSet.add(u.getUserid())) { // userId 기준
-                System.out.println("ID: " + u.getUserid() + " / Name: " + u.getNickname() + " / Status : " + u.isOnline());
+                System.out.println("ID: " + u.getUserid() + " | Name: " + u.getNickname()
+                        + " | Status : " + u.getStatus() + "| Profile :" + u.getProfileImagePath());
             }
         }
     }

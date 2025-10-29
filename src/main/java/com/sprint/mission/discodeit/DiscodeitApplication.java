@@ -1,15 +1,14 @@
 package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.dto.request.UserCreateRequestDto;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
+import com.sun.source.tree.Tree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -34,7 +33,9 @@ public class DiscodeitApplication {
 
         userService.runTest();
         Channel[] channels = channelService.runChannelService();
-        messageService.runMessageService(userService.readAllUser().stream().map(u->new User(u.getUserid(), u.getEmail(), null, u.getNickname(), null))
+        messageService.runMessageService(userService.readAllUser().stream()
+                .map(u->new User(u.getUserid(), u.getEmail(), null,
+                        u.getNickname(), null, null))
                 .toArray(User[]::new), channels);
     }
 
