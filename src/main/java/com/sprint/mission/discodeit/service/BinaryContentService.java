@@ -12,7 +12,7 @@ public interface BinaryContentService {
 
     BinaryContent getBinaryContent(UUID id);
 
-    List<BinaryContent> getBinaryContentsByIds();
+    List<BinaryContent> getBinaryContentsByIds(List<UUID> ids);
 
     void deleteBinaryContent(UUID id);
 }

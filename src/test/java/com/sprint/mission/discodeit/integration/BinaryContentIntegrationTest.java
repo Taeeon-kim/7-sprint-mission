@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -87,6 +88,37 @@ public class BinaryContentIntegrationTest {
 
             // when & then
             assertThrows(NoSuchElementException.class, () -> binaryContentService.getBinaryContent(id));
+        }
+    }
+
+    @Nested
+    @DisplayName("getBinaryContentsByIds")
+    class getBinaryContentsByIds {
+
+        @Test
+        @DisplayName("[Integration][Flow][Positive] 특정 ids 파일 조회 - 요청 ids에 해당하는 binaryContent List 반환")
+        void getBinaryContentsByIds_returns_saved_contents() {
+            //given
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent updateContent2 = new BinaryContent("test2.png", "image/png", "test222".getBytes());
+            BinaryContent saved = binaryContentRepository.save(updateContent);
+            BinaryContent saved2 = binaryContentRepository.save(updateContent2);
+
+            // when
+            List<BinaryContent> binaryContentsByIds = binaryContentService.getBinaryContentsByIds(List.of(saved.getId(), saved2.getId()));
+
+            // then
+
+            assertAll(
+                    ()-> assertEquals(2, binaryContentsByIds.size()),
+                    ()-> assertEquals(saved.getId(), binaryContentsByIds.get(0).getId()),
+                    ()-> assertEquals(saved2.getId(), binaryContentsByIds.get(1).getId()),
+                    ()-> assertEquals(saved.getFileName(), binaryContentsByIds.get(0).getFileName()),
+                    ()-> assertEquals(saved2.getFileName(), binaryContentsByIds.get(1).getFileName()),
+                    ()-> assertEquals(saved.getContentType(), binaryContentsByIds.get(0).getContentType()),
+                    ()-> assertEquals(saved2.getContentType(), binaryContentsByIds.get(1).getContentType())
+            );
+
         }
     }
 }

@@ -3,10 +3,7 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class JCFBinaryContentRepository implements BinaryContentRepository {
 
@@ -37,6 +34,14 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     public List<BinaryContent> findAll() {
         return data.values()
                 .stream()
+                .toList();
+    }
+
+    @Override
+    public List<BinaryContent> findAllByIds(List<UUID> ids) {
+        return ids.stream()
+                .map((id)-> data.get(id)) // // O(N) + O(1) = O(N)
+                .filter((binaryContent)-> Objects.nonNull(binaryContent))
                 .toList();
     }
 }
