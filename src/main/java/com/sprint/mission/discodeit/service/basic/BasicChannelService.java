@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -82,7 +83,7 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         User user = userReader.findUserOrThrow(createdByUserId);
-        return Channel.createPublicChannel(requestDto.title(), requestDto.description(), user.getId());
+        return Channel.createPublicChannel(user.getId(), requestDto.title(), requestDto.description());
     }
 
 
@@ -133,6 +134,14 @@ public class BasicChannelService implements ChannelService {
                 .toList();
     }
 
+    @Override
+    public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
+        return channelRepository.findAllByUserId(userId)
+                .stream()
+                .map(channel -> toChannelResponseDto(channel.getId()))
+                .toList();
+    }
+
     // 헬퍼 메서드
     private ChannelResponseDto toChannelResponseDto(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
@@ -143,13 +152,22 @@ public class BasicChannelService implements ChannelService {
         if (!messageIds.isEmpty()) {
             UUID currentMessageId = messageIds.get(messageIds.size() - 1);
 
-            createdAt =  messageRepository.findById(currentMessageId)
+            createdAt = messageRepository.findById(currentMessageId)
                     .map(Message::getCreatedAt)
                     .orElse(null);
 
         }
+        return getChannelResponseDto(channel, createdAt);
+    }
 
-        return ChannelResponseDto.from(channel, createdAt);
+    private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant createdAt) {
+        if (channel.getType() == ChannelType.PUBLIC) {
+            return ChannelResponseDto.from(channel, createdAt);
+        } else if (channel.getType() == ChannelType.PRIVATE) {
+            return ChannelResponseDto.from(channel, createdAt);
+        } else {
+            throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
+        }
     }
 
     @Override

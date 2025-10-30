@@ -215,7 +215,7 @@ public class ChannelIntegrationTest {
             );
 
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
             );
 
             // 메시지 두 개 저장 (시간 차이 확인용)
@@ -269,7 +269,7 @@ public class ChannelIntegrationTest {
             );
 
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
             );
 
             // 메세지만 생성
@@ -301,7 +301,7 @@ public class ChannelIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
             );
 
             // when
@@ -315,7 +315,7 @@ public class ChannelIntegrationTest {
 
     @Nested
     @DisplayName("getAllChannel")
-    class getAllChannel{
+    class getAllChannel {
 
         @Test
         @DisplayName("[Integration][Positive] 전체 채널 조회 - 각 채널 정보와 최신 메시지 시간 포함")
@@ -334,7 +334,7 @@ public class ChannelIntegrationTest {
 
             // Channel A
             Channel channelA = channelRepository.save(
-                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
             );
             Message messageA1 = messageRepository.save(new Message("A1", channelA.getId(), creator.getId(), null));
             channelA.addMessageId(messageA1.getId());
@@ -345,17 +345,23 @@ public class ChannelIntegrationTest {
 
             // Channel B
             Channel channelB = channelRepository.save(
-                    Channel.createPublicChannel("잡담", "자유 채팅방", creator.getId())
+                    Channel.createPublicChannel(creator.getId(), "잡담", "자유 채팅방")
             );
             Message messageB1 = messageRepository.save(new Message("B1", channelB.getId(), creator.getId(), null));
             channelB.addMessageId(messageB1.getId());
+            channelRepository.save(channelB);
+
+
+            Channel channelC = channelRepository.save(
+                    Channel.createPrivateChannel(creator.getId())
+            );
             channelRepository.save(channelB);
 
             // when
             List<ChannelResponseDto> result = channelService.getAllChannels();
 
             // then
-            assertEquals(2, result.size());
+            assertEquals(3, result.size());
 
             // 채널별 DTO 찾기
             ChannelResponseDto dtoA = result.stream()
@@ -380,5 +386,97 @@ public class ChannelIntegrationTest {
                     () -> assertEquals(messageB1.getCreatedAt(), dtoB.currentMessagedAt())
             );
         }
+    }
+
+    @Nested
+    @DisplayName("getAllChannelsByUserId")
+    class getAllChannelsByUserId {
+
+        @Test
+        @DisplayName("[Integration][Positive] 유저채널 조회 - Public 채널 및 자기속한 private 채널 조회")
+        void getAllChannelsByUserId_returns_public_and_joined_private_channel_list() {
+            // given
+            User creator = userRepository.save(
+                    User.builder()
+                            .nickname("creator")
+                            .email("c@ex.com")
+                            .password("pw")
+                            .role(RoleType.USER)
+                            .phoneNumber("010")
+                            .build()
+            );
+
+            Channel channelA = channelRepository.save(
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+            );
+            Channel channelB = channelRepository.save(
+                    Channel.createPublicChannel(creator.getId(), "자유", "자유 게시판채널")
+            );
+            Channel channelC = channelRepository.save(
+                    Channel.createPrivateChannel(creator.getId())
+            );
+            Channel channelD = channelRepository.save(
+                    Channel.createPrivateChannel(creator.getId())
+            );
+
+            // joined member
+            User member1 = userRepository.save(User.builder()
+                    .nickname("member1")
+                    .email("aaaaac@ex.com")
+                    .password("p111w")
+                    .role(RoleType.USER)
+                    .phoneNumber("010-1111-2222")
+                    .build());
+
+            User member2 = userRepository.save(User.builder()
+                    .nickname("member2")
+                    .email("xxxx@ex.com")
+                    .password("xxx")
+                    .role(RoleType.USER)
+                    .phoneNumber("010-3333-4444")
+                    .build());
+
+
+            channelC.addUser(member1.getId());
+            channelRepository.save(channelC);
+
+
+            // when
+            List<ChannelResponseDto> result = channelService.getAllChannelsByUserId(member1.getId());
+
+
+            // then
+            // 포함/제외 채널 id 세트 검증 (순서 무시)
+            Set<UUID> actualIds = result.stream()
+                    .map(ChannelResponseDto::channelId)
+                    .collect(Collectors.toSet());
+
+            assertAll(
+                    // 개수 검증
+                    () -> assertEquals(3, result.size()),
+
+                    // 공개 + 가입된 private만 포함
+                    () -> assertEquals(
+                            Set.of(channelA.getId(), channelB.getId(), channelC.getId()),
+                            actualIds,
+                            "A,B(공개) + C(가입된 비공개)만 포함되어야 함"
+                    ),
+
+                    // D는 포함되면 안 됨
+                    () -> assertFalse(actualIds.contains(channelD.getId()), "D(미가입 비공개)는 보이면 안 됨"),
+
+                    // userIds 정책 검증
+                    () -> result.forEach(dto -> {
+                        if (dto.channelId().equals(channelC.getId())) {
+                            assertNotNull(dto.userIds(), "비공개 채널은 참여자 정보 제공");
+                            assertTrue(dto.userIds().contains(member1.getId()));
+                        } else {
+                            assertTrue(dto.userIds().isEmpty(), "공개 채널은 맴버가 없어야한다");
+                        }
+                    })
+            );
+        }
+
+
     }
 }

@@ -29,6 +29,8 @@ public interface ChannelService {
     // 전체 채널목록 불러오기 getAllChannels (전체 체널 리스트)
     List<ChannelResponseDto> getAllChannels();
 
+    List<ChannelResponseDto> getAllChannelsByUserId(UUID userId);
+
     // 채널 입장
     void joinChannel(UUID channelId, UUID userId);
 

@@ -42,7 +42,7 @@ public class Channel extends BasicEntity {
         this.messageIds = new ArrayList<>();
     }
 
-    public static Channel createPublicChannel(String title, String description, UUID createdByUserId) {
+    public static Channel createPublicChannel(UUID createdByUserId, String title, String description) {
         return new Channel(title, description, createdByUserId, ChannelType.PUBLIC);
     }
 

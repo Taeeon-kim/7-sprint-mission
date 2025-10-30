@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.store.Store;
 import org.springframework.stereotype.Repository;
@@ -31,6 +32,14 @@ public class FileChannelRepository implements ChannelRepository {
     @Override
     public Map<UUID, Channel> findAllMap() {
         return Store.loadMap(Store.CHANNEL_DATA_FILE);
+    }
+
+    @Override
+    public List<Channel> findAllByUserId(UUID userId) {
+        List<Channel> allChannels = findAll();
+        return allChannels.stream()
+                .filter(channel -> channel.getType() == ChannelType.PUBLIC || channel.isMember(userId))
+                .toList();
     }
 
     @Override
