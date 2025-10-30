@@ -83,7 +83,7 @@ public class BasicUserService implements UserService {
                 .findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
 
-        return UserResponseDto.from(user, statusByUserId);
+        return UserResponseDto.from(user, statusByUserId.getUserStatus());
     }
 
     @Override

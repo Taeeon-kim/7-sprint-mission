@@ -160,7 +160,7 @@ public class UserIntegrationTest {
 
             //then
             assertEquals("name", userById.getNickname());
-            assertEquals(id, userById.getUserStatus().getUserId());
+            assertEquals(id, userById.getId());
         }
 
         @Test
@@ -256,7 +256,7 @@ public class UserIntegrationTest {
         @DisplayName("[Integration][Flow] 회원삭제 - 회원삭제시 해당 연관 프로필, 유저상태 데이터 삭제")
         void deleteUser_then_deletes_profile_and_status() {
             // given
-            // 결적적 픽스쳐 준비
+            // 결정적 픽스쳐 준비
             byte[] payload = "fake-bytes".getBytes(UTF_8);
             // 프로필이미지
             BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", payload));

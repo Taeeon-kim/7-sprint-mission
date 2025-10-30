@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.dto.user;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
 import com.sprint.mission.discodeit.entity.type.RoleType;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,9 +17,9 @@ public class UserResponseDto {
     private RoleType role;
     private String phoneNumber;
     private UUID profileId;
-    UserStatus userStatus;
+    UserActiveStatus isOnline;
 
-    public static UserResponseDto from(User user, UserStatus userStatus) {
+    public static UserResponseDto from(User user, UserActiveStatus userStatus) {
         return UserResponseDto.builder()
                 .id(user.getId())
                 .phoneNumber(user.getPhoneNumber())
@@ -27,7 +27,7 @@ public class UserResponseDto {
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .profileId(user.getProfileId())
-                .userStatus(userStatus)
+                .isOnline(userStatus)
                 .build();
     }
 
