@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.sprint.mission.discodeit.entity.ChannelType.PRIVATE;
 import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 
 @Service
@@ -52,7 +53,8 @@ public class BasicChannelService implements ChannelService {
         Channel[] channels = {
                 new Channel(PUBLIC, "이벤트"),
                 new Channel(PUBLIC, "공지"),
-                new Channel(PUBLIC, "자유게시판")
+                new Channel(PUBLIC, "자유게시판"),
+                new Channel(PRIVATE, "1반 소식"),
         };
         for (Channel c : channels) {
             createChannel(c);
