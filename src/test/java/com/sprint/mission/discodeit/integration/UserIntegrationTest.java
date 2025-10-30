@@ -260,7 +260,7 @@ public class UserIntegrationTest {
             byte[] payload = "fake-bytes".getBytes(UTF_8);
             // 프로필이미지
             BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", payload));
-            User user = new User("nick", "a@b.com", "pw", RoleType.USER, "010", savedBinarycontent.getId());
+            User user = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", savedBinarycontent.getId());
             UserStatus userStatus = new UserStatus(user.getId());
             //유저등록
             User savedUser = userRepository.save(user);

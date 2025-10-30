@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
@@ -25,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ChannelIntegrationTest {
@@ -93,7 +96,7 @@ public class ChannelIntegrationTest {
                     () -> assertEquals(beforeReadStatusSize, afterReadStatusSize) // ReadStatus 생성 X
             );
 
-            Channel saved = channelRepository.findAll().get(afterChannelSize -1 ); // 혹은 정밀조회
+            Channel saved = channelRepository.findAll().get(afterChannelSize - 1); // 혹은 정밀조회
             assertAll(
                     () -> assertEquals(ChannelType.PUBLIC, saved.getType()),
                     () -> assertEquals("공지", saved.getTitle()),
@@ -187,6 +190,123 @@ public class ChannelIntegrationTest {
 
             assertThrows(NoSuchElementException.class,
                     () -> channelService.createChannel(creator.getId(), channelCreateRequestDto)); // userReader.findUserOrThrow(memberId)에서 터짐
+        }
+
+    }
+
+    @Nested
+    @DisplayName("getChannel")
+    class getChannel {
+
+
+        @Test
+        @DisplayName("[Integration][Positive] 채널 조회 - 기본 채널 정보와 최신 메세지 시간 반환 ")
+        void getChannel_then_returns_result() throws InterruptedException {
+
+            // given
+            User creator = userRepository.save(
+                    User.builder()
+                            .nickname("creator")
+                            .email("c@ex.com")
+                            .password("pw")
+                            .role(RoleType.USER)
+                            .phoneNumber("010")
+                            .build()
+            );
+
+            Channel channel = channelRepository.save(
+                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+            );
+
+            // 메시지 두 개 저장 (시간 차이 확인용)
+            Message m1 = messageRepository.save(
+                    new Message("hello1", channel.getId(), creator.getId(), null)
+            );
+            channel.addMessageId(m1.getId());
+            sleep(10); // 10ms 정도 차이 — LocalDateTime/Instant 비교 안전
+            Message m2 = messageRepository.save(
+                    new Message("hello2", channel.getId(), creator.getId(), null)
+            );
+            channel.addMessageId(m2.getId());
+
+            // when
+            ChannelResponseDto result = channelService.getChannel(channel.getId());
+
+            // then
+            assertAll(
+                    () -> assertEquals(channel.getId(), result.channelId()),
+                    () -> assertEquals("공지", result.title()),
+                    () -> assertEquals("전체 공지", result.description()),
+                    () -> assertEquals(ChannelType.PUBLIC, result.type()),
+                    () -> assertEquals(creator.getId(), result.createdByUserId()),
+                    // 최신 메시지 시간 검증
+                    () -> assertNotNull(result.currentMessagedAt()),
+                    () -> assertEquals(m2.getCreatedAt(), result.currentMessagedAt())
+            );
+        }
+
+        @Test
+        @DisplayName("[Integration][Positive] 채널 조회 - 존재하지않는 채널 조회시 예외")
+        void getChannel_throws_when_not_found() {
+            UUID id = UUID.randomUUID();
+            assertThrows(NoSuchElementException.class, () -> channelService.getChannel(id));
+        }
+
+        @Test
+        @DisplayName("[Integration][Negative] 채널 조회 - 채널에 등록된 messageId가 저장소에 없다면 currentMessagedAt 이 null ")
+        void getChannel_null_when_message_not_found() {
+            // given
+            User creator = userRepository.save(
+                    User.builder()
+                            .nickname("creator")
+                            .email("c@ex.com")
+                            .password("pw")
+                            .role(RoleType.USER)
+                            .phoneNumber("010")
+                            .build()
+            );
+
+            Channel channel = channelRepository.save(
+                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+            );
+
+            // 메세지만 생성
+            Message m1 = new Message("hello1", channel.getId(), creator.getId(), null);
+
+            // 메세지 레포지토리에 넣지않고 채널에 추가
+            channel.addMessageId(m1.getId());
+
+            // when
+            ChannelResponseDto responsedChannel = channelService.getChannel(channel.getId());
+
+            //  then
+            assertAll(
+                    () -> assertEquals(channel.getId(), responsedChannel.channelId()),
+                    () -> assertEquals("공지", responsedChannel.title()),
+                    () -> assertEquals("전체 공지", responsedChannel.description()),
+                    () -> assertEquals(ChannelType.PUBLIC, responsedChannel.type()),
+                    () -> assertEquals(creator.getId(), responsedChannel.createdByUserId()),
+                    () -> assertNull(responsedChannel.currentMessagedAt()) // 핵심 검증
+            );
+        }
+
+        @Test
+        @DisplayName("[Integration][Edge] 채널 조회 - 메시지가 하나도 없으면 currentMessagedAt == null")
+        void getChannel_null_when_no_messages() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+            );
+            Channel channel = channelRepository.save(
+                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+            );
+
+            // when
+            ChannelResponseDto dto = channelService.getChannel(channel.getId());
+
+            // then
+            assertNull(dto.currentMessagedAt());
         }
 
     }

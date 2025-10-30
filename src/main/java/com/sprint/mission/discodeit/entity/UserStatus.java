@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-
 public class UserStatus extends BasicEntity {
     private final UUID userId;
     private Instant lastActiveAt;

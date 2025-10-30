@@ -3,7 +3,9 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreatePrivateParams;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreatePublicParams;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -106,7 +108,7 @@ public class BasicChannelService implements ChannelService {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
-        Channel channel = getChannel(channelId);
+        Channel channel = channelReader.findChannelOrThrow(channelId);
         // 메세지 레포지토리에서 삭제 로직
         List<UUID> channelMessageIds = channel.getMessageIds();
         for (UUID messageId : channelMessageIds) {
@@ -117,8 +119,37 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public Channel getChannel(UUID channelId) {
-        return channelReader.findChannelOrThrow(channelId);
+    public ChannelResponseDto getChannel(UUID channelId) {
+        return toChannelResponseDto(channelId);
+    }
+
+    @Override
+    public List<ChannelResponseDto> getAllChannels() {
+
+        List<Channel> channelList = channelRepository.findAll();
+        return channelList
+                .stream()
+                .map(channel -> toChannelResponseDto(channel.getId()))
+                .toList();
+    }
+
+    // 헬퍼 메서드
+    private ChannelResponseDto toChannelResponseDto(UUID channelId) {
+        Channel channel = channelReader.findChannelOrThrow(channelId);
+        Instant createdAt = null;
+        // 최신 메세지 하나가져오고
+        List<UUID> messageIds = channel.getMessageIds();
+        // 해당 메세지의 createdAt 추출하고 response dto에 포함
+        if (!messageIds.isEmpty()) {
+            UUID currentMessageId = messageIds.get(messageIds.size() - 1);
+
+            createdAt =  messageRepository.findById(currentMessageId)
+                    .map(Message::getCreatedAt)
+                    .orElse(null);
+
+        }
+
+        return ChannelResponseDto.from(channel, createdAt);
     }
 
     @Override
@@ -162,14 +193,9 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public List<Channel> getAllChannels() {
-        return channelRepository.findAll();
-    }
-
-    @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
         User userById = userReader.findUserOrThrow(userId);
-        List<Channel> allChannels = getAllChannels();
+        List<Channel> allChannels = channelRepository.findAll();
         return allChannels.stream()
                 .filter(channel -> channel.isMember(userById.getId()))
                 .toList();

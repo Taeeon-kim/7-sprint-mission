@@ -4,7 +4,7 @@ import com.sprint.mission.discodeit.entity.type.ChannelType;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.io.Serializable;
+
 import java.util.*;
 
 @Getter

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -58,7 +59,7 @@ public class DiscodeitApplication {
         System.out.println("allUsers = " + allUsers);
 
         // ------- 채널 조회 ----
-        List<Channel> allChannels = channelService.getAllChannels();
+        List<ChannelResponseDto> allChannels = channelService.getAllChannels();
         System.out.println("allChannels = " + allChannels);
 
         System.out.println("=============================== ");
@@ -72,25 +73,25 @@ public class DiscodeitApplication {
 
         System.out.println("=============================== ");
 
-        channelService.updateChannel(allChannels.get(0).getId(), "changed title", "changed description");
+        channelService.updateChannel(allChannels.get(0).channelId(), "changed title", "changed description");
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel :" + allChannels);
         System.out.println("=============================== ");
 
-        channelService.updateChannel(allChannels.get(0).getId(), null, "changed description");
+        channelService.updateChannel(allChannels.get(0).channelId(), null, "changed description");
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel2 :" + allChannels);
         System.out.println("=============================== ");
 
 
         // --- 채널 맴버 조회 ----
-        List<User> allMembers = channelService.getAllMembers(allChannels.get(0).getId());
+        List<User> allMembers = channelService.getAllMembers(allChannels.get(0).channelId());
         System.out.println("all members of channel before join channel: " + allMembers);
 
         System.out.println("=============================== ");
 
         // --- 채널 조인 ----
-        UUID chId = allChannels.get(0).getId();
+        UUID chId = allChannels.get(0).channelId();
         allUsers
                 .forEach(member -> {
                     channelService.joinChannel(chId, member.getId());
@@ -160,7 +161,7 @@ public class DiscodeitApplication {
         allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
         System.out.println("allMessagesOfChannel after delecting a message= " + allMessagesOfChannel);
         // -- 채널 제거하기 ---
-        channelService.deleteChannel(allChannels.get(0).getId());
+        channelService.deleteChannel(allChannels.get(0).channelId());
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after deleting the channel :" + allChannels);
         allMessages = messageService.getAllMessages();

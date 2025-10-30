@@ -55,7 +55,7 @@ class BasicUserServiceTest {
             String password = "1234";
             String phone = "01012345678";
             when(userRepository.save(any(User.class)))
-                    .thenReturn(new User(nickname, email, password, RoleType.USER, phone, null));
+                    .thenReturn(User.create(nickname, email, password, RoleType.USER, phone, null));
 
 
             // when
@@ -112,7 +112,7 @@ class BasicUserServiceTest {
             when(userStatusRepository
                     .findByUserId(id))
                     .thenReturn(Optional.of(new UserStatus(id)));
-            when(userReader.findUserOrThrow(id)).thenReturn(new User("nickname", "email@exa.com", "pwd", RoleType.USER, "010", null));
+            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER, "010", null));
 
             // when
             userService.getUserById(id);
@@ -125,7 +125,7 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
 
             // given
-            User user = new User("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
+            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(user.getId())).thenReturn(user); // Stub
             when(userStatusRepository.findByUserId(user.getId()))
                     .thenReturn(Optional.of(new UserStatus(user.getId())));
@@ -237,7 +237,7 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when (행위 실행 : 실제 서비스 호출)
@@ -255,7 +255,7 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User real = new User("same", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("same", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
 
@@ -273,7 +273,7 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenEmailChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -291,7 +291,7 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -309,7 +309,7 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -327,7 +327,7 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
             UUID profileId = UUID.randomUUID();
 
@@ -345,7 +345,7 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenAllFieldNull() {
             // given
             UUID id = UUID.randomUUID();
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -362,7 +362,7 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = new User("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -381,7 +381,7 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Behavior + Flow] 모든회원조회 - 리포지토리 결과를 그대로 반환")
         void getAllUsers_shouldReturnListFromRepository() {
-            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010", null));
+            List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, "010", null));
             when(userRepository.findAll()).thenReturn(users);
 
             List<User> result = userService.getAllUsers();
@@ -405,7 +405,7 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 주어진 id 리스트에 해당하는 유저 목록 반환")
         void getUsersByIds_shouldReturnUsers_whenIdsValid() {
             List<UUID> ids = List.of(UUID.randomUUID());
-            List<User> users = List.of(new User("a", "a@b.com", "p", RoleType.USER, "010", null));
+            List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, "010", null));
             when(userRepository.findAllByIds(ids)).thenReturn(users);
 
             List<User> result = userService.getUsersByIds(ids);

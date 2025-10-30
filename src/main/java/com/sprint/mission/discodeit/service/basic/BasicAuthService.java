@@ -23,13 +23,6 @@ public class BasicAuthService implements AuthService {
         User findUser = all.stream()
                 .filter((user) -> (user.getNickname().equals(username)) && (user.getPassword().equals(password)))
                 .findFirst().orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
-        return UserResponseDto.builder()
-                .id(findUser.getId())
-                .nickname(findUser.getNickname())
-                .email(findUser.getEmail())
-                .profileId(findUser.getProfileId())
-                .role(findUser.getRole())
-                .phoneNumber(findUser.getPhoneNumber())
-                .build();
+        return UserResponseDto.from(findUser, null); // TODO: 추후 컨트롤러 생기면 넘겨주는 속성만 전달하는 LoginResult로 변경
     }
 }

@@ -21,6 +21,7 @@ import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
@@ -66,7 +67,7 @@ public class UserStatusIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 유저상태 생성 - 생성후 조회시 동일 데이터 반환 ")
         void create_persists_and_returns_same_data() {
             // given
-            User user = new User("name", "emaile@example.com", "pwd", RoleType.USER, "010", null);
+            User user = User.create("name", "emaile@example.com", "pwd", RoleType.USER, "010", null);
             User savedUser = userRepository.save(user);
             int before = userStatusRepository.findAll().size();
 

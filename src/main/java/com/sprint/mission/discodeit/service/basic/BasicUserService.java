@@ -54,7 +54,7 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
 
-        User newUser = new User(request.getNickname(),
+        User newUser = User.create(request.getNickname(),
                 request.getEmail(),
                 request.getPassword(),
                 USER,
@@ -83,14 +83,7 @@ public class BasicUserService implements UserService {
                 .findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
 
-        return UserResponseDto.builder()
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .profileId(user.getProfileId())
-                .role(user.getRole())
-                .userStatus(statusByUserId)
-                .phoneNumber(user.getPhoneNumber())
-                .build();
+        return UserResponseDto.from(user, statusByUserId);
     }
 
     @Override

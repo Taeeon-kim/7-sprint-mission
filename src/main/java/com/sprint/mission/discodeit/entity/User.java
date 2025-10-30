@@ -10,8 +10,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-@ToString
-@Builder
 public class User extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String nickname;
@@ -26,8 +24,9 @@ public class User extends BasicEntity {
     private User() {
     }
 
-    public User(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
-        this();
+    @Builder
+    private User(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
+        super();
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
@@ -45,7 +44,7 @@ public class User extends BasicEntity {
         this.profileId = profileId;
     }
 
-    public User(User other) { //  NOTE: 복사용, 복사 생성자
+    private User(User other) { //  NOTE: 복사용, 복사 생성자
 
         super(other);
         this.nickname = other.nickname;
@@ -55,6 +54,14 @@ public class User extends BasicEntity {
         this.phoneNumber = other.phoneNumber;
         this.profileId = other.profileId;
 //        this.friends = new ArrayList<>(other.friends);
+    }
+
+    public static User copyOf(User other) {
+        return new User(other);
+    }
+
+    public static User create(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
+        return new User(nickname, email, password, role, phoneNumber, profileId);
     }
 
     public boolean update(UserUpdateParams request) {
