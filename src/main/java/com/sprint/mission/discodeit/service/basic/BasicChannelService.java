@@ -1,9 +1,15 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.channel.ChannelCreatePrivateParams;
+import com.sprint.mission.discodeit.dto.channel.ChannelCreatePublicParams;
+import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
@@ -20,23 +26,63 @@ public class BasicChannelService implements ChannelService {
     private final MessageRepository messageRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
+    private final ReadStatusRepository readStatusRepository;
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader) {
+    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, UserStatusRepository userStatusRepository, ReadStatusRepository readStatusRepository) {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
+        this.readStatusRepository = readStatusRepository;
     }
 
     @Override
-    public void createChannel(String title, String description, UUID createdByUserId) {
-        if (title == null || title.isBlank() || description == null || description.isBlank() || createdByUserId == null) {
+    public void createChannel(UUID createdByUserId, ChannelCreateRequestDto requestDto) {
+
+        User creator = userReader.findUserOrThrow(createdByUserId);
+
+        Channel channel = switch (requestDto.type()) {
+            case PUBLIC -> {
+                ChannelCreatePublicParams params = ChannelCreatePublicParams.from(requestDto);
+                yield createPublicChannel(creator.getId(), params);
+            }
+            case PRIVATE -> {
+                new ChannelCreatePrivateParams(requestDto.memberIds());
+                ChannelCreatePrivateParams params = ChannelCreatePrivateParams.from(requestDto);
+                yield createPrivateChannel(creator.getId(), params);
+            }
+            default -> throw new IllegalArgumentException("unsupported channel type: " + requestDto.type());
+        };
+        channelRepository.save(channel);
+    }
+
+    private Channel createPrivateChannel(UUID createdByUserId, ChannelCreatePrivateParams params) {
+        List<UUID> memberIds = params.memberIds();
+
+        if (createdByUserId == null) {
+            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        }
+        User createdUser = userReader.findUserOrThrow(createdByUserId);
+        Channel channel = Channel.createPrivateChannel(createdUser.getId());
+
+        // NOTE: readStatus 생성 로직 부분
+        memberIds.forEach((memberId) -> {
+            User user = userReader.findUserOrThrow(memberId);
+            ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(), Instant.now());
+            readStatusRepository.save(readStatus);
+        });
+
+        return channel;
+    }
+
+    private Channel createPublicChannel(UUID createdByUserId, ChannelCreatePublicParams requestDto) {
+        if (createdByUserId == null || requestDto.title() == null || requestDto.title().isBlank() || requestDto.description() == null || requestDto.description().isBlank()) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         User user = userReader.findUserOrThrow(createdByUserId);
-        Channel channel = new Channel(title, description, user.getId(), false);
-        channelRepository.save(channel);
+        return Channel.createPublicChannel(requestDto.title(), requestDto.description(), user.getId());
     }
+
 
     @Override
     public void updateChannel(UUID channelId, String title, String description) {
@@ -52,7 +98,6 @@ public class BasicChannelService implements ChannelService {
             channelById.setUpdatedAt(Instant.now());
             channelRepository.save(channelById);
         }
-
     }
 
 

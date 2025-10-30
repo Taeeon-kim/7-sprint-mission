@@ -2,10 +2,12 @@ package com.sprint.mission.discodeit.config;
 
 
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
+import com.sprint.mission.discodeit.repository.jcf.JCFReadStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.store.InMemoryStore;
@@ -30,6 +32,11 @@ public class AppConfig {
     @Bean
     public UserStatusRepository jcfUserStatusRepository(InMemoryStore store) {
         return new JCFUserStatusRepository(store.userStatusses);
+    }
+
+    @Bean
+    public ReadStatusRepository jcfReadStatusRepository(InMemoryStore store) {
+        return new JCFReadStatusRepository(store.readStatuses);
     }
 
 //    @Bean

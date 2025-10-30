@@ -2,5 +2,9 @@ package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.entity.ReadStatus;
 
-public interface ReadStatusRepository extends Repository<ReadStatus, String> {
+import java.util.List;
+import java.util.UUID;
+
+public interface ReadStatusRepository extends Repository<ReadStatus, UUID> {
+    List<ReadStatus> findByChannelId(UUID id);
 }

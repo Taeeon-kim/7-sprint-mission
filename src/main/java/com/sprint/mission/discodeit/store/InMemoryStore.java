@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.store;
 import com.sprint.mission.discodeit.entity.*;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class InMemoryStore {
@@ -13,4 +14,5 @@ public class InMemoryStore {
 
     public final HashMap<UUID, BinaryContent> binaryContents = new HashMap<>();
     public final HashMap<UUID, UserStatus> userStatusses = new HashMap<>();
+    public final Map<UUID, ReadStatus> readStatuses = new HashMap<>();
 }

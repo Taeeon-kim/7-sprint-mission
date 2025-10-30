@@ -1,11 +1,13 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -63,8 +65,8 @@ public class DiscodeitApplication {
 
         // ------- 채널 만들기  ----
 
-        channelService.createChannel("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", allUsers.get(0).getId());
-        channelService.createChannel("두번째 타이틀", "두번째 채널 공지 채널입니다.", allUsers.get(1).getId());
+        channelService.createChannel(allUsers.get(0).getId(), new ChannelCreateRequestDto("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", ChannelType.PUBLIC, null));
+        channelService.createChannel(allUsers.get(0).getId(),new ChannelCreateRequestDto("두번째 타이틀", "두번째 채널 공지 채널입니다.", ChannelType.PUBLIC, null));
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after creating channel :" + allChannels);
 

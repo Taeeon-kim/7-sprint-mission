@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
+import com.sprint.mission.discodeit.entity.type.RoleType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
