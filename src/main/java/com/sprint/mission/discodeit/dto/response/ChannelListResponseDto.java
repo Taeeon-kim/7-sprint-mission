@@ -13,6 +13,6 @@ import java.util.List;
 public class ChannelListResponseDto {
 
     // 특정 유저 기준 반환할 채널 목록
-    private List<ChannelListResponseDto> channelList;
+    private List<ChannelResponseDto> channelList;
 
 }

@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 public interface MessageService {
 
-    void createMessage(Message message); //메시지 전송
+    void createMessage(MessageCreateRequestDto messageCreateRequestDto); //메시지 전송
 
     Message getMessage(UUID uuid); //메시지 조회
 

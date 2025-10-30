@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.request.ChannelCreateRequestDto;
+import com.sprint.mission.discodeit.dto.request.MessageCreateRequestDto;
+import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -25,16 +28,31 @@ public class BasicMessageService implements MessageService {
 
 
     @Override
-    public void createMessage(Message message) {
-        if(message == null){
+    public void createMessage(MessageCreateRequestDto messageCreateRequestDto) {
+        if (messageCreateRequestDto == null) {
             System.out.println("내용을 입력해주세요");
             return;
         }
-        if(message.getSenderId() == null || message.getChannelId() == null){
+        Message message = new Message(messageCreateRequestDto.getSenderId(),
+                messageCreateRequestDto.getChannelId(),
+                messageCreateRequestDto.getInputMsg());
+        createMessage(message);
+    }
+
+    // 오버로드
+    public void createMessage(Message message) {
+        if (message == null) {
+            System.out.println("메시지 객체가 없습니다.");
+            return;
+        }
+
+        if (message.getSenderId() == null || message.getChannelId() == null) {
             System.out.println("작성자나 게시판이 잘못되었습니다.");
             return;
         }
         messageRepository.save(message);
+
+        ChannelResponseDto channelResponseDto = channelService.findChannel(message.getChannelId());
         System.out.println("[메시지 등록]" + message);
     }
 
@@ -49,7 +67,7 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public List<Message> getChannelAllMessage(Channel channel) {
-        if(channel == null){
+        if (channel == null) {
             return List.of();
         }
         String channelName = channel.getChanName();
@@ -59,21 +77,21 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public List<Message> getUserAllMessage(User user) {
-        if(user == null){
+        if (user == null) {
             return List.of();
         }
         String nickName = user.getNickName();
-        System.out.println( "[" + nickName + "] 의 메시지 출력");
+        System.out.println("[" + nickName + "] 의 메시지 출력");
         return messageRepository.findUserAll(user);
     }
 
     @Override
     public void updateMessage(UUID uuid, String newMessage) {
-        if(uuid == null){
+        if (uuid == null) {
             System.out.println("수정할 메시지를 찾을 수 없습니다.");
             return;
         }
-        if(newMessage == null){
+        if (newMessage == null) {
             System.out.println("공백으로 작성할 수 없습니다.");
             return;
         }
@@ -82,7 +100,7 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public void deleteMessage(UUID uuid) {
-        if(uuid == null){
+        if (uuid == null) {
             System.out.println("삭제할 메시지가 없습니다");
             return;
         }
@@ -90,7 +108,7 @@ public class BasicMessageService implements MessageService {
         System.out.println("메시지 삭제");
     }
 
-    public void runMessageService(User[] users, Channel[] channels){
+    public void runMessageService(User[] users, Channel[] channels) {
         // 메시지 전송
         Message[] msgs = {
                 new Message(users[0].getUuid(), channels[0].getUuid(), "채널 테스트 중"),
@@ -101,7 +119,8 @@ public class BasicMessageService implements MessageService {
         };
         for (Message m : msgs) {
             createMessage(m);
-        };
+        }
+        ;
 
         // 메시지 전체 조회(채널기준)
         channelMessageList(channels[0]);
@@ -120,17 +139,17 @@ public class BasicMessageService implements MessageService {
 
     }
 
-    public void channelMessageList(Channel channel){
+    public void channelMessageList(Channel channel) {
         List<Message> messages = getChannelAllMessage(channel);
 
-        if(messages.isEmpty()){
+        if (messages.isEmpty()) {
             System.out.println("작성된 메시지가 없습니다.");
             return;
         }
 
-        for (Message m: messages) {
+        for (Message m : messages) {
             String nickName = userService.readUser(m.getSenderId()).getNickname();//.getNickName();
-            String channelName = channelService.readChannel(m.getChannelId()).getChanName();
+            String channelName = channelService.findChannel(m.getChannelId()).getChannelName();
             System.out.println(
                     "[" + m.getCreateAt() + "] "
                             + nickName + " - "
@@ -140,20 +159,20 @@ public class BasicMessageService implements MessageService {
         }
     }
 
-    public void userMessageList(User user){
+    public void userMessageList(User user) {
         List<Message> messages = getUserAllMessage(user);
-        if(messages.isEmpty()){
+        if (messages.isEmpty()) {
             System.out.println("작성된 메시지가 없습니다");
             return;
         }
-        for (Message m: messages) {
+        for (Message m : messages) {
             String nickName = userService.readUser(m.getSenderId()).getNickname(); //.getNickName();
-            String channelName = channelService.readChannel(m.getChannelId()).getChanName();
+            String channelName = channelService.findChannel(m.getChannelId()).getChannelName();
             System.out.println(
                     "[" + m.getCreateAt() + "] "
-                    + nickName + " - "
-                    + channelName + " : "
-                    + m.getInputMsg()
+                            + nickName + " - "
+                            + channelName + " : "
+                            + m.getInputMsg()
             );
         }
     }

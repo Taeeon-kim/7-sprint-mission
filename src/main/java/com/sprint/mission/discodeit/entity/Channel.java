@@ -42,9 +42,13 @@ public class Channel extends BaseEntity {
     // 채널 참가자 리스트를 외부에서 한 번에 교체함
     public void setParticipantIds(List<UUID> participantIds) {
         if(participantIds != null){
-            this.participantIds.addAll(participantIds);
-            this.participantIds.addAll(participantIds);
+            for(UUID uuid : participantIds){
+                if(!this.participantIds.contains(uuid)){
+                    this.participantIds.add(uuid);
+                }
+            }
         }
+        setUpdatedAt(Instant.now());
     }
 
     // 채널에 한 명씩 참가자를 추가할 때

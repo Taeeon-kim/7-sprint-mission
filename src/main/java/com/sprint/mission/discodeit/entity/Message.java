@@ -21,7 +21,7 @@ public class Message extends BaseEntity {
     }
 
     public void setInputMsg(String inputMsg) {
-        if(inputMsg != null || !inputMsg.equals(this.inputMsg)) {
+        if(inputMsg != null && !inputMsg.equals(this.inputMsg)) {
             this.inputMsg = inputMsg;
             setUpdatedAt(Instant.now()); //변경 시 갱신
         }
