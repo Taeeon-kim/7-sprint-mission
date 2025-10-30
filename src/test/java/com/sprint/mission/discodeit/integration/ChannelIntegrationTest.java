@@ -336,19 +336,19 @@ public class ChannelIntegrationTest {
             Channel channelA = channelRepository.save(
                     Channel.createPublicChannel("공지", "전체 공지", creator.getId())
             );
-            Message a1 = messageRepository.save(new Message("A1", channelA.getId(), creator.getId(), null));
-            channelA.addMessageId(a1.getId());
+            Message messageA1 = messageRepository.save(new Message("A1", channelA.getId(), creator.getId(), null));
+            channelA.addMessageId(messageA1.getId());
             Thread.sleep(5);
-            Message a2 = messageRepository.save(new Message("A2", channelA.getId(), creator.getId(), null));
-            channelA.addMessageId(a2.getId());
+            Message messageA2 = messageRepository.save(new Message("A2", channelA.getId(), creator.getId(), null));
+            channelA.addMessageId(messageA2.getId());
             channelRepository.save(channelA);
 
             // Channel B
             Channel channelB = channelRepository.save(
                     Channel.createPublicChannel("잡담", "자유 채팅방", creator.getId())
             );
-            Message b1 = messageRepository.save(new Message("B1", channelB.getId(), creator.getId(), null));
-            channelB.addMessageId(b1.getId());
+            Message messageB1 = messageRepository.save(new Message("B1", channelB.getId(), creator.getId(), null));
+            channelB.addMessageId(messageB1.getId());
             channelRepository.save(channelB);
 
             // when
@@ -372,12 +372,12 @@ public class ChannelIntegrationTest {
                     // Channel A
                     () -> assertEquals("공지", dtoA.title()),
                     () -> assertEquals("전체 공지", dtoA.description()),
-                    () -> assertEquals(a2.getCreatedAt(), dtoA.currentMessagedAt()),
+                    () -> assertEquals(messageA2.getCreatedAt(), dtoA.currentMessagedAt()),
 
                     // Channel B
                     () -> assertEquals("잡담", dtoB.title()),
                     () -> assertEquals("자유 채팅방", dtoB.description()),
-                    () -> assertEquals(b1.getCreatedAt(), dtoB.currentMessagedAt())
+                    () -> assertEquals(messageB1.getCreatedAt(), dtoB.currentMessagedAt())
             );
         }
     }
