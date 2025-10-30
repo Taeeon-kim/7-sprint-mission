@@ -229,6 +229,8 @@ public class ChannelIntegrationTest {
             );
             channel.addMessageId(m2.getId());
 
+            channelRepository.save(channel);
+
             // when
             ChannelResponseDto result = channelService.getChannel(channel.getId());
 
@@ -309,5 +311,74 @@ public class ChannelIntegrationTest {
             assertNull(dto.currentMessagedAt());
         }
 
+    }
+
+    @Nested
+    @DisplayName("getAllChannel")
+    class getAllChannel{
+
+        @Test
+        @DisplayName("[Integration][Positive] 전체 채널 조회 - 각 채널 정보와 최신 메시지 시간 포함")
+        void getAllChannels_returns_channel_list_with_last_message_time() throws InterruptedException {
+
+            // given
+            User creator = userRepository.save(
+                    User.builder()
+                            .nickname("creator")
+                            .email("c@ex.com")
+                            .password("pw")
+                            .role(RoleType.USER)
+                            .phoneNumber("010")
+                            .build()
+            );
+
+            // Channel A
+            Channel channelA = channelRepository.save(
+                    Channel.createPublicChannel("공지", "전체 공지", creator.getId())
+            );
+            Message a1 = messageRepository.save(new Message("A1", channelA.getId(), creator.getId(), null));
+            channelA.addMessageId(a1.getId());
+            Thread.sleep(5);
+            Message a2 = messageRepository.save(new Message("A2", channelA.getId(), creator.getId(), null));
+            channelA.addMessageId(a2.getId());
+            channelRepository.save(channelA);
+
+            // Channel B
+            Channel channelB = channelRepository.save(
+                    Channel.createPublicChannel("잡담", "자유 채팅방", creator.getId())
+            );
+            Message b1 = messageRepository.save(new Message("B1", channelB.getId(), creator.getId(), null));
+            channelB.addMessageId(b1.getId());
+            channelRepository.save(channelB);
+
+            // when
+            List<ChannelResponseDto> result = channelService.getAllChannels();
+
+            // then
+            assertEquals(2, result.size());
+
+            // 채널별 DTO 찾기
+            ChannelResponseDto dtoA = result.stream()
+                    .filter(r -> r.channelId().equals(channelA.getId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            ChannelResponseDto dtoB = result.stream()
+                    .filter(r -> r.channelId().equals(channelB.getId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            assertAll(
+                    // Channel A
+                    () -> assertEquals("공지", dtoA.title()),
+                    () -> assertEquals("전체 공지", dtoA.description()),
+                    () -> assertEquals(a2.getCreatedAt(), dtoA.currentMessagedAt()),
+
+                    // Channel B
+                    () -> assertEquals("잡담", dtoB.title()),
+                    () -> assertEquals("자유 채팅방", dtoB.description()),
+                    () -> assertEquals(b1.getCreatedAt(), dtoB.currentMessagedAt())
+            );
+        }
     }
 }
