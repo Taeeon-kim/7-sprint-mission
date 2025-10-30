@@ -1,17 +1,14 @@
 package com.sprint.mission.discodeit.dto.binaryContent;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Getter
-@AllArgsConstructor
-public class BinaryContentUploadCommand {
-    private String fileName;
-    private String contentType;
-    private byte[] bytes;
+public record BinaryContentUploadCommand(
+     String fileName,
+     String contentType,
+     byte[] bytes
+) {
 
 
     public static BinaryContentUploadCommand from(MultipartFile file) {

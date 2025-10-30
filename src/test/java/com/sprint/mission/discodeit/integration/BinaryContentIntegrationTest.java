@@ -52,9 +52,9 @@ public class BinaryContentIntegrationTest {
 
             BinaryContent binaryContent = binaryContentRepository.findById(uuid).orElseThrow();
 
-            assertEquals(command.getFileName(), binaryContent.getFileName());
-            assertEquals(command.getContentType(), binaryContent.getContentType());
-            assertArrayEquals(command.getBytes(), binaryContent.getBytes());
+            assertEquals(command.fileName(), binaryContent.getFileName());
+            assertEquals(command.contentType(), binaryContent.getContentType());
+            assertArrayEquals(command.bytes(), binaryContent.getBytes());
 
         }
     }

@@ -21,9 +21,9 @@ public class BasicBinaryContentService implements BinaryContentService {
     public UUID uploadBinaryContent(BinaryContentUploadCommand command) {
 
         BinaryContent binaryContent = new BinaryContent(
-                command.getFileName(),
-                command.getContentType(),
-                command.getBytes());
+                command.fileName(),
+                command.contentType(),
+                command.bytes());
 
         BinaryContent saved = binaryContentRepository.save(binaryContent);
         return saved.getId();
