@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -34,14 +35,16 @@ public class BasicReadStatusService implements ReadStatusService {
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
 
-        if (!readStatusRepository.findByChannelId(channel.getId()).isEmpty() ||
-                !readStatusRepository.findByUserId(user.getId()).isEmpty()) {
-            throw new IllegalArgumentException("이미 존재합니다.");
+        for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
+            if (readStatus.getChannelId().equals(channel.getId())) {
+                throw new IllegalArgumentException("이미 존재합니다.");
+            }
         }
 
+
         ReadStatus readStatus = ReadStatus.builder()
-                .userId(requestDto.userId())
-                .channelId(requestDto.channelId())
+                .userId(user.getId())
+                .channelId(channel.getId())
                 .readAt(Instant.now())
                 .build();
 
@@ -53,5 +56,13 @@ public class BasicReadStatusService implements ReadStatusService {
     public ReadStatusResponseDto getReadStatus(UUID readStatusId) {
         ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new NoSuchElementException("읽음 상태가 존재하지 않습니다."));
         return ReadStatusResponseDto.from(readStatus);
+    }
+
+    @Override
+    public List<ReadStatusResponseDto> getAllReadStatusesByUserId(UUID userId) {
+        List<ReadStatus> allByUserId = readStatusRepository.findAllByUserId(userId);
+        return allByUserId.stream()
+                .map(ReadStatusResponseDto::from)
+                .toList();
     }
 }

@@ -477,6 +477,7 @@ public class ChannelIntegrationTest {
                     })
             );
         }
+
     }
 
     @Nested
