@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 

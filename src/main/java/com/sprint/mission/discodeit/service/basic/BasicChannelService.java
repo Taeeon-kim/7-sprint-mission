@@ -113,8 +113,14 @@ public class BasicChannelService implements ChannelService {
         for (UUID messageId : channelMessageIds) {
             messageRepository.deleteById(messageId);
         }
+        // readStatus 삭제
+        List<ReadStatus> readStatuses = readStatusRepository.findByChannelId(channel.getId());
+        for (ReadStatus readStatus : readStatuses) {
+            readStatusRepository.deleteById(readStatus.getId());
+        }
         // 채널삭제
         channelRepository.deleteById(channel.getId());
+        // NOTE: 보상로직 생략, DB 생기면 @Transactional
     }
 
     @Override

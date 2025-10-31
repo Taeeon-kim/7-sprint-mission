@@ -556,5 +556,73 @@ public class ChannelIntegrationTest {
             assertThrows(IllegalArgumentException.class, () -> channelService.updateChannel(privateChannel.getId(), request));
         }
     }
+
+    @Nested
+    @DisplayName("deleteChannel")
+    class deleteChannel {
+
+        @Test
+        @DisplayName("[Integration][Positive] 채널 삭제 - 채널/메시지/읽음상태 모두 삭제된다 ")
+        void deleteChannel_deletes_channel_and_related_messages_read_statuses() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+            );
+
+            User member1 = userRepository.save(
+                    User.builder().nickname("member1").email("csdd@ex.com")
+                            .password("pssw").role(RoleType.USER).phoneNumber("010-2222-2222").build()
+            );
+
+            User member2 = userRepository.save(
+                    User.builder().nickname("member2").email("cfffsdd@ex.com")
+                            .password("pssssw").role(RoleType.USER).phoneNumber("010-3333-4444").build()
+            );
+
+
+            channelService.createChannel(
+                    creator.getId(), ChannelCreateRequestDto.builder()
+                            .title("private")
+                            .description("private")
+                            .type(ChannelType.PRIVATE)
+                            .memberIds(List.of(member1.getId(), member2.getId()))
+                            .build()
+            );
+            // 방금 생긴 채널 식별 (가장 최근/사이즈 차이로 추적)
+            List<Channel> afterCreate = channelRepository.findAll();
+            Channel channel = afterCreate.get(afterCreate.size() - 1); // in-memory라면 OK (JPA면 정밀 조회 권장)
+
+            // 메시지 2개 저장 + 채널에 messageId 연결 후 채널 재저장
+            Message m1 = messageRepository.save(new Message("hello1", channel.getId(), creator.getId(), null));
+            Message m2 = messageRepository.save(new Message("hello2", channel.getId(), creator.getId(), null));
+            channel.addMessageId(m1.getId());
+            channel.addMessageId(m2.getId());
+            channelRepository.save(channel); // 삭제 로직이 channel.getMessageIds()를 보므로 반영 필요
+
+            // then
+            assertAll(
+                    () -> assertTrue(messageRepository.findById(m1.getId()).isPresent()),
+                    () -> assertTrue(messageRepository.findById(m2.getId()).isPresent()),
+                    () -> assertTrue(!readStatusRepository.findByChannelId(channel.getId()).isEmpty())
+            );
+
+            // when
+            channelService.deleteChannel(channel.getId());
+
+            // then
+            assertAll(
+                    // 채널 삭제
+                    () -> assertTrue(channelRepository.findById(channel.getId()).isEmpty()),
+                    // 메시지 삭제
+                    () -> assertTrue(messageRepository.findById(m1.getId()).isEmpty()),
+                    () -> assertTrue(messageRepository.findById(m2.getId()).isEmpty()),
+                    // ReadStatus 삭제
+                    () -> assertTrue(readStatusRepository.findByChannelId(channel.getId()).isEmpty())
+            );
+
+        }
+    }
+
 }
 
