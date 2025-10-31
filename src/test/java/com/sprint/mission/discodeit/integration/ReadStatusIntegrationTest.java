@@ -203,7 +203,7 @@ public class ReadStatusIntegrationTest {
                     () -> assertTrue(allReadStatusesByUserId.stream().allMatch(readStatus -> readStatus.userId().equals(creator.getId()))),
                     () -> assertEquals(2, allReadStatusesByUserId2.size()),
                     () -> assertEquals(Set.of(readStatusId3, readStatusId4), readStatusIds2),
-                    () -> assertTrue(allReadStatusesByUserId.stream().allMatch(readStatus -> readStatus.userId().equals(creator.getId())))
+                    () -> assertTrue(allReadStatusesByUserId2.stream().allMatch(readStatus -> readStatus.userId().equals(member.getId())))
 
 
             );
