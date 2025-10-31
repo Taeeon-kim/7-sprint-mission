@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -73,12 +74,12 @@ public class DiscodeitApplication {
 
         System.out.println("=============================== ");
 
-        channelService.updateChannel(allChannels.get(0).channelId(), "changed title", "changed description");
+        channelService.updateChannel(allChannels.get(0).channelId(), new ChannelUpdateRequestDto("changed title", "changed description"));
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel :" + allChannels);
         System.out.println("=============================== ");
 
-        channelService.updateChannel(allChannels.get(0).channelId(), null, "changed description");
+        channelService.updateChannel(allChannels.get(0).channelId(), new ChannelUpdateRequestDto(null, "changed description"));
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after updating channel2 :" + allChannels);
         System.out.println("=============================== ");

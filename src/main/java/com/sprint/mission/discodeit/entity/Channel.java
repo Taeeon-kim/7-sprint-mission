@@ -1,10 +1,13 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import lombok.Getter;
 import lombok.ToString;
 
 
+import java.time.Instant;
 import java.util.*;
 
 @Getter
@@ -125,6 +128,14 @@ public class Channel extends BasicEntity {
     }
 
 
+    public boolean update(ChannelUpdateParams params) {
+        boolean changeFlag = false;
+        changeFlag |= this.updateTitle(params.title());
+        changeFlag |= this.updateDescription(params.description());
+        if(changeFlag){
 
-
+        this.setUpdatedAt(Instant.now());
+        }
+        return changeFlag;
+    }
 }

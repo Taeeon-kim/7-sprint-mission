@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -476,7 +477,84 @@ public class ChannelIntegrationTest {
                     })
             );
         }
+    }
+
+    @Nested
+    @DisplayName("updateChannel")
+    class updateChannel {
+
+        @Test
+        @DisplayName("[Integration][Positive] 채널 변경 - Public 채널 수정시 내용 반영된다")
+        void updateChannel_updates_public_channel_fields() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+            );
+            Channel channel = channelRepository.save(
+                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+            );
 
 
+            ChannelUpdateRequestDto request = ChannelUpdateRequestDto.builder()
+                    .title("수정한 타이틀")
+                    .description("수정한 설명란")
+                    .build();
+
+
+            // 변경 전 스냅샷
+            UUID channelId = channel.getId();
+            Instant beforeUpdatedAt = channel.getUpdatedAt();
+            String beforeTitle = channel.getTitle();
+            String beforeDesc = channel.getDescription();
+            ChannelType beforeType = channel.getType();
+            UUID beforeCreatedBy = channel.getCreatedByUserId();
+            Instant beforeCreatedAt = channel.getCreatedAt();
+
+
+            // when
+            channelService.updateChannel(channel.getId(), request);
+
+            // then
+            Channel updatedChannel = channelRepository.findById(channel.getId()).orElseThrow();
+            assertAll(
+                    // 식별자/기본 속성 유지
+                    () -> assertEquals(channel.getId(), updatedChannel.getId()),
+                    () -> assertEquals(channelId, updatedChannel.getId()),
+                    () -> assertEquals(beforeType, updatedChannel.getType()),
+                    () -> assertEquals(beforeCreatedBy, updatedChannel.getCreatedByUserId()),
+                    () -> assertEquals(beforeCreatedAt, updatedChannel.getCreatedAt()),
+
+                    // 변경된 필드
+                    () -> assertEquals("수정한 타이틀", updatedChannel.getTitle()),
+                    () -> assertEquals("수정한 설명란", updatedChannel.getDescription()),
+
+                    // updatedAt 갱신 확인(널 아님 + 이전보다 늦음)
+                    () -> assertNotNull(updatedChannel.getUpdatedAt()),
+                    () -> assertTrue(updatedChannel.getUpdatedAt().isAfter(beforeUpdatedAt),
+                            "updatedAt은 이전 값보다 이후여야 한다")
+            );
+        }
+
+        @Test
+        @DisplayName("[Integration][Negative] 채널 변경 - Private 채널 수정시 예외가 발생한다.")
+        void updateChannel_throws_when_update_private_channel() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+            );
+            Channel privateChannel = channelRepository.save(
+                    Channel.createPrivateChannel(creator.getId())
+            );
+
+            ChannelUpdateRequestDto request = ChannelUpdateRequestDto.builder()
+                    .title("수정한 타이틀")
+                    .description("수정한 설명란")
+                    .build();
+            // when & then
+            assertThrows(IllegalArgumentException.class, () -> channelService.updateChannel(privateChannel.getId(), request));
+        }
     }
 }
+

@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.channel.ChannelCreatePrivateParams;
-import com.sprint.mission.discodeit.dto.channel.ChannelCreatePublicParams;
-import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
-import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.channel.*;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -88,17 +85,18 @@ public class BasicChannelService implements ChannelService {
 
 
     @Override
-    public void updateChannel(UUID channelId, String title, String description) {
+    public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {
         if (channelId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
         Channel channelById = channelRepository.findById(channelId).orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
-        boolean changeFlag = false;
-        changeFlag |= channelById.updateTitle(title);
-        changeFlag |= channelById.updateDescription(description);
+        if (channelById.getType() == ChannelType.PRIVATE) {
+            throw new IllegalArgumentException("해당 채널은 수정할수 없습니다.");
+        }
+        ChannelUpdateParams params = ChannelUpdateParams.from(request);
+        boolean changeFlag = channelById.update(params);
         if (changeFlag) {
-            channelById.setUpdatedAt(Instant.now());
             channelRepository.save(channelById);
         }
     }
