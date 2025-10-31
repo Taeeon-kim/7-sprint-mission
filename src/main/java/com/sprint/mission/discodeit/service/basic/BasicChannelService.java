@@ -68,6 +68,7 @@ public class BasicChannelService implements ChannelService {
         // NOTE: readStatus 생성 로직 부분
         memberIds.forEach((memberId) -> {
             User user = userReader.findUserOrThrow(memberId);
+            channel.addUserId(user.getId()); // TODO: 이부분 뭔가 분리해서 넣는게 나을거같은데 시간상 추후에 고민해볼것
             ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(), Instant.now());
             readStatusRepository.save(readStatus);
         });
@@ -182,7 +183,7 @@ public class BasicChannelService implements ChannelService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         User user = userReader.findUserOrThrow(userId);
-        channel.addUser(user.getId());
+        channel.addUserId(user.getId());
         channelRepository.save(channel);
         // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
 

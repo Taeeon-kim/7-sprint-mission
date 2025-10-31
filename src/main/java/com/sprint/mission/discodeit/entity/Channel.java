@@ -55,7 +55,7 @@ public class Channel extends BasicEntity {
     }
 
 
-    public void addUser(UUID userId) {
+    public void addUserId(UUID userId) {
         if (userId == null) {
             throw new IllegalArgumentException("유저정보가 잘못 되었습니다.");
         }

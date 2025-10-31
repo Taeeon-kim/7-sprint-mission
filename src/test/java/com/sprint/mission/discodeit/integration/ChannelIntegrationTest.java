@@ -438,7 +438,7 @@ public class ChannelIntegrationTest {
                     .build());
 
 
-            channelC.addUser(member1.getId());
+            channelC.addUserId(member1.getId());
             channelRepository.save(channelC);
 
 
