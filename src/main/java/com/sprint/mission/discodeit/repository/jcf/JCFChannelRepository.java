@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
 import java.util.List;
@@ -16,8 +17,9 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public void save(Channel channel) {
+    public Channel save(Channel channel) {
         data.put(channel.getId(), channel);
+        return channel;
     }
 
     @Override
@@ -31,6 +33,14 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
+    public List<Channel> findAllByUserId(UUID userId) {
+        List<Channel> allChannels = findAll();
+        return allChannels.stream()
+                .filter(channel -> channel.getType() == ChannelType.PUBLIC || channel.isMember(userId))
+                .toList();
+    }
+
+    @Override
     public List<Channel> findAll() {
         return data.values()
                 .stream()
@@ -38,7 +48,7 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public void deleteById(UUID channelId) {
-        data.remove(channelId);
+    public boolean deleteById(UUID channelId) {
+        return data.remove(channelId) != null;
     }
 }

@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,14 +16,23 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public void save(Message message) {
+    public Message save(Message message) {
         data.put(message.getId(), message);
+        return message;
     }
 
     @Override
     public boolean deleteById(UUID id) {
         Message remove = data.remove(id);
         return remove != null;
+    }
+
+    @Override
+    public List<Message> findAll() {
+        return findAllMap()
+                .values()
+                .stream()
+                .toList();
     }
 
     @Override

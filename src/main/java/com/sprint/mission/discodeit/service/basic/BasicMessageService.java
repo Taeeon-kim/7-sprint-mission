@@ -9,9 +9,12 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
+@Service
 public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
@@ -70,7 +73,7 @@ public class BasicMessageService implements MessageService {
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        Message message = new Message(content, sender.getId(), channel.getId());
+        Message message = new Message(content, sender.getId(), channel.getId(), null);
         channel.addMessageId(message.getId());
         boolean messageSaved = false;
         try {
@@ -108,7 +111,7 @@ public class BasicMessageService implements MessageService {
         }
 
         if (isUpdated) {
-            message.setUpdatedAt(System.currentTimeMillis());
+            message.setUpdatedAt(Instant.now());
             messageRepository.save(message);
         }
     }

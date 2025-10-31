@@ -1,28 +1,33 @@
 package com.sprint.mission.discodeit.repository.file;
+
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.store.Store;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
+@Repository
 public class FileUserRepository implements UserRepository {
 
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         Map<UUID, User> allUsers = findAllMap();
         allUsers.put(user.getId(), user);
         Store.saveMap(Store.USER_DATA_FILE, allUsers);
+        return user;
     }
 
     @Override
-    public void deleteById(UUID id) {
+    public boolean deleteById(UUID id) {
         Map<UUID, User> allUsers = findAllMap();
         User remove = allUsers.remove(id);
         if (remove != null) {
             Store.saveMap(Store.USER_DATA_FILE, allUsers);
+            return true;
         }
-
+        return false;
     }
 
     @Override
@@ -53,5 +58,21 @@ public class FileUserRepository implements UserRepository {
                 .map(allUsers::get)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getNickname().equals(nickname));
     }
 }

@@ -13,13 +13,15 @@ public class JCFUserRepository implements UserRepository {
     }
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         data.put(user.getId(), user);
+        return user;
     }
 
     @Override
-    public void deleteById(UUID id) {
-        data.remove(id);
+    public boolean deleteById(UUID id) {
+        return data.remove(id) != null;
+
     }
 
     @Override
@@ -46,5 +48,21 @@ public class JCFUserRepository implements UserRepository {
                 .map(data::get)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getNickname().equals(nickname));
     }
 }
