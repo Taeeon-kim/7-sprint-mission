@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -45,5 +47,11 @@ public class BasicReadStatusService implements ReadStatusService {
 
         ReadStatus saved = readStatusRepository.save(readStatus);
         return saved.getId();
+    }
+
+    @Override
+    public ReadStatusResponseDto getReadStatus(UUID readStatusId) {
+        ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new NoSuchElementException("읽음 상태가 존재하지 않습니다."));
+        return ReadStatusResponseDto.from(readStatus);
     }
 }

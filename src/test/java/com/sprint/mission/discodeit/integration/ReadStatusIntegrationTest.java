@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -18,10 +19,10 @@ import com.sprint.mission.discodeit.service.reader.UserReader;
 import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReadStatusIntegrationTest {
     private final InMemoryStore store = new InMemoryStore();
@@ -81,6 +82,53 @@ public class ReadStatusIntegrationTest {
             assertNotNull(readStatus.getReadAt());
 
         }
+    }
+
+    @Nested
+    @DisplayName("getReadStatus")
+    class getReadStatus {
+
+        @Test
+        @DisplayName("[Integration][Positive] 읽음상태 조회 - 해당 읽음상태 반환 및 값 일치")
+        void getReadStatus_returns_saved_readStatus() {
+            // Given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+            );
+
+            Channel channel = Channel.createPrivateChannel(creator.getId());
+            channel.addUserId(creator.getId());
+            channelRepository.save(channel);
+
+
+            UUID readStatusId = readStatusService.createReadStatus(
+                    ReadStatusCreateRequestDto.builder()
+                            .userId(creator.getId())
+                            .channelId(channel.getId()).build()
+            );
+
+            // when
+            ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
+
+            // then
+            assertEquals(creator.getId(), readStatus.userId());
+            assertEquals(channel.getId(), readStatus.channelId());
+            assertNotNull(readStatus.readAt());
+
+        }
+
+        @Test
+        @DisplayName("[Integration][Negative] 읽음상태 조회 - 존재하지않는 Id 조회시 NoSuchElementException 예외")
+        void getReadStatus_throws_when_not_found(){
+
+            UUID readStatusId = UUID.randomUUID();
+
+            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+
+        }
+
+
     }
 
 }
