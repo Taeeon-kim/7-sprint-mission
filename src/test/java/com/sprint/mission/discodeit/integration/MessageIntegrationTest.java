@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.integration;
 
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -101,8 +103,6 @@ public class MessageIntegrationTest {
             BinaryContent savedBinaryContent = binaryContentRepository.save(binaryContent);
 
 
-
-
             // When
             UUID messageId = messageService.sendMessageToChannel(
                     MessageSendRequestDto.builder()
@@ -118,10 +118,10 @@ public class MessageIntegrationTest {
             Message message = messageRepository.findById(messageId).orElseThrow();
             List<UUID> attachmentIds = message.getAttachmentIds();
             UUID attachmentId = attachmentIds
-                   .stream()
-                   .filter(id -> id.equals(savedBinaryContent.getId()))
-                   .findFirst()
-                   .orElseThrow();
+                    .stream()
+                    .filter(id -> id.equals(savedBinaryContent.getId()))
+                    .findFirst()
+                    .orElseThrow();
 
             BinaryContent binaryContentById = binaryContentRepository.findById(attachmentId).orElseThrow();
 
@@ -188,23 +188,68 @@ public class MessageIntegrationTest {
 
 
             assertAll(
-                    () ->  assertEquals(2, allMessagesByChannelId.size()),
+                    () -> assertEquals(2, allMessagesByChannelId.size()),
                     () -> assertEquals(message1.getId(), foundMessage1.getId()),
-                    () ->  assertEquals(message2.getId(), foundMessage2.getId()),
-                    () ->  assertEquals(message1.getContent(), foundMessage1.getContent()),
-                    () ->  assertEquals(message2.getContent(), foundMessage2.getContent()),
+                    () -> assertEquals(message2.getId(), foundMessage2.getId()),
+                    () -> assertEquals(message1.getContent(), foundMessage1.getContent()),
+                    () -> assertEquals(message2.getContent(), foundMessage2.getContent()),
                     () -> assertEquals(message1.getCreatedAt(), foundMessage1.getCreatedAt()),
-                    () ->  assertEquals(message2.getCreatedAt(), foundMessage2.getCreatedAt()),
+                    () -> assertEquals(message2.getCreatedAt(), foundMessage2.getCreatedAt()),
                     () -> assertEquals(message1.getChannelId(), foundMessage1.getChannelId()),
                     () -> assertEquals(message2.getChannelId(), foundMessage2.getChannelId()),
                     () -> assertEquals(message1.getSenderId(), foundMessage1.getSenderId()),
-                    () ->  assertEquals(message2.getSenderId(), foundMessage2.getSenderId())
+                    () -> assertEquals(message2.getSenderId(), foundMessage2.getSenderId())
             );
 
 
+        }
+    }
+
+    @Nested
+    @DisplayName("updateMessage")
+    class updateMessage {
+
+        @Test
+        @DisplayName("[Integration][Positive] 메세지 수정 - 작성자가 수정하면 내용과 updatedAt이 반영된다")
+        void updateMessage_updates_content_when_edits() throws InterruptedException {
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("ee@exam.com")
+                    .profileId(null)
+                    .role(RoleType.USER)
+                    .phoneNumber("010-1111-1111")
+                    .password("dsfsdfdf")
+                    .build();
+            userRepository.save(user);
+
+            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            publicChannel.addUserId(user.getId());
+            channelRepository.save(publicChannel);
+
+            Message message = messageRepository.save(new Message("message1", publicChannel.getId(), user.getId(), null));
+
+            Instant before = message.getUpdatedAt(); // 또는 createdAt
+            Thread.sleep(5);
+
+            // when
+            messageService.updateMessage(
+                    message.getId(),
+                    MessageUpdateRequestDto.builder()
+                            .content("updated message")
+                            .build());
+
+            // then
+            Message findMessage = messageRepository.findById(message.getId()).orElseThrow();
+            assertAll(
+                    () -> assertEquals(message.getId(), findMessage.getId()),
+                    () -> assertEquals("updated message", findMessage.getContent()),
+                    () -> assertTrue(findMessage.getUpdatedAt().isAfter(before), "updatedAt이 갱신되어야 함")
+            );
 
 
         }
+
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Message;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface MessageService {
     // 메세지 보내기(개인) -> 결국 개인도 하나의 또다른 채널에서 1:1로만 한다고 가정하면될듯, 그럼 receiver가 필요한가? 개인이면 필요, 그룹이면 Null?
 
     // 특정 메세지(uuid 사용) 수정하기
-    void updateMessage(UUID messageId, String content);
+    void updateMessage(UUID id, MessageUpdateRequestDto request);
 
     // 특정 메세지(uuid 사용) 삭제하기
     void deleteMessage(UUID messageId);

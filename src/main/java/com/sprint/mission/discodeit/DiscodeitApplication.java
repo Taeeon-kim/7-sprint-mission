@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -164,7 +165,9 @@ public class DiscodeitApplication {
         System.out.println("=============================== ");
 
         // -- 메세지 업데이트하기 --
-        messageService.updateMessage(messageById.getId(), "updated message!!");
+        messageService.updateMessage(messageById.getId(), MessageUpdateRequestDto.builder()
+                .content("updated message!!")
+                .build());
         messageById = messageService.getMessageById(messageById.getId());
         System.out.println("updated messageById = " + messageById);
         allMessagesOfChannel = messageService.getAllMessagesByChannelId(chId);
