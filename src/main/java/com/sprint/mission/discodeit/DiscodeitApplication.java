@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -68,7 +69,7 @@ public class DiscodeitApplication {
         // ------- 채널 만들기  ----
 
         channelService.createChannel(allUsers.get(0).getId(), new ChannelCreateRequestDto("첫 채널 타이틀", "첫 채널입니다 마음껏 메세지를 주고받으세요", ChannelType.PUBLIC, null));
-        channelService.createChannel(allUsers.get(0).getId(),new ChannelCreateRequestDto("두번째 타이틀", "두번째 채널 공지 채널입니다.", ChannelType.PUBLIC, null));
+        channelService.createChannel(allUsers.get(0).getId(), new ChannelCreateRequestDto("두번째 타이틀", "두번째 채널 공지 채널입니다.", ChannelType.PUBLIC, null));
         allChannels = channelService.getAllChannels();
         System.out.println("all channels after creating channel :" + allChannels);
 
@@ -124,7 +125,12 @@ public class DiscodeitApplication {
 
         // --- 메세지 보내기 --
 
-        messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "첫번째 message메세지입니다");
+        messageService.sendMessageToChannel(MessageSendRequestDto.builder()
+                .channelId(chId)
+                .senderId(allMembers.get(0).getId())
+                .content("첫번째 message입니다")
+                .build());
+
         allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
         System.out.println("chId 2 = " + chId);
         System.out.println("all messages of channel after send message: " + allMessagesOfChannel);
@@ -138,8 +144,16 @@ public class DiscodeitApplication {
         List<Message> allMessages = messageService.getAllMessages();
         System.out.println("allMessages = " + allMessages);
         System.out.println("=============================== ");
-        messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "두번째 message메세지입니다");
-        messageService.sendMessageToChannel(chId, allMembers.get(0).getId(), "세번째 message메세지입니다");
+        messageService.sendMessageToChannel(MessageSendRequestDto.builder()
+                .channelId(chId)
+                .senderId(allMembers.get(0).getId())
+                .content("두번째 message입니다")
+                .build());
+        messageService.sendMessageToChannel(MessageSendRequestDto.builder()
+                .channelId(chId)
+                .senderId(allMembers.get(0).getId())
+                .content("세번째 message입니다")
+                .build());
         allMessages = messageService.getAllMessages();
         System.out.println("allMessages after send Message = " + allMessages);
         System.out.println("=============================== ");

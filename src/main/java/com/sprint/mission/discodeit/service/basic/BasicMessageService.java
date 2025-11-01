@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
@@ -61,27 +62,34 @@ public class BasicMessageService implements MessageService {
     }
 
 
-    public void sendMessageToChannel(UUID channelId, UUID senderId, String content) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
-        if (content == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+    public UUID sendMessageToChannel(MessageSendRequestDto request) {
+        if (request.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
-        User sender = userReader.findUserOrThrow(senderId);
+        User sender = userReader.findUserOrThrow(request.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
-        Channel channel = channelReader.findChannelOrThrow(channelId);
+        Channel channel = channelReader.findChannelOrThrow(request.channelId());
         boolean isMember = channel.isMember(sender.getId());
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        Message message = new Message(content, sender.getId(), channel.getId(), null);
+        Message message = Message.builder()
+                .content(request.content())
+                .senderId(sender.getId())
+                .channelId(channel.getId())
+                .attachmentIds(request.binaryFileIds())
+                .build();
+
         channel.addMessageId(message.getId());
         boolean messageSaved = false;
         try {
             // NOTE: 3. 메세지를 전역 Message 저장소에 저장
-            messageRepository.save(message);
+            Message savedMessage = messageRepository.save(message);
             messageSaved = true;
             // NOTE: 4. 해당 채널에 messageId 추가 및 업데이트
             channelRepository.save(channel);
+            return savedMessage.getId();
         } catch (Exception e) {
             channel.removeMessageId(message.getId());
             if (messageSaved) {
