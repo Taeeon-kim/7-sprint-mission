@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.request.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -13,7 +12,6 @@ import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

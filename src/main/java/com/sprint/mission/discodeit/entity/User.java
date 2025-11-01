@@ -18,16 +18,6 @@ public class User extends BaseEntity {
     private UUID profileImageId; // 변경 가능
     private UserStatus userStatus;
 
-//    public User(String userId, String email, String userPassword, String nickName, UUID profileImageId, StatusType userStatus) {
-//        super();
-//        this.userId = userId;
-//        this.email = email;
-//        this.userPassword = userPassword;
-//        this.nickName = nickName;
-//        this.profileImageId = profileImageId;
-//        this.userStatus = userStatus;
-//    }
-
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
         setUpdatedAt(Instant.now()); //변경 시 시간 갱신
