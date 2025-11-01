@@ -12,7 +12,7 @@ public interface MessageService {
     List<Message> getAllMessages();
 
     // 특정 채널의 모든 메세지 읽기
-    List<Message> getAllMessagesOfChannel(UUID channelId);
+    List<Message> getAllMessagesByChannelId(UUID channelId);
 
     // 단일 특정 메세지 읽기
     Message getMessageById(UUID messageId);

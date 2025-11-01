@@ -140,8 +140,71 @@ public class MessageIntegrationTest {
         }
 
 
+    }
+
+    @Nested
+    @DisplayName("getAllMessagesByChannelId")
+    class getAllMessagesByChannelId {
+
+        @Test
+        @DisplayName("[Integration][Positive] 다중 메세지 조회 - 해당 채널의 메세지들 반환")
+        void getAllMessagesByChannelId_returns_message_list() {
+
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("ee@exam.com")
+                    .profileId(null)
+                    .role(RoleType.USER)
+                    .phoneNumber("010-1111-1111")
+                    .password("dsfsdfdf")
+                    .build();
+            userRepository.save(user);
+
+            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            publicChannel.addUserId(user.getId());
+            channelRepository.save(publicChannel);
+
+            Message message1 = messageRepository.save(new Message("message1", publicChannel.getId(), user.getId(), null));
+            Message message2 = messageRepository.save(new Message("message2", publicChannel.getId(), user.getId(), null));
+
+            publicChannel.addMessageId(message1.getId());
+            publicChannel.addMessageId(message2.getId());
+            channelRepository.save(publicChannel);
+
+            // when
+            List<Message> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
+
+            // then
+            Message foundMessage1 = allMessagesByChannelId.stream()
+                    .filter(message -> message.getId() == message1.getId())
+                    .findFirst()
+                    .orElseThrow();
+
+            Message foundMessage2 = allMessagesByChannelId.stream()
+                    .filter(message -> message.getId() == message2.getId())
+                    .findFirst()
+                    .orElseThrow();
 
 
+            assertAll(
+                    () ->  assertEquals(2, allMessagesByChannelId.size()),
+                    () -> assertEquals(message1.getId(), foundMessage1.getId()),
+                    () ->  assertEquals(message2.getId(), foundMessage2.getId()),
+                    () ->  assertEquals(message1.getContent(), foundMessage1.getContent()),
+                    () ->  assertEquals(message2.getContent(), foundMessage2.getContent()),
+                    () -> assertEquals(message1.getCreatedAt(), foundMessage1.getCreatedAt()),
+                    () ->  assertEquals(message2.getCreatedAt(), foundMessage2.getCreatedAt()),
+                    () -> assertEquals(message1.getChannelId(), foundMessage1.getChannelId()),
+                    () -> assertEquals(message2.getChannelId(), foundMessage2.getChannelId()),
+                    () -> assertEquals(message1.getSenderId(), foundMessage1.getSenderId()),
+                    () ->  assertEquals(message2.getSenderId(), foundMessage2.getSenderId())
+            );
+
+
+
+
+        }
     }
 
 }

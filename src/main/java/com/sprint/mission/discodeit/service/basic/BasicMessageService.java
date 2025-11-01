@@ -42,7 +42,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public List<Message> getAllMessagesOfChannel(UUID channelId) {
+    public List<Message> getAllMessagesByChannelId(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }

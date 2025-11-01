@@ -117,7 +117,7 @@ public class DiscodeitApplication {
         System.out.println("=============================== ");
 
         // --- 채널의 모든 메세지 확인 ---
-        List<Message> allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        List<Message> allMessagesOfChannel = messageService.getAllMessagesByChannelId(chId);
         System.out.println("chId 1 = " + chId);
         System.out.println("all messages of channel before send message: " + allMessagesOfChannel);
 
@@ -131,7 +131,7 @@ public class DiscodeitApplication {
                 .content("첫번째 message입니다")
                 .build());
 
-        allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        allMessagesOfChannel = messageService.getAllMessagesByChannelId(chId);
         System.out.println("chId 2 = " + chId);
         System.out.println("all messages of channel after send message: " + allMessagesOfChannel);
 
@@ -167,13 +167,13 @@ public class DiscodeitApplication {
         messageService.updateMessage(messageById.getId(), "updated message!!");
         messageById = messageService.getMessageById(messageById.getId());
         System.out.println("updated messageById = " + messageById);
-        allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        allMessagesOfChannel = messageService.getAllMessagesByChannelId(chId);
         System.out.println("allMessagesOfChannel = " + allMessagesOfChannel);
         // -- 메세지 제거하기 --
         messageService.deleteMessage(messageById.getId());
         allMessages = messageService.getAllMessages();
         System.out.println("allMessages after delecting a message= " + allMessages);
-        allMessagesOfChannel = messageService.getAllMessagesOfChannel(chId);
+        allMessagesOfChannel = messageService.getAllMessagesByChannelId(chId);
         System.out.println("allMessagesOfChannel after delecting a message= " + allMessagesOfChannel);
         // -- 채널 제거하기 ---
         channelService.deleteChannel(allChannels.get(0).channelId());
