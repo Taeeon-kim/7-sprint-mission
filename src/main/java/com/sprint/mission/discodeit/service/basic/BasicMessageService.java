@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -23,13 +24,15 @@ public class BasicMessageService implements MessageService {
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final MessageReader messageReader;
+    private final BinaryContentRepository binaryContentRepository;
 
-    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader) {
+    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository) {
         this.messageRepository = messageRepository;
         this.channelRepository = channelRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
         this.messageReader = messageReader;
+        this.binaryContentRepository = binaryContentRepository;
     }
 
 
@@ -136,6 +139,9 @@ public class BasicMessageService implements MessageService {
             Channel channel = channelReader.findChannelOrThrow(message.getChannelId());
             channel.removeMessageId(message.getId());
             channelRepository.save(channel);
+            for (UUID uuid : message.getAttachmentIds()) {
+                binaryContentRepository.deleteById(uuid);
+            }
         }
     }
 }

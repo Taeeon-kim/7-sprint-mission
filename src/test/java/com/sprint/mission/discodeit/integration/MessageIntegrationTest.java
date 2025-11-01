@@ -28,6 +28,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public class MessageIntegrationTest {
         channelReader = new ChannelReader(channelRepository);
         messageReader = new MessageReader(messageRepository);
         binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
-        messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader);
+        messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader, binaryContentRepository);
 
     }
 
@@ -165,8 +166,8 @@ public class MessageIntegrationTest {
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 
-            Message message1 = messageRepository.save(new Message("message1", publicChannel.getId(), user.getId(), null));
-            Message message2 = messageRepository.save(new Message("message2", publicChannel.getId(), user.getId(), null));
+            Message message1 = messageRepository.save(new Message("message1", user.getId(), publicChannel.getId(), null));
+            Message message2 = messageRepository.save(new Message("message2", user.getId(), publicChannel.getId(), null));
 
             publicChannel.addMessageId(message1.getId());
             publicChannel.addMessageId(message2.getId());
@@ -250,6 +251,70 @@ public class MessageIntegrationTest {
 
         }
 
+    }
+
+    @Nested()
+    @DisplayName("deleteMessage")
+    class deleteMessage {
+        @Test
+        @DisplayName("[Integration][Positive] 메세지 삭제 - 삭제 후 조회 시 예외")
+        void deleteMessage_then_not_found() throws IOException {
+
+            // given
+            User user = User.builder()
+                    .nickname("name")
+                    .email("ee@exam.com")
+                    .profileId(null)
+                    .role(RoleType.USER)
+                    .phoneNumber("010-1111-1111")
+                    .password("dsfsdfdf")
+                    .build();
+            userRepository.save(user);
+
+            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            publicChannel.addUserId(user.getId());
+            channelRepository.save(publicChannel);
+
+
+            MockMultipartFile file = new MockMultipartFile(
+                    "file",                // form field name
+                    "test.png",            // filename
+                    "image/png",           // content type
+                    "test".getBytes()      // file content
+            );
+
+            BinaryContent binaryContent = BinaryContent.builder()
+                    .bytes(file.getBytes())
+                    .contentType(file.getContentType())
+                    .fileName(file.getOriginalFilename())
+                    .build();
+
+            BinaryContent savedBinaryContent = binaryContentRepository.save(binaryContent);
+            Message savedMessage = messageRepository.save(
+                    new Message("message1",
+                            user.getId(),
+                            publicChannel.getId(),
+                            List.of(savedBinaryContent.getId())
+                    )
+            );
+            publicChannel.addMessageId(savedMessage.getId());
+            channelRepository.save(publicChannel);
+
+            Channel reloadedChannel = channelRepository.findById(publicChannel.getId()).orElseThrow();
+
+            assertTrue(reloadedChannel.getMessageIds().contains(savedMessage.getId()));
+            // when
+            messageService.deleteMessage(savedMessage.getId());
+
+            //then
+            assertAll(
+                    () -> assertThrows(NoSuchElementException.class, () -> messageRepository.findById(savedMessage.getId()).orElseThrow()),
+                    () -> assertThrows(NoSuchElementException.class, () -> binaryContentRepository.findById(savedBinaryContent.getId()).orElseThrow()),
+                    () -> assertFalse(reloadedChannel.getMessageIds().contains(savedMessage.getId()), "채널 내 메시지 목록에서도 제거되어야 함")
+
+            );
+
+        }
     }
 
 }
