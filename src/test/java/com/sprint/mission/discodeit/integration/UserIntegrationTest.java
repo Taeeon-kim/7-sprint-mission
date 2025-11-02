@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class UserIntegrationTest {
-    private InMemoryStore store = new InMemoryStore(); // JCF용 인메모리, fake
+
     private UserService userService;
     private UserRepository userRepository;
     private UserReader userReader;
@@ -42,20 +42,15 @@ public class UserIntegrationTest {
     // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
+        userRepository = new JCFUserRepository();
         userReader = new UserReader(userRepository);
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
-        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
+        userStatusRepository = new JCFUserStatusRepository();
+        binaryContentRepository = new JCFBinaryContentRepository();
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
         userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
     }
 
-    @AfterEach
-    void tearDown() {
-        store.users.clear(); // 인메모리 초기화
-        store.userStatusses.clear();
-        store.binaryContents.clear();
-    }
+
 
     @Nested
     @DisplayName("signUp")

@@ -25,7 +25,7 @@ public class BinaryContentIntegrationTest {
     @BeforeEach
     void setUp() {
 
-        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
+        binaryContentRepository = new JCFBinaryContentRepository();
         binaryContentService = new BasicBinaryContentService(binaryContentRepository);
     }
 

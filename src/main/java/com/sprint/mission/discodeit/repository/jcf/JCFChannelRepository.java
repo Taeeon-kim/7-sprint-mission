@@ -3,18 +3,13 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+@Repository
 public class JCFChannelRepository implements ChannelRepository {
-    private final Map<UUID, Channel> data;
-
-    public JCFChannelRepository(Map<UUID, Channel> data) {
-        this.data = data;
-    }
+    private final Map<UUID, Channel> data = new HashMap<>();
 
     @Override
     public Channel save(Channel channel) {

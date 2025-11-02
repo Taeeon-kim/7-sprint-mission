@@ -26,8 +26,8 @@ public class AuthIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
+        userRepository = new JCFUserRepository();
+        userStatusRepository = new JCFUserStatusRepository();
         authService = new BasicAuthService(userRepository, userStatusRepository);
     }
 

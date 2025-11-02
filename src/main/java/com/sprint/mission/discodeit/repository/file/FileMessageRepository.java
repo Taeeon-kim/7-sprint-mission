@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+//@Repository
 public class FileMessageRepository implements MessageRepository {
     @Override
     public Message save(Message message) {

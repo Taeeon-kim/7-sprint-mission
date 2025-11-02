@@ -51,13 +51,13 @@ public class MessageIntegrationTest {
     @BeforeEach
     void setUp() {
         store = new InMemoryStore();
-        messageRepository = new JCFMessageRepository(store.messages);
-        channelRepository = new JCFChannelRepository(store.channels);
-        userRepository = new JCFUserRepository(store.users);
+        messageRepository = new JCFMessageRepository();
+        channelRepository = new JCFChannelRepository();
+        userRepository = new JCFUserRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
         messageReader = new MessageReader(messageRepository);
-        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
+        binaryContentRepository = new JCFBinaryContentRepository();
         messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader, binaryContentRepository);
 
     }

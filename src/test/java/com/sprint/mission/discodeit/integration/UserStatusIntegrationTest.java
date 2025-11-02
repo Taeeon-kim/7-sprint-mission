@@ -33,7 +33,6 @@ public class UserStatusIntegrationTest {
 
 
     // 필드
-    private final InMemoryStore store = new InMemoryStore();
     private UserStatusRepository userStatusRepository;
     private UserRepository userRepository;
     private UserReader userReader;
@@ -46,18 +45,14 @@ public class UserStatusIntegrationTest {
     // before each
     @BeforeEach
     void setUp() {
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
-        userRepository = new JCFUserRepository(store.users);
-        binaryContentRepository = new JCFBinaryContentRepository(store.binaryContents);
+        userStatusRepository = new JCFUserStatusRepository();
+        userRepository = new JCFUserRepository();
+        binaryContentRepository = new JCFBinaryContentRepository();
         UserReader userReader = new UserReader(userRepository);
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
         userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
     }
 
-    @AfterEach
-    void teardown() {
-        store.userStatusses.clear();
-    }
 
     @Nested
     @DisplayName("createUserStatus")

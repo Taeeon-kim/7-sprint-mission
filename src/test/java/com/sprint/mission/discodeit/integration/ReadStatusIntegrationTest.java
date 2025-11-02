@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReadStatusIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
+
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
     private ReadStatusRepository readStatusRepository;
@@ -41,9 +41,9 @@ public class ReadStatusIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        channelRepository = new JCFChannelRepository(store.channels);
-        readStatusRepository = new JCFReadStatusRepository(store.readStatuses);
+        userRepository = new JCFUserRepository();
+        channelRepository = new JCFChannelRepository();
+        readStatusRepository = new JCFReadStatusRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
         readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader);

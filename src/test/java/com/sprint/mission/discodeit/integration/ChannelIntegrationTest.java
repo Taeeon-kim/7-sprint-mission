@@ -46,13 +46,13 @@ public class ChannelIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        channelRepository = new JCFChannelRepository(store.channels);
-        readStatusRepository = new JCFReadStatusRepository(store.readStatuses);
-        messageRepository = new JCFMessageRepository(store.messages);
+        userRepository = new JCFUserRepository();
+        channelRepository = new JCFChannelRepository();
+        readStatusRepository = new JCFReadStatusRepository();
+        messageRepository = new JCFMessageRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
+        userStatusRepository = new JCFUserStatusRepository();
 
         channelService = new BasicChannelService(
                 channelRepository,

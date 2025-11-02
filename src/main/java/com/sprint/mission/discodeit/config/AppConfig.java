@@ -19,25 +19,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
 
-    @Bean
-    public InMemoryStore inMemoryStore() {
-        return new InMemoryStore();
-    }
-
-    @Bean
-    public BinaryContentRepository jcfBinaryContentRepository(InMemoryStore store) {
-        return new JCFBinaryContentRepository(store.binaryContents);
-    }
-
-    @Bean
-    public UserStatusRepository jcfUserStatusRepository(InMemoryStore store) {
-        return new JCFUserStatusRepository(store.userStatusses);
-    }
-
-    @Bean
-    public ReadStatusRepository jcfReadStatusRepository(InMemoryStore store) {
-        return new JCFReadStatusRepository(store.readStatuses);
-    }
 
 //    @Bean
 //    // 이 메서드의 리턴 객체는 조건부로 빈 등록이 된다.
