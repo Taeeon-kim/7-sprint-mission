@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.repository.file;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.store.Store;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,7 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-//@Repository
+@ConditionalOnProperty(prefix = "discodeit.repository",  // 접두어
+        name = "type", // 참조해야할 속성 키값
+        havingValue = "file") //
+@Repository
 public class FileMessageRepository implements MessageRepository {
     @Override
     public Message save(Message message) {

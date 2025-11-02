@@ -3,7 +3,7 @@ spring:
     name: discodeit
 
 
-#discodeit:
-#  repository:
-#    type: jcf
-#    file-directory: .discodeit
+discodeit:
+  repository:
+    type: jcf
+    file-directory: ./data
