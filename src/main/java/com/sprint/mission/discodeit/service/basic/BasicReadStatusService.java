@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -65,4 +67,20 @@ public class BasicReadStatusService implements ReadStatusService {
                 .map(ReadStatusResponseDto::from)
                 .toList();
     }
+
+    @Override
+    public void updateReadStatus(UUID id, ReadStatusUpdateRequestDto requestDto) {
+        ReadStatus readStatusById = readStatusRepository.findById(id).orElseThrow();
+
+        boolean isUpdated = readStatusById.updateReadAt(requestDto.readAt());
+        if (isUpdated) {
+            readStatusRepository.save(readStatusById);
+        }
+    }
+
+    @Override
+    public void deleteReadStatus(UUID id) {
+        readStatusRepository.deleteById(id);
+    }
+
 }

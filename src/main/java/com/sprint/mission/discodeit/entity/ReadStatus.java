@@ -20,5 +20,18 @@ public class ReadStatus extends BasicEntity {
         setUpdatedAt(Instant.now());
     }
 
+    public boolean updateReadAt(Instant readAt) {
+        boolean isUpdated = false;
+        if (readAt == null) {
+            throw new IllegalArgumentException("값이 잘못되었습니다");
+        }
+        if (this.readAt != null && readAt.isBefore(this.readAt) && !this.readAt.equals(readAt)) {
+            this.readAt = readAt;
+            isUpdated = true;
+        }
+
+        return isUpdated;
+    }
+
 
 }
