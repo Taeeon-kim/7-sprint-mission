@@ -17,6 +17,7 @@ import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
  */
 @Getter
 //@AllArgsConstructor
+@ToString
 @Builder
 public class ChannelResponseDto {
 
@@ -32,7 +33,11 @@ public class ChannelResponseDto {
         return ChannelResponseDto.builder()
                 .channelId(channel.getUuid())
                 .channelName(channel.getChanName())
+                .participantIds(channel.getParticipantIds())
                 .channelType(channel.getType())
+                .createAt(channel.getCreateAt())
+                .updateAt(channel.getLastMessageAt())
+                .lastMessageAt(channel.getLastMessageAt())
                 .build();
     }
 }
