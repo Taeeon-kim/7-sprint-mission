@@ -46,4 +46,9 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
                 .filter((binaryContent)-> Objects.nonNull(binaryContent))
                 .toList();
     }
+
+    @Override
+    public Map<UUID, BinaryContent> findAllMap() {
+        return data;
+    }
 }

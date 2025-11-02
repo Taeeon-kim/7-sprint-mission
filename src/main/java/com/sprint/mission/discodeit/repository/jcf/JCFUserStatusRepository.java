@@ -52,4 +52,9 @@ public class JCFUserStatusRepository implements UserStatusRepository {
                 .stream()
                 .anyMatch((userStatus) -> userStatus.getUserId().equals(userId));
     }
+
+    @Override
+    public Map<UUID, UserStatus> findAllMap() {
+        return data;
+    }
 }

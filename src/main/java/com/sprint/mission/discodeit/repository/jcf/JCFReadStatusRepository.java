@@ -57,4 +57,9 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
                 .toList();
 
     }
+
+    @Override
+    public Map<UUID, ReadStatus> findAllMap() {
+        return data;
+    }
 }
