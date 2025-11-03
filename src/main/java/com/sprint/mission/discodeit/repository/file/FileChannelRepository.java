@@ -2,11 +2,12 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.service.file.FileChannelService;
+import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.util.*;
 
+@Repository
 public class FileChannelRepository implements ChannelRepository {
 
     //파일 저장 경로
@@ -63,7 +64,7 @@ public class FileChannelRepository implements ChannelRepository {
 
     @Override
     public void save(Channel channel) {
-        channels.put(channel.getId(), channel);
+        channels.put(channel.getUuid(), channel);
         saveChannelToFile();
     }
 

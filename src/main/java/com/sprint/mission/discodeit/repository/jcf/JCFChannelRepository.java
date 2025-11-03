@@ -20,7 +20,7 @@ public class JCFChannelRepository implements ChannelRepository {
     // 채널 생성
     @Override
     public void save(Channel channel) {
-        channels.put(channel.getId(), channel);
+        channels.put(channel.getUuid(), channel);
     }
 
     // 채널 1개 조회
