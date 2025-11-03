@@ -5,10 +5,12 @@ import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,16 +25,17 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<UUID> createUser(@RequestBody UserSignupRequestDto userSignupRequestDto) {
         UUID uuid = userService.signUp(userSignupRequestDto);
-        return ResponseEntity.ok(uuid);
+        return ResponseEntity.created(URI.create("/api/usrs/" + uuid)).body(uuid);
     }
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
     @ResponseBody
-    public void updateUser(
+    public ResponseEntity<Void> updateUser(
             @PathVariable UUID userId,
             @RequestBody UserUpdateRequestDto request
     ) {
         userService.updateUser(userId, request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -40,6 +43,13 @@ public class UserController {
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         List<UserResponseDto> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
+    }
+
+    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
