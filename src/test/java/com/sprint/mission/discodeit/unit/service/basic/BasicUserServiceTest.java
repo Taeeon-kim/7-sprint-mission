@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.service.basic;
+package com.sprint.mission.discodeit.unit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AuthIntegrationTest {
+public class AuthServiceIntegrationTest {
     private final InMemoryStore store = new InMemoryStore();
     private UserRepository userRepository;
     private AuthService authService;

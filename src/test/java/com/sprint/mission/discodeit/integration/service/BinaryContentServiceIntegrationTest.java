@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryContentIntegrationTest {
+public class BinaryContentServiceIntegrationTest {
     private final InMemoryStore store = new InMemoryStore();
     private BinaryContentRepository binaryContentRepository;
     private BinaryContentService binaryContentService;

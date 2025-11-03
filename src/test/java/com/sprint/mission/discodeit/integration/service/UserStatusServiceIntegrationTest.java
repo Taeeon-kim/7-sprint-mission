@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
@@ -19,7 +19,6 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-public class UserStatusIntegrationTest {
+public class UserStatusServiceIntegrationTest {
 
 
     // 필드

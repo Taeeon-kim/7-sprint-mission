@@ -1,5 +1,6 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.unit.entity;
 
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

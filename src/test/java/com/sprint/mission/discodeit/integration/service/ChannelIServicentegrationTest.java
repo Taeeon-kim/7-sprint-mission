@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ChannelIntegrationTest {
+public class ChannelIServicentegrationTest {
     private final InMemoryStore store = new InMemoryStore();
 
     private UserRepository userRepository;

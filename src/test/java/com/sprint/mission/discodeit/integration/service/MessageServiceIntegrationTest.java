@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
@@ -15,7 +15,6 @@ import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
@@ -29,12 +28,11 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MessageIntegrationTest {
+public class MessageServiceIntegrationTest {
 
     private InMemoryStore store;
     private MessageRepository messageRepository;

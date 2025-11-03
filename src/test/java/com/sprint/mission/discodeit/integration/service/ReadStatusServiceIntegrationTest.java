@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
@@ -17,11 +17,9 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -30,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReadStatusIntegrationTest {
+public class ReadStatusServiceIntegrationTest {
 
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
