@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.auth.AuthLoginRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
@@ -58,7 +59,10 @@ public class AuthServiceIntegrationTest {
             userStatusRepository.save(userStatus);
 
             // when
-            UserResponseDto loginUser = authService.login(saved.getNickname(), saved.getPassword());
+            UserResponseDto loginUser = authService.login(AuthLoginRequestDto.builder()
+                    .username(saved.getNickname())
+                    .password(saved.getPassword())
+                    .build());
 
             // then
             assertAll(
@@ -91,8 +95,16 @@ public class AuthServiceIntegrationTest {
 
             // when & then
             assertAll(
-                    ()-> assertThrows(NoSuchElementException.class, () -> authService.login(saved.getNickname(), "wrongPassword")),
-                    ()-> assertThrows(NoSuchElementException.class, () -> authService.login("wrongNickname", saved.getPassword()))
+                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                            .username(saved.getNickname())
+                            .password("wrongPassword")
+                            .build())),
+                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                                    .username("wrongName")
+                                    .password(saved.getPassword())
+                                    .build()
+                            )
+                    )
             );
         }
     }
