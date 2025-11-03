@@ -385,7 +385,7 @@ class BasicUserServiceTest {
             List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, "010", null));
             when(userRepository.findAll()).thenReturn(users);
 
-            List<User> result = userService.getAllUsers();
+            List<UserResponseDto> result = userService.getAllUsers();
 
             assertEquals(users, result); // flow 검증 (결과 전달이 잘 되었는가)
             verify(userRepository).findAll(); // behavior 검증(호출/위임이 잘되었는가)

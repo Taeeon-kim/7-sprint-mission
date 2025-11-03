@@ -122,7 +122,7 @@ public class BasicUserService implements UserService {
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-
+        System.out.println("id = " + id);
         User userById = userReader.findUserOrThrow(id);
         UserUpdateParams params = UserUpdateParams.from(request); // 경계분리
         boolean updated = userById.update(params);
@@ -132,8 +132,20 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDto> getAllUsers() {
+
+        List<User> all = userRepository.findAll();
+        return all.stream().map(
+                user -> UserResponseDto.builder()
+                        .id(user.getId())
+                        .profileId(user.getProfileId())
+                        .role(user.getRole())
+                        .phoneNumber(user.getPhoneNumber())
+                        .email(user.getEmail())
+                        .nickname(user.getNickname())
+                        .build()
+                ).toList();
+
     }
 
     @Override
