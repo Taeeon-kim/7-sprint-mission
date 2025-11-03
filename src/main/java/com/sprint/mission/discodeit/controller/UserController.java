@@ -25,7 +25,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<UUID> createUser(@RequestBody UserSignupRequestDto userSignupRequestDto) {
         UUID uuid = userService.signUp(userSignupRequestDto);
-        return ResponseEntity.created(URI.create("/api/usrs/" + uuid)).body(uuid);
+        return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
     }
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
