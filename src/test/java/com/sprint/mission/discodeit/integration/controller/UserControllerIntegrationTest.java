@@ -106,7 +106,7 @@ public class UserControllerIntegrationTest {
             );
 
 
-            actions.andExpect(status().isOk())
+            actions.andExpect(status().isCreated())
                     .andExpect(result -> {
                         String uuid = result.getResponse().getContentAsString();
                        assertNotNull(uuid);

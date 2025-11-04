@@ -37,23 +37,24 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public void createChannel(UUID createdByUserId, ChannelCreateRequestDto requestDto) {
+    public UUID createChannel(UUID userId, ChannelCreateCommand command) {
 
-        User creator = userReader.findUserOrThrow(createdByUserId);
+        User creator = userReader.findUserOrThrow(userId);
 
-        Channel channel = switch (requestDto.type()) {
+        Channel channel = switch (command.type()) {
             case PUBLIC -> {
-                ChannelCreatePublicParams params = ChannelCreatePublicParams.from(requestDto);
+                ChannelCreatePublicParams params = ChannelCreatePublicParams.from(command);
                 yield createPublicChannel(creator.getId(), params);
             }
             case PRIVATE -> {
-                new ChannelCreatePrivateParams(requestDto.memberIds());
-                ChannelCreatePrivateParams params = ChannelCreatePrivateParams.from(requestDto);
+                new ChannelCreatePrivateParams(command.memberIds());
+                ChannelCreatePrivateParams params = ChannelCreatePrivateParams.from(command);
                 yield createPrivateChannel(creator.getId(), params);
             }
-            default -> throw new IllegalArgumentException("unsupported channel type: " + requestDto.type());
+            default -> throw new IllegalArgumentException("unsupported channel type: " + command.type());
         };
-        channelRepository.save(channel);
+        Channel saved = channelRepository.save(channel);
+        return saved.getId();
     }
 
     private Channel createPrivateChannel(UUID createdByUserId, ChannelCreatePrivateParams params) {

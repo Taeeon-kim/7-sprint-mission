@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/api/user-status")
+@RequestMapping("/api/user-statuses")
 @RequiredArgsConstructor
 public class UserStatusController {
 

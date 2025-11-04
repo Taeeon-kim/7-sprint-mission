@@ -9,7 +9,7 @@ import java.util.UUID;
 public record ChannelCreatePrivateParams(
         List<UUID> memberIds
 ) {
-    public static ChannelCreatePrivateParams from(ChannelCreateRequestDto requestDto) {
+    public static ChannelCreatePrivateParams from(ChannelCreateCommand requestDto) {
         return ChannelCreatePrivateParams.builder()
                 .memberIds(requestDto.memberIds())
                 .build();

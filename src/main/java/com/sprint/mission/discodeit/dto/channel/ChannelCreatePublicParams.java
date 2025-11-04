@@ -8,11 +8,11 @@ public record ChannelCreatePublicParams(
         String description
 ) {
 
-    public static ChannelCreatePublicParams from(ChannelCreateRequestDto requestDto) {
+    public static ChannelCreatePublicParams from(ChannelCreateCommand command) {
         // NOTE: 정규화(trim, null 등), 불변식, 입력 가드등 처리 가능 이점있음
         return ChannelCreatePublicParams.builder()
-                .title(requestDto.title())
-                .description(requestDto.description())
+                .title(command.title())
+                .description(command.description())
                 .build();
     }
 

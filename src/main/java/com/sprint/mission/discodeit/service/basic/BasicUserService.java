@@ -60,7 +60,6 @@ public class BasicUserService implements UserService {
                 USER,
                 request.getPhoneNumber(),
                 request.getProfileId());
-
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
 
