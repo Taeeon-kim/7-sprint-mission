@@ -40,12 +40,14 @@ public class ChannelController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<ChannelResponseDto>> getAllChannels() {
-        List<ChannelResponseDto> allChannels = channelService.getAllChannels();
-        return ResponseEntity.ok(allChannels);
+    public ResponseEntity<List<ChannelResponseDto>> getAllChannels(@RequestParam(required = false) UUID userId) {
+        List<ChannelResponseDto> channels = (userId == null) ?
+                channelService.getAllChannels() :
+                channelService.getAllChannelsByUserId(userId);
+        return ResponseEntity.ok(channels);
     }
 
-    @RequestMapping(value = "/{channelId}",method = RequestMethod.PATCH)
+    @RequestMapping(value = "/{channelId}", method = RequestMethod.PATCH)
     @ResponseBody
     public ResponseEntity<Void> updateChannel(
             @PathVariable UUID channelId,
@@ -60,5 +62,5 @@ public class ChannelController {
         channelService.deleteChannel(channelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
+    
 }
