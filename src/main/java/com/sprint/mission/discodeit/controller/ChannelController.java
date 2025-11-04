@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,15 @@ public class ChannelController {
     public ResponseEntity<List<ChannelResponseDto>> getAllChannels() {
         List<ChannelResponseDto> allChannels = channelService.getAllChannels();
         return ResponseEntity.ok(allChannels);
+    }
+
+    @RequestMapping(value = "/{channelId}",method = RequestMethod.PATCH)
+    @ResponseBody
+    public ResponseEntity<Void> updateChannel(
+            @PathVariable UUID channelId,
+            @RequestBody ChannelUpdateRequestDto request) {
+        channelService.updateChannel(channelId, request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
