@@ -16,7 +16,7 @@ public class ReadStatusController {
 
     private final ReadStatusService readStatusService;
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<UUID> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request
