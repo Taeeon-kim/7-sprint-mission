@@ -16,26 +16,30 @@ public class User extends BaseEntity {
     private String userName; //유저 이름
     private UUID profileImageId; //프로필
 
-    public void setUpdate(String newPassword, String newEmail, String newUserName, UUID newProfileImageId) {
-        boolean anyUpdated = false;
+    public void setPassword(String newPassword) {
         if (newPassword != null && !newPassword.equals(this.password)) { //비밀번호 변경
             this.password = newPassword;
-            anyUpdated = true;
+            setUpdatedAt(Instant.now());
         }
-        if(newEmail != null && !newEmail.equals(this.email)){ //이메일 변경
-            this.email = newEmail;
-            anyUpdated = true;
-        }
-        if(newUserName != null && !newUserName.equals(this.userName)){
-            this.userName = newUserName;
-            anyUpdated = true;
-        }
-        if(newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)){ //프로필 변경
-            this.profileImageId = newProfileImageId;
-            anyUpdated = true;
-        }
+    }
 
-        if(anyUpdated){ //변경 후 시간업데이트
+    public void setEmail(String newEmail) {
+        if (newEmail != null && !newEmail.equals(this.email)) { //이메일 변경
+            this.email = newEmail;
+            setUpdatedAt(Instant.now());
+        }
+    }
+
+    public void setUserName(String newUserName) {
+        if(newUserName !=null&&!newUserName.equals(this.userName)) {
+            this.userName = newUserName;
+            setUpdatedAt(Instant.now());
+        }
+    }
+
+    public void setProfileImageId(UUID newProfileImageId) {
+        if(newProfileImageId !=null&&!newProfileImageId.equals(this.profileImageId)) { //프로필 변경
+            this.profileImageId = newProfileImageId;
             setUpdatedAt(Instant.now());
         }
     }
