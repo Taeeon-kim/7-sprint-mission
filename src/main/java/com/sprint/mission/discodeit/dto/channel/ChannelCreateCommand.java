@@ -17,7 +17,7 @@ public record ChannelCreateCommand(
                 requestDto.title(),
                 requestDto.description(),
                 requestDto.type(),
-                requestDto.memberIds()
+                requestDto.memberIds() == null ? List.of() : requestDto.memberIds()
         );
     }
 }
