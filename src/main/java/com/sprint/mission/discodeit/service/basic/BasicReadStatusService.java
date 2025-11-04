@@ -43,7 +43,6 @@ public class BasicReadStatusService implements ReadStatusService {
             }
         }
 
-
         ReadStatus readStatus = ReadStatus.builder()
                 .userId(user.getId())
                 .channelId(channel.getId())
