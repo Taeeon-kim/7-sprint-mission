@@ -1,56 +1,66 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serializable;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
+
+
+import java.time.Instant;
 import java.util.*;
 
-public class Channel extends BasicEntity implements Serializable {
+@Getter
+@ToString
+public class Channel extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String title;
     private String description;
     private final Set<UUID> userIds;
     private final List<UUID> messageIds; // TODO: 추후 DB 및 레포지토리 계층 사용시 효율성을 위해 Message객체가아닌 messageId만 받는것 고려할 것, 채널이 모든 객체 정보를 가질 필요가있는지 먼저 생각
     private final UUID createdByUserId; // NOTE: 작성자는 수정못하게 final, 해당 유저가 지워질걸 고려해서 User가아닌 userId로 받기
-    private boolean isPrivate;
+    private final ChannelType type;
 
 
-    public Channel(String title, String description, UUID createdByUserId, boolean isPrivate) {
+    private Channel(String title, String description, UUID createdByUserId, ChannelType type) {
 
-        if (title == null || title.isBlank()){
-            throw new IllegalArgumentException("title is invalid");
+        if (type == ChannelType.PUBLIC) {
+            if (title == null || title.isBlank()) {
+                throw new IllegalArgumentException("title is invalid");
+            }
+            if (description == null) {
+                throw new IllegalArgumentException("description is null");
+            }
+
         }
-        if (description == null){
-            throw new IllegalArgumentException("description is null");
-        }
-        if (createdByUserId == null){
+        if (createdByUserId == null) {
             throw new IllegalArgumentException("createdByUserId is null");
         }
 
         this.title = title;
         this.description = description;
         this.createdByUserId = createdByUserId;
-        this.isPrivate = isPrivate;
+        this.type = type;
         this.userIds = new HashSet<>();
         this.messageIds = new ArrayList<>();
     }
 
-    public String getTitle() {
-        return title;
+    public static Channel createPublicChannel(UUID createdByUserId, String title, String description) {
+        return new Channel(title, description, createdByUserId, ChannelType.PUBLIC);
     }
 
-    public String getDescription() {
-        return description;
+    public static Channel createPrivateChannel(UUID createdByUserId) {
+        return new Channel(null, null, createdByUserId, ChannelType.PRIVATE);
     }
 
-    public List<UUID> getUserIds() {
-        return userIds.stream().toList();
-    }
 
-    public void addUser(UUID userId) {
-        if(userId == null){
+    public void addUserId(UUID userId) {
+        if (userId == null) {
             throw new IllegalArgumentException("유저정보가 잘못 되었습니다.");
         }
         boolean isAdded = userIds.add(userId);
-        if  (!isAdded){ // NOTE: 중복체크
+        if (!isAdded) { // NOTE: 중복체크
             throw new IllegalStateException("이미 참여한 유저입니다.");
         }
     }
@@ -61,28 +71,28 @@ public class Channel extends BasicEntity implements Serializable {
         }
         boolean isRemoved = userIds.remove(userId);
 
-        if(!isRemoved){
+        if (!isRemoved) {
             throw new IllegalStateException("채널에서 유저가 없습니다.");
         }
     }
 
     public void removeMessageId(UUID messageId) {
-        if(messageId == null){
+        if (messageId == null) {
             throw new IllegalArgumentException("메세지정보가 잘못 되었습니다.");
         }
         messageIds.remove(messageId);
     }
 
     public void addMessageId(UUID messageId) {
-        if (messageId == null){
+        if (messageId == null) {
             throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");
         }
         messageIds.add(messageId);
 
     }
 
-    public boolean isMember(UUID userId){
-            return userIds.contains(userId);
+    public boolean isMember(UUID userId) {
+        return userIds.contains(userId);
     }
 
     public List<UUID> getMessageIds() {
@@ -91,10 +101,6 @@ public class Channel extends BasicEntity implements Serializable {
 
     public UUID getCreatedByUserId() {
         return createdByUserId;
-    }
-
-    public boolean isPrivate() {
-        return isPrivate;
     }
 
 
@@ -123,19 +129,14 @@ public class Channel extends BasicEntity implements Serializable {
     }
 
 
-    @Override
-    public String toString() {
-        return "Channel{" +
-                "id='" + getId() + '\'' +
-                ", createdAt=" + getCreatedAt() +
-                ", updatedAt=" + getUpdatedAt() +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", userIds=" + userIds +
-                ", messages=" + messageIds +
-                ", createdByUserId=" + createdByUserId +
-                ", isPrivate=" + isPrivate +
-                '}';
-    }
+    public boolean update(ChannelUpdateParams params) {
+        boolean changeFlag = false;
+        changeFlag |= this.updateTitle(params.title());
+        changeFlag |= this.updateDescription(params.description());
+        if(changeFlag){
 
+        this.setUpdatedAt(Instant.now());
+        }
+        return changeFlag;
+    }
 }

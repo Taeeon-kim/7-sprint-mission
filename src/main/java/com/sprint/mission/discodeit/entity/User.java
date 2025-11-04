@@ -1,28 +1,37 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
+import com.sprint.mission.discodeit.entity.type.RoleType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
-public class User extends BasicEntity implements Serializable {
+import java.time.Instant;
+import java.util.UUID;
+
+@Getter
+public class User extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String nickname;
     private String email;
     private String password;
     private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
     private String phoneNumber;
+    private UUID profileId;
 //    private final List<User> friends;
 
 
     private User() {
     }
 
-    public User(String nickname, String email, String password, RoleType role, String phoneNumber) {
-        this();
+    @Builder
+    private User(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
+        super();
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
          */
+
         if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("nickname invalid");
         if (email == null || !email.contains("@")) throw new IllegalArgumentException("email invalid");
         if (password == null || password.isBlank()) throw new IllegalArgumentException("password invalid");
@@ -32,9 +41,10 @@ public class User extends BasicEntity implements Serializable {
         this.password = password;
         this.role = role;
         this.phoneNumber = phoneNumber;
+        this.profileId = profileId;
     }
 
-    public User(User other) { //  NOTE: 복사용, 복사 생성자
+    private User(User other) { //  NOTE: 복사용, 복사 생성자
 
         super(other);
         this.nickname = other.nickname;
@@ -42,28 +52,37 @@ public class User extends BasicEntity implements Serializable {
         this.password = other.password;
         this.role = other.role;
         this.phoneNumber = other.phoneNumber;
+        this.profileId = other.profileId;
 //        this.friends = new ArrayList<>(other.friends);
     }
 
-
-    public String getNickname() {
-        return nickname;
+    public static User copyOf(User other) {
+        return new User(other);
     }
 
-    public String getEmail() {
-        return email;
+    public static User create(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
+        return new User(nickname, email, password, role, phoneNumber, profileId);
     }
 
-    public String getPassword() {
-        return password;
+    public boolean update(UserUpdateParams request) {
+        boolean changeFlag = false;
+        changeFlag |= this.updateNickname(request.getNickname());
+        changeFlag |= this.updateEmail(request.getEmail());
+        changeFlag |= this.updatePassword(request.getPassword());
+        changeFlag |= this.updatePhoneNumber(request.getPhoneNumber());
+        changeFlag |= this.updateProfileId(request.getProfileId());
+        if (changeFlag) {
+            this.setUpdatedAt(Instant.now());
+        }
+        return changeFlag;
     }
 
-    public RoleType getRole() {
-        return role;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
+    private boolean updateProfileId(UUID profileId) {
+        if (profileId != null && !profileId.equals(this.profileId)) {
+            this.profileId = profileId;
+            return true;
+        }
+        return false;
     }
 
     public boolean updateNickname(String nickname) {
@@ -99,20 +118,4 @@ public class User extends BasicEntity implements Serializable {
         return false;
     }
 
-
-
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id='" + getId() + '\'' +
-                ", createdAt=" + getCreatedAt() +
-                ", updatedAt=" + getUpdatedAt() +
-                ",nickname='" + nickname + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", role=" + role +
-                ", phoneNumber='" + phoneNumber +
-                '}';
-    }
 }

@@ -2,24 +2,29 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true)
+@Repository
 public class JCFUserRepository implements UserRepository {
-    private final Map<UUID, User> data;
-
-    public JCFUserRepository(HashMap<UUID, User> data) {
-        this.data = data;
-    }
+    private final Map<UUID, User> data = new HashMap<>();
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         data.put(user.getId(), user);
+        return user;
     }
 
     @Override
-    public void deleteById(UUID id) {
-        data.remove(id);
+    public boolean deleteById(UUID id) {
+        return data.remove(id) != null;
+
     }
 
     @Override
@@ -46,5 +51,21 @@ public class JCFUserRepository implements UserRepository {
                 .map(data::get)
                 .filter(Objects::nonNull)
                 .toList();
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        return findAllMap()
+                .values()
+                .stream()
+                .anyMatch(user -> user.getNickname().equals(nickname));
     }
 }

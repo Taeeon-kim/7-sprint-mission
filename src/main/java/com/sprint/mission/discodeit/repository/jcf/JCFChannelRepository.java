@@ -1,23 +1,25 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true)
+@Repository
 public class JCFChannelRepository implements ChannelRepository {
-    private final Map<UUID, Channel> data;
-
-    public JCFChannelRepository(Map<UUID, Channel> data) {
-        this.data = data;
-    }
+    private final Map<UUID, Channel> data = new HashMap<>();
 
     @Override
-    public void save(Channel channel) {
+    public Channel save(Channel channel) {
         data.put(channel.getId(), channel);
+        return channel;
     }
 
     @Override
@@ -31,6 +33,14 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
+    public List<Channel> findAllByUserId(UUID userId) {
+        List<Channel> allChannels = findAll();
+        return allChannels.stream()
+                .filter(channel -> channel.getType() == ChannelType.PUBLIC || channel.isMember(userId))
+                .toList();
+    }
+
+    @Override
     public List<Channel> findAll() {
         return data.values()
                 .stream()
@@ -38,7 +48,7 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public void deleteById(UUID channelId) {
-        data.remove(channelId);
+    public boolean deleteById(UUID channelId) {
+        return data.remove(channelId) != null;
     }
 }

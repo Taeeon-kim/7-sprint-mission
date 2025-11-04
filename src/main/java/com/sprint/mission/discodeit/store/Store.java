@@ -12,6 +12,10 @@ public class Store {
     public static final Path USER_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "users.ser");
     public static final Path CHANNEL_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "channels.ser");
     public static final Path MESSAGE_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "messages.ser");
+    public static final Path BINARY_CONTENT_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "binary_contents.ser");
+    public static final Path READ_STATUS_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "read_statuses.ser");
+    public static final Path USER_STATUS_DATA_FILE = Path.of(USER_DATA_DIR.toString(), "user_statuses.ser");
+
 
     public static <K extends Serializable, V extends Serializable> void saveMap(Path file, Map<K, V> map) {
         try {
