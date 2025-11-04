@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
 import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
@@ -11,10 +12,10 @@ import java.util.UUID;
 public interface MessageService {
 
     // 모든 메세지 읽기(채널상관없이)
-    List<Message> getAllMessages();
+    List<MessageResponseDto> getAllMessages();
 
     // 특정 채널의 모든 메세지 읽기
-    List<Message> getAllMessagesByChannelId(UUID channelId);
+    List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId);
 
     // 단일 특정 메세지 읽기
     Message getMessageById(UUID messageId);

@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
 import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -37,16 +38,17 @@ public class BasicMessageService implements MessageService {
 
 
     @Override
-    public List<Message> getAllMessages() {
+    public List<MessageResponseDto> getAllMessages() {
         Map<UUID, Message> allMessages = messageRepository.findAllMap();
         return allMessages.values()
                 .stream()
                 .sorted(Comparator.comparing(Message::getCreatedAt))
+                .map(MessageResponseDto::from)
                 .toList();
     }
 
     @Override
-    public List<Message> getAllMessagesByChannelId(UUID channelId) {
+    public List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
@@ -57,6 +59,7 @@ public class BasicMessageService implements MessageService {
                 .map(allMessages::get)
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(Message::getCreatedAt))
+                .map(MessageResponseDto::from)
                 .toList();
     }
 

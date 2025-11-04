@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
 import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
@@ -168,32 +169,30 @@ public class MessageServiceIntegrationTest {
             channelRepository.save(publicChannel);
 
             // when
-            List<Message> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
+            List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
 
             // then
-            Message foundMessage1 = allMessagesByChannelId.stream()
-                    .filter(message -> message.getId() == message1.getId())
+            MessageResponseDto foundMessage1 = allMessagesByChannelId.stream()
+                    .filter(message -> message.id() == message1.getId())
                     .findFirst()
                     .orElseThrow();
 
-            Message foundMessage2 = allMessagesByChannelId.stream()
-                    .filter(message -> message.getId() == message2.getId())
+            MessageResponseDto foundMessage2 = allMessagesByChannelId.stream()
+                    .filter(message -> message.id() == message2.getId())
                     .findFirst()
                     .orElseThrow();
 
 
             assertAll(
                     () -> assertEquals(2, allMessagesByChannelId.size()),
-                    () -> assertEquals(message1.getId(), foundMessage1.getId()),
-                    () -> assertEquals(message2.getId(), foundMessage2.getId()),
-                    () -> assertEquals(message1.getContent(), foundMessage1.getContent()),
-                    () -> assertEquals(message2.getContent(), foundMessage2.getContent()),
-                    () -> assertEquals(message1.getCreatedAt(), foundMessage1.getCreatedAt()),
-                    () -> assertEquals(message2.getCreatedAt(), foundMessage2.getCreatedAt()),
-                    () -> assertEquals(message1.getChannelId(), foundMessage1.getChannelId()),
-                    () -> assertEquals(message2.getChannelId(), foundMessage2.getChannelId()),
-                    () -> assertEquals(message1.getSenderId(), foundMessage1.getSenderId()),
-                    () -> assertEquals(message2.getSenderId(), foundMessage2.getSenderId())
+                    () -> assertEquals(message1.getId(), foundMessage1.id()),
+                    () -> assertEquals(message2.getId(), foundMessage2.id()),
+                    () -> assertEquals(message1.getContent(), foundMessage1.content()),
+                    () -> assertEquals(message2.getContent(), foundMessage2.content()),
+                    () -> assertEquals(message1.getChannelId(), foundMessage1.channelId()),
+                    () -> assertEquals(message2.getChannelId(), foundMessage2.channelId()),
+                    () -> assertEquals(message1.getSenderId(), foundMessage1.senderId()),
+                    () -> assertEquals(message2.getSenderId(), foundMessage2.senderId())
             );
 
 
