@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
@@ -37,6 +38,10 @@ public class BasicReadStatusService implements ReadStatusService {
 
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
+
+        if (channel.getType() == ChannelType.PUBLIC) {
+            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
+        }
 
         for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
             if (readStatus.getChannelId().equals(channel.getId())) {
