@@ -13,9 +13,9 @@ public interface ChannelService {
     ChannelResponseDto createPublicChannel(ChannelPublicCreateRequestDto channelCreateRequestDto); //채널 생성
     ChannelResponseDto createPrivateChannel(ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto); //채널 생성
 
-    ChannelResponseDto findChannel(UUID channelId); //채널 내용 보기
+    ChannelResponseDto findById(UUID channelId); //채널 내용 보기
 
-    ChannelListResponseDto findAllByUserId(UUID userId);
+    ChannelListResponseDto findAllChannel(UUID userId);
 
     void updateChannel(UUID uuid, ChannelUpdateRequestDto channelUpdateRequestDto); //채널 수정
 

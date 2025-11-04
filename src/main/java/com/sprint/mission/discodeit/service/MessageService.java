@@ -12,11 +12,11 @@ public interface MessageService {
 
     void createMessage(MessageCreateRequestDto messageCreateRequestDto); //메시지 전송
 
-    Message getMessage(UUID uuid); //메시지 조회
+    Message findByMessage(UUID uuid); //메시지 조회
 
-    List<Message> getUserAllMessage(User users); //유저 관련 전체 메시지 조회
+    List<Message> findUserAllMessage(User users); //유저 관련 전체 메시지 조회
 
-    List<Message> getChannelAllMessage(Channel channels); // 채널 관련 전체 메시지 조회
+    List<Message> findChannelAllMessage(Channel channels); // 채널 관련 전체 메시지 조회
 
     void updateMessage(UUID uuid, String newMessage); //수정
 
