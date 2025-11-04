@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,6 +26,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ReadStatusRepository readStatusRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
+    private final ChannelRepository channelRepository;
 
     @Override
     public UUID createReadStatus(ReadStatusCreateRequestDto requestDto) {
@@ -43,12 +44,15 @@ public class BasicReadStatusService implements ReadStatusService {
             }
         }
 
+        channel.addUserId(requestDto.userId());
+
         ReadStatus readStatus = ReadStatus.builder()
                 .userId(user.getId())
                 .channelId(channel.getId())
                 .readAt(Instant.now())
                 .build();
 
+        channelRepository.save(channel);
         ReadStatus saved = readStatusRepository.save(readStatus);
         return saved.getId();
     }
