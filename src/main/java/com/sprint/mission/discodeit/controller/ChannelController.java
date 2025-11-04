@@ -54,4 +54,11 @@ public class ChannelController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @RequestMapping(value = "/{channelId}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<Void> deleteChannel(@PathVariable UUID channelId) {
+        channelService.deleteChannel(channelId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }
