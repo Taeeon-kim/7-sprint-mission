@@ -26,6 +26,10 @@ public class User extends BaseEntity {
             this.email = newEmail;
             anyUpdated = true;
         }
+        if(newUserName != null && !newUserName.equals(this.userName)){
+            this.userName = newUserName;
+            anyUpdated = true;
+        }
         if(newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)){ //프로필 변경
             this.profileImageId = newProfileImageId;
             anyUpdated = true;
