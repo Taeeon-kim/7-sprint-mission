@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
+
+    // 레파지토리 의존성 주입
+    private final UserRepository userRepository;
+
     @Override
     public void createUser(UserCreateRequestDto userCreateRequestDto) {
 
@@ -45,7 +49,6 @@ public class BasicUserService implements UserService {
     }
 
     //    // 레파지토리 의존성 주입
-//    private final UserRepository userRepository;
 //    private final BinaryContentRepository binaryContentRepository;
 //    private final UserStatusRepository userStatusRepository;
 //

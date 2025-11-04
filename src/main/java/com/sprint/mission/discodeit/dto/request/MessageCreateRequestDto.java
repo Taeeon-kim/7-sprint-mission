@@ -11,7 +11,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageCreateRequestDto {
-    private UUID senderId;
+    private UUID userId;
+    private String userName;
     private UUID channelId;
-    private String inputMsg;
+    private String channelName;
+    private String content;
 }

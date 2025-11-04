@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ChannelUpdateRequestDto {
 
-//    private UUID channelId;
+    private UUID channelId;
     private String newChannelName;
 
 }

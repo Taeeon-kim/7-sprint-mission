@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter @Setter
@@ -18,7 +19,8 @@ public class MessageResponseDto {
     private String senderNickName;
     private UUID channelId;
     private String channelName;
-    private String inputMsg;
+    private String content;
+    private List<UUID> attachmentIds;
     private Instant createAt;
     private Instant updateAt;
 }

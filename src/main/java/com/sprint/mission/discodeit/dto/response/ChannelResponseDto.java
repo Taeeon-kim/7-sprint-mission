@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.dto.response;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.User;
 import lombok.*;
 
 import java.time.Instant;
@@ -25,19 +26,17 @@ public class ChannelResponseDto {
     private String channelName;
     private ChannelType channelType;
     private Instant createAt;
-    private Instant updateAt;
-    private Instant lastMessageAt;
-    private List<UUID> participantIds;
+//    private Instant updateAt;
+//    private Instant lastMessageAt;
+//    private List<UUID> participantIds;
 
     public static ChannelResponseDto from(Channel channel) {
+        User user;
         return ChannelResponseDto.builder()
                 .channelId(channel.getUuid())
-                .channelName(channel.getChanName())
-                .participantIds(channel.getParticipantIds())
-                .channelType(channel.getType())
+                .channelName(channel.getChannelName())
+                .channelType(channel.getChannelType())
                 .createAt(channel.getCreateAt())
-                .updateAt(channel.getLastMessageAt())
-                .lastMessageAt(channel.getLastMessageAt())
                 .build();
     }
 }
