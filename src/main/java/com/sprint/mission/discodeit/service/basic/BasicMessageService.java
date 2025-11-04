@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
 import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateCommand;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -114,15 +115,15 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public void updateMessage(UUID messageId, MessageUpdateRequestDto request) {
-        if (messageId == null || request.content() == null || request.content().trim().isEmpty()) {
+    public void updateMessage(MessageUpdateCommand command) {
+        if (command.messageId() == null || command.content() == null || command.content().trim().isEmpty()) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        Message message = messageReader.findMessageOrThrow(messageId);
+        Message message = messageReader.findMessageOrThrow(command.messageId());
         boolean isUpdated = false;
-        if (!request.content().equals(message.getContent())) {
-            isUpdated = message.updateContent(request.content());
+        if (!command.content().equals(message.getContent())) {
+            isUpdated = message.updateContent(command.content());
         }
 
         if (isUpdated) {

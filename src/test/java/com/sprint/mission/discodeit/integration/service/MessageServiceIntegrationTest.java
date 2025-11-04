@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
-import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
-import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
-import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -228,10 +225,13 @@ public class MessageServiceIntegrationTest {
 
             // when
             messageService.updateMessage(
-                    message.getId(),
-                    MessageUpdateRequestDto.builder()
-                            .content("updated message")
-                            .build());
+
+                    MessageUpdateCommand.from(
+                            MessageUpdateRequestDto.builder()
+                                    .content("updated message")
+                                    .build(),
+                            message.getId()
+                    ));
 
             // then
             Message findMessage = messageRepository.findById(message.getId()).orElseThrow();
