@@ -12,8 +12,6 @@ public interface ChannelRepository {
     Channel findByChannel(UUID uuid); // 채널 보기
     
     List<Channel> findAll(); // 채널 전체 보기
-    
-    void updateChannel(UUID uuid, String newChannel); // 채널 수정
-    
+
     void deleteChannel(UUID uuid); // 채널 삭제
 }

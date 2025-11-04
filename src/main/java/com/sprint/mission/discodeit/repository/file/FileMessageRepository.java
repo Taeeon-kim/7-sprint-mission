@@ -17,18 +17,8 @@ public class FileMessageRepository implements MessageRepository {
     private static final String FILENAME
             = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\message.sav";
 
-    // 임시저장
-    private final Map<UUID, Message> messages = new LinkedHashMap<>();
-
-    //싱글톤
-    private static final FileMessageRepository INSTANCE = new FileMessageRepository();
-
     private FileMessageRepository(){
         loadMessageFromFile();
-    }
-
-    public static FileMessageRepository getInstance(){
-        return INSTANCE;
     }
 
     // 파일 갖고 오기(역직렬화)
@@ -65,9 +55,12 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
+    // 임시저장
+    private final Map<UUID, Message> messages = new LinkedHashMap<>();
+
     @Override
     public void save(Message message) {
-        messages.put(message.getUuid()  , message);
+        messages.put(message.getUuid(), message);
         saveMessageToFile();
     }
 
@@ -77,33 +70,33 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<Message> findUserAll(User userId) {
+    public List<Message> findUserAll(User user) {
         return messages.values().stream()
-                .filter(m->m.getSenderId().equals(userId.getUuid()))
-                .sorted(Comparator.comparing(Message::getCreateAt))
+                .filter(m->m.getUserId().equals(user.getUserId()))
                 .collect(Collectors.toList());
     }
-
-    public List<Message> findChannelAll(Channel channelId) {
-        return messages.values().stream()
-                .filter(m->m.getChannelId().equals(channelId.getUuid()))
-                .sorted(Comparator.comparing(Message::getCreateAt))
-                .collect(Collectors.toList());
-    }
-
 
     @Override
-    public void updateMessage(UUID uuid, String newMessage) {
-        Message m = messages.get(uuid);
-        if( m != null){
-            m.setInputMsg(newMessage);
-            saveMessageToFile();
-        }
+    public List<Message> findChannelAll(Channel channel) {
+        return messages.values().stream()
+                .filter(m->m.getChannelId().equals(channel.getUuid()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteMessage(UUID uuid) {
+        Message message = messages.get(uuid);
         messages.remove(uuid);
         saveMessageToFile();
     }
+
+//    @Override
+//    public void updateMessage(UUID uuid, String newMessage) {
+//        Message m = messages.get(uuid);
+//        if( m != null){
+//            m.setInputMsg(newMessage);
+//            saveMessageToFile();
+//        }
+//    }
+
 }

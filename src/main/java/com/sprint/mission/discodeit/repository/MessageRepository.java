@@ -17,8 +17,6 @@ public interface MessageRepository {
 
     List<Message> findChannelAll(Channel channel); // 채널관련 메시지 전체조회
 
-    void updateMessage(UUID uuid, String newMessage); // 메시지 수정
-
     void deleteMessage(UUID uuid); // 메시지 삭제
 
 }

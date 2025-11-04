@@ -19,7 +19,7 @@ public class JCFUserRepository implements UserRepository {
 
     @Override
     public void save(User user) {
-        users.put(user.getUuid(), user);
+        users.put(user.getUuid(),  user);
     }
 
     @Override
@@ -33,19 +33,19 @@ public class JCFUserRepository implements UserRepository {
     }
 
     @Override
-    public void updateNickName(UUID uuid, String newName) {
-        User u = users.get(uuid);
-        if(u != null) u.setNickName(newName);
-    }
-
-    @Override
-    public void updatePassword(UUID uuid, String newPassword) {
-        User u = users.get(uuid);
-        if(u != null) u.setUserPassword(newPassword);
-    }
-
-    @Override
     public void delete(UUID uuid) {
         users.remove(uuid);
     }
+
+//    @Override
+//    public void updateNickName(UUID uuid, String newName) {
+//        User u = users.get(uuid);
+//        if(u != null) u.setNickName(newName);
+//    }
+//
+//    @Override
+//    public void updatePassword(UUID uuid, String newPassword) {
+//        User u = users.get(uuid);
+//        if(u != null) u.setUserPassword(newPassword);
+//    }
 }
