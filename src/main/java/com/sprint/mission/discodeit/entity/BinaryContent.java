@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -11,22 +12,15 @@ import java.util.UUID;
  * 수정 불가능한 도메인 모델로 간주함, 따라서 updateAt필드는 정의하지 않음
  * User, Message 도메인 모델과의 의존 관계 방향성을 고려해 id 참조 필드 추가
  */
-@Getter @Setter @ToString
+@Getter @ToString
+@AllArgsConstructor
 public class BinaryContent {
 
-    private final UUID uuid;
-    private final Instant createdAt; // 생성 시간
-    private final UUID userId; // 유저 프로필
-    private final UUID messageId; // 메시지 첨부 파일
-    private String filePath; // 파일 이름
-    private String contentType; // 이미지 타입
+    private UUID uuid;
+    private Instant createAt;
 
-    public BinaryContent(UUID userId, UUID messageId, String filePath, String contentType) {
-        this.uuid = UUID.randomUUID();
-        this.createdAt = Instant.now();
-        this.userId = userId;
-        this.messageId = messageId;
-        this.filePath = filePath;
-        this.contentType = contentType;
-    }
+    private String fileName; //첨부파일 이름
+    private String contentType; //파일 타입
+    private byte[] bytes; //파일 내 실제 데이터
+
 }
