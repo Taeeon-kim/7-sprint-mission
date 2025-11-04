@@ -37,9 +37,9 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public UUID createChannel(UUID userId, ChannelCreateCommand command) {
+    public UUID createChannel(ChannelCreateCommand command) {
 
-        User creator = userReader.findUserOrThrow(userId);
+        User creator = userReader.findUserOrThrow(command.userId());
 
         Channel channel = switch (command.type()) {
             case PUBLIC -> {

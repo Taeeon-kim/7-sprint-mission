@@ -14,7 +14,7 @@ public interface ChannelService {
 
     // 채널 생성
     UUID createChannel(
-            UUID createdByUserId,  ChannelCreateCommand createCommand
+            ChannelCreateCommand createCommand
     );
 
     // 채널 수정 -> 어차피 DB없으니 넘겨주는 값보고 같은지 비교후 다르면 해당 부분수정(그래야 "" 이런것도 지운걸로 인식할테니)

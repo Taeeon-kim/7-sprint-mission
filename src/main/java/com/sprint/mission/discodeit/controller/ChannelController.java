@@ -27,7 +27,7 @@ public class ChannelController {
     public ResponseEntity<UUID> createChannel(@RequestBody ChannelCreateRequestDto request) {
         UUID createdBy = request.userId();
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request);
-        UUID channelId = channelService.createChannel(createdBy, cmd);
+        UUID channelId = channelService.createChannel(cmd);
         return ResponseEntity.created(URI.create("/api/channels/" + channelId)).body(channelId);
     }
 
@@ -62,5 +62,5 @@ public class ChannelController {
         channelService.deleteChannel(channelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    
+
 }

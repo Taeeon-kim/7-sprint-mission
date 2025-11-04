@@ -89,7 +89,7 @@ public class ChannelIServicentegrationTest {
             int beforeReadStatusSize = readStatusRepository.findAll().size();
 
             // when
-            channelService.createChannel(creator.getId(), cmd);
+            channelService.createChannel(cmd);
 
             // then
             int afterChannelSize = channelRepository.findAll().size();
@@ -120,7 +120,7 @@ public class ChannelIServicentegrationTest {
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(creator.getId(), " ", null, ChannelType.PUBLIC, null);
             ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto);
             assertThrows(IllegalArgumentException.class,
-                    () -> channelService.createChannel(creator.getId(), cmd));
+                    () -> channelService.createChannel(cmd));
         }
 
         @Test
@@ -147,7 +147,7 @@ public class ChannelIServicentegrationTest {
             int beforeReadStatusSize = readStatusRepository.findAll().size();
 
             // when
-            channelService.createChannel(creator.getId(), cmd);
+            channelService.createChannel(cmd);
 
             // then
             int afterChannelSize = channelRepository.findAll().size();
@@ -195,7 +195,7 @@ public class ChannelIServicentegrationTest {
             ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto);
 
             assertThrows(NoSuchElementException.class,
-                    () -> channelService.createChannel(creator.getId(), cmd)); // userReader.findUserOrThrow(memberId)에서 터짐
+                    () -> channelService.createChannel(cmd)); // userReader.findUserOrThrow(memberId)에서 터짐
         }
 
     }
@@ -586,6 +586,7 @@ public class ChannelIServicentegrationTest {
                             .password("pssssw").role(RoleType.USER).phoneNumber("010-3333-4444").build()
             );
             ChannelCreateRequestDto dto = ChannelCreateRequestDto.builder()
+                    .userId(creator.getId())
                     .title("private")
                     .description("private")
                     .type(ChannelType.PRIVATE)
@@ -594,7 +595,7 @@ public class ChannelIServicentegrationTest {
 
             ChannelCreateCommand cmd = ChannelCreateCommand.from(dto);
 
-            channelService.createChannel(creator.getId(), cmd); // TODO: 추후 service 의존도 빼고 repository로 만들것
+            channelService.createChannel(cmd); // TODO: 추후 service 의존도 빼고 repository로 만들것
 
             // 방금 생긴 채널 식별 (가장 최근/사이즈 차이로 추적)
             List<Channel> afterCreate = channelRepository.findAll();

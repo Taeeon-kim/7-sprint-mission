@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
 import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
@@ -104,12 +105,7 @@ public class MessageServiceIntegrationTest {
 
             // When
             UUID messageId = messageService.sendMessageToChannel(
-                    MessageSendRequestDto.builder()
-                            .channelId(publicChannel.getId())
-                            .senderId(sender.getId())
-                            .content("message")
-                            .binaryFileIds(List.of(savedBinaryContent.getId()))
-                            .build()
+                    new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(savedBinaryContent.getId()))
             );
 
 

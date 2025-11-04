@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
+import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
 import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -66,23 +66,23 @@ public class BasicMessageService implements MessageService {
     }
 
 
-    public UUID sendMessageToChannel(MessageSendRequestDto request) {
-        if (request.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+    public UUID sendMessageToChannel(MessageSendCommand command) {
+        if (command.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
-        User sender = userReader.findUserOrThrow(request.senderId());
+        User sender = userReader.findUserOrThrow(command.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
-        Channel channel = channelReader.findChannelOrThrow(request.channelId());
+        Channel channel = channelReader.findChannelOrThrow(command.channelId());
         boolean isMember = channel.isMember(sender.getId());
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
         Message message = Message.builder()
-                .content(request.content())
+                .content(command.content())
                 .senderId(sender.getId())
                 .channelId(channel.getId())
-                .attachmentIds(request.binaryFileIds())
+                .attachmentIds(command.binaryFileIds())
                 .build();
 
         channel.addMessageId(message.getId());

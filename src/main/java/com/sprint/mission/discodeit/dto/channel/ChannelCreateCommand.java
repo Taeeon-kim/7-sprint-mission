@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record ChannelCreateCommand(
+        UUID userId,
         String title,
         String description,
         ChannelType type,
@@ -14,6 +15,7 @@ public record ChannelCreateCommand(
 
     public static ChannelCreateCommand from(ChannelCreateRequestDto requestDto) {
         return new ChannelCreateCommand(
+                requestDto.userId(),
                 requestDto.title(),
                 requestDto.description(),
                 requestDto.type(),
