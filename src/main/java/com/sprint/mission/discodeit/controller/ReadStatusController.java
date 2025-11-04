@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,13 @@ public class ReadStatusController {
     ) {
         UUID readStatusId = readStatusService.createReadStatus(request);
         return ResponseEntity.ok(readStatusId);
+    }
+
+    @RequestMapping(value = "/{readStatusId}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<ReadStatusResponseDto> getReadStatus(@PathVariable UUID readStatusId) {
+        ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
+        return ResponseEntity.ok(readStatus);
     }
 
 
