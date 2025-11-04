@@ -5,32 +5,34 @@ import lombok.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter @Setter @ToString
-//@NoArgsConstructor
+@Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
 
-    //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
-    private final String userId;  //아이디 string
-    private final String email; // 이메일
-    private String userPassword;    //비밀번호 string 수정가능
-    private String nickName;    //닉네임 = 사용자명 string, 수정가능
-    private UUID profileImageId; // 변경 가능
-    private UserStatus userStatus;
+    private String userId; //가입 Id
+    private String password; //비밀번호
+    private String email; //이메일
+    private String userName; //유저 이름
+    private UUID profileImageId; //프로필
 
-    public void setUserPassword(String userPassword) {
-        this.userPassword = userPassword;
-        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
-    }
+    public void setUpdate(String newPassword, String newEmail, String newUserName, UUID newProfileImageId) {
+        boolean anyUpdated = false;
+        if (newPassword != null && !newPassword.equals(this.password)) { //비밀번호 변경
+            this.password = newPassword;
+            anyUpdated = true;
+        }
+        if(newEmail != null && !newEmail.equals(this.email)){ //이메일 변경
+            this.email = newEmail;
+            anyUpdated = true;
+        }
+        if(newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)){ //프로필 변경
+            this.profileImageId = newProfileImageId;
+            anyUpdated = true;
+        }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
-    }
-
-    // 프로필 이미지 교체
-    public void setProfileImage(UUID profileImageId) {
-        this.profileImageId = profileImageId;
-        setUpdatedAt(Instant.now());
+        if(anyUpdated){ //변경 후 시간업데이트
+            setUpdatedAt(Instant.now());
+        }
     }
 }
