@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -77,14 +78,14 @@ public class BinaryContentServiceIntegrationTest {
             BinaryContent saved = binaryContentRepository.save(updateContent);
 
             // when
-            BinaryContent binaryContent = binaryContentService.getBinaryContent(saved.getId());
+            BinaryContentResponseDto responseDtos = binaryContentService.getBinaryContent(saved.getId());
 
             // then
-            assertEquals(saved.getId(), binaryContent.getId());
-            assertEquals(saved.getFileName(), binaryContent.getFileName());
-            assertEquals(saved.getContentType(), binaryContent.getContentType());
+            assertEquals(saved.getId(), responseDtos.id());
+            assertEquals(saved.getFileName(), responseDtos.fileName());
+            assertEquals(saved.getContentType(), responseDtos.contentType());
 
-            assertArrayEquals(saved.getBytes(), binaryContent.getBytes()); // 내용비교를 위해 순회하면 하나씩 비교, 원소 수, 순서, 값 모두 같으면 통과
+            assertArrayEquals(saved.getBytes(), responseDtos.bytes()); // 내용비교를 위해 순회하면 하나씩 비교, 원소 수, 순서, 값 모두 같으면 통과
         }
 
         @Test
@@ -112,18 +113,18 @@ public class BinaryContentServiceIntegrationTest {
             BinaryContent saved2 = binaryContentRepository.save(updateContent2);
 
             // when
-            List<BinaryContent> binaryContentsByIds = binaryContentService.getBinaryContentsByIds(List.of(saved.getId(), saved2.getId()));
+            List<BinaryContentResponseDto> responseDtos = binaryContentService.getBinaryContentsByIds(List.of(saved.getId(), saved2.getId()));
 
             // then
 
             assertAll(
-                    () -> assertEquals(2, binaryContentsByIds.size()),
-                    () -> assertEquals(saved.getId(), binaryContentsByIds.get(0).getId()),
-                    () -> assertEquals(saved2.getId(), binaryContentsByIds.get(1).getId()),
-                    () -> assertEquals(saved.getFileName(), binaryContentsByIds.get(0).getFileName()),
-                    () -> assertEquals(saved2.getFileName(), binaryContentsByIds.get(1).getFileName()),
-                    () -> assertEquals(saved.getContentType(), binaryContentsByIds.get(0).getContentType()),
-                    () -> assertEquals(saved2.getContentType(), binaryContentsByIds.get(1).getContentType())
+                    () -> assertEquals(2, responseDtos.size()),
+                    () -> assertEquals(saved.getId(), responseDtos.get(0).id()),
+                    () -> assertEquals(saved2.getId(), responseDtos.get(1).id()),
+                    () -> assertEquals(saved.getFileName(), responseDtos.get(0).fileName()),
+                    () -> assertEquals(saved2.getFileName(), responseDtos.get(1).fileName()),
+                    () -> assertEquals(saved.getContentType(), responseDtos.get(0).contentType()),
+                    () -> assertEquals(saved2.getContentType(), responseDtos.get(1).contentType())
             );
 
         }
@@ -136,10 +137,10 @@ public class BinaryContentServiceIntegrationTest {
             List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
 
             // when
-            List<BinaryContent> binaryContentsByIds = binaryContentService.getBinaryContentsByIds(ids);
+            List<BinaryContentResponseDto> responseDtos = binaryContentService.getBinaryContentsByIds(ids);
 
             // then
-            assertTrue(binaryContentsByIds.isEmpty());
+            assertTrue(responseDtos.isEmpty());
         }
     }
 
