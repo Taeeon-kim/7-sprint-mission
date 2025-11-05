@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.type.RoleType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -18,6 +19,8 @@ public class UserResponseDto {
     private String phoneNumber;
     private UUID profileId;
     UserActiveStatus isOnline;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public static UserResponseDto from(User user, UserActiveStatus userStatus) {
         return UserResponseDto.builder()

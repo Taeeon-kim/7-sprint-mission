@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -131,12 +128,12 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public List<UserResponseDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
 
         List<User> all = userRepository.findAll();
 
         return all.stream().map(
-                user -> UserResponseDto.from(
+                user -> UserDto.from(
                         user,
                         userStatusRepository.findByUserId(user.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다.")) // TODO:  N+1 문제 발생, DB 없을때도 이런방식으로 해야되나? 별도 보조인덱스 Map 없는이상 일단 유지, 추후 N+1 개선 신경쓸것
                         .getUserStatus())
