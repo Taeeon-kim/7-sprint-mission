@@ -30,10 +30,15 @@ public class BinaryContentController {
     @RequestMapping(value = "/binary-contents", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
-            @RequestParam List<UUID> ids
+            @RequestParam(required = false) List<UUID> ids
     ) {
-        List<BinaryContentResponseDto> binaryContentsByIds = binaryContentService.getBinaryContentsByIds(ids);
-        return ResponseEntity.ok(binaryContentsByIds);
+        List<BinaryContentResponseDto> binaryContents;
+        if (ids== null || ids.isEmpty()) {
+            binaryContents = binaryContentService.getAllBinaryContents();
+        } else {
+            binaryContents = binaryContentService.getBinaryContentsByIds(ids);
+        }
+        return ResponseEntity.ok(binaryContents);
     }
 
     @RequestMapping(value = "/binary-contents", method = RequestMethod.POST, consumes = "multipart/form-data")
@@ -45,5 +50,4 @@ public class BinaryContentController {
         UUID binaryId = binaryContentService.uploadBinaryContent(fileCommand);
         return ResponseEntity.ok(binaryId);
     }
-
 }

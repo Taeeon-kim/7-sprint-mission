@@ -51,4 +51,12 @@ public class BasicBinaryContentService implements BinaryContentService {
         }
         binaryContentRepository.deleteById(id);
     }
+
+    @Override
+    public List<BinaryContentResponseDto> getAllBinaryContents() {
+        List<BinaryContent> all = binaryContentRepository.findAll();
+        return all.stream()
+                .map(BinaryContentResponseDto::from)
+                .toList();
+    }
 }
