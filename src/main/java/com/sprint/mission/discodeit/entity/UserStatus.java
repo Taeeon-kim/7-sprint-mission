@@ -26,6 +26,16 @@ public class UserStatus{
     private Instant lastActiveAt; //마지막 접속시간
     private StatusType status; //Online, Offline 표시
 
+
+    public UserStatus(UUID userId) {
+        this.uuid = UUID.randomUUID();
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+        this.userId = userId;
+        this.lastActiveAt = null;
+        this.status = StatusType.ONLINE;
+    }
+
     private void updateStatus() {
         this.status = isOnline() ? StatusType.ONLINE : StatusType.OFFLINE;
     }

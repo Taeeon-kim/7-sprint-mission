@@ -7,7 +7,6 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class User extends BaseEntity {
 
     private String userId; //가입 Id
@@ -15,6 +14,15 @@ public class User extends BaseEntity {
     private String email; //이메일
     private String userName; //유저 이름
     private UUID profileImageId; //프로필
+
+    public User(String userId, String password, String email, String userName, UUID profileImageId) {
+        super();
+        this.userId = userId;
+        this.password = password;
+        this.email = email;
+        this.userName = userName;
+        this.profileImageId = profileImageId;
+    }
 
     public void setPassword(String newPassword) {
         if (newPassword != null && !newPassword.equals(this.password)) { //비밀번호 변경
