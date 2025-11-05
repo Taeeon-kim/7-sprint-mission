@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MessageServiceIntegrationTest {
 
-    private InMemoryStore store;
     private MessageRepository messageRepository;
     private ChannelRepository channelRepository;
     private UserRepository userRepository;
@@ -47,7 +46,6 @@ public class MessageServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        store = new InMemoryStore();
         messageRepository = new JCFMessageRepository();
         channelRepository = new JCFChannelRepository();
         userRepository = new JCFUserRepository();

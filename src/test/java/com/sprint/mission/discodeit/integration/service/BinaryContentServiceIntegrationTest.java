@@ -19,7 +19,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryContentServiceIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
     private BinaryContentRepository binaryContentRepository;
     private BinaryContentService binaryContentService;
 
@@ -32,7 +31,6 @@ public class BinaryContentServiceIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        store.binaryContents.clear();
     }
 
     @Nested

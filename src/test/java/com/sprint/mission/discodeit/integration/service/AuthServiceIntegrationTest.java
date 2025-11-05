@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthServiceIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
+
     private UserRepository userRepository;
     private AuthService authService;
     private UserStatusRepository userStatusRepository;
@@ -34,7 +34,7 @@ public class AuthServiceIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        store.users.clear();
+
     }
 
     @Nested
