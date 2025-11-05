@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.dto.response;
 
-import com.sprint.mission.discodeit.entity.StatusType;
 import com.sprint.mission.discodeit.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
