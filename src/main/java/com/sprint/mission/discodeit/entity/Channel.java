@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Getter @ToString
-@AllArgsConstructor
+@Getter
+@ToString
 public class Channel extends BaseEntity {
     //채널 id, 생성, 수정은 BaseEntity에
 
     private String channelName;
     private ChannelType channelType;
+    private List<UUID> participantIds = new ArrayList<>();
 
     public void setUpdate(String newChannelName) {
         if(newChannelName != null && !newChannelName.equals(this.channelName)){
@@ -23,7 +24,23 @@ public class Channel extends BaseEntity {
             setUpdatedAt(Instant.now());
         }
     }
-//    private List<UUID> participantIds; //PRIVATE 채널 참여자 목록
+
+    //PUBLIC
+    public Channel(String channelName, ChannelType channelType) {
+        super();
+        this.channelName = channelName;
+        this.channelType = channelType;
+    }
+
+    public Channel(List<UUID> participantIds, ChannelType channelType) {
+        super();
+        this.participantIds = participantIds;
+        this.channelType = channelType;
+        this.channelName = null;
+    }
+
+
+    //    private List<UUID> participantIds; //PRIVATE 채널 참여자 목록
 //    private Instant lastMessageAt; //최근 메시지 시간 캐시
 //
 

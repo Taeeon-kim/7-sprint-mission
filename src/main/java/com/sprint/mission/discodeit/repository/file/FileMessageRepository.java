@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,22 +66,31 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public Message findByMessage(UUID uuid) {
-        return messages.get(uuid);
+    public Optional<Message> findByMessage(UUID uuid) {
+        return Optional.empty();
     }
 
     @Override
-    public List<Message> findUserAll(User user) {
-        return messages.values().stream()
-                .filter(m->m.getUserId().equals(user.getUserId()))
-                .collect(Collectors.toList());
+    public List<Message> findAll() {
+        return List.of();
     }
 
     @Override
-    public List<Message> findChannelAll(Channel channel) {
+    public List<Message> findAllByChannelId(Channel channel) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Instant> findLastByChannel(UUID channelId) {
         return messages.values().stream()
-                .filter(m->m.getChannelId().equals(channel.getUuid()))
-                .collect(Collectors.toList());
+                .filter(m->m.getChannelId().equals(channelId))
+                .map(Message::getCreateAt)
+                .max(Comparator.naturalOrder());
+    }
+
+    @Override
+    public void deleteAllByChannelId(UUID channelId) {
+
     }
 
     @Override
@@ -89,6 +99,26 @@ public class FileMessageRepository implements MessageRepository {
         messages.remove(uuid);
         saveMessageToFile();
     }
+
+//    @Override
+//    public Message findByMessage(UUID uuid) {
+//        return messages.get(uuid);
+//    }
+//
+//    @Override
+//    public List<Message> findUserAll(User user) {
+//        return messages.values().stream()
+//                .filter(m->m.getUserId().equals(user.getUserId()))
+//                .collect(Collectors.toList());
+//    }
+//
+//    @Override
+//    public List<Message> findChannelAll(Channel channel) {
+//        return messages.values().stream()
+//                .filter(m->m.getChannelId().equals(channel.getUuid()))
+//                .collect(Collectors.toList());
+//    }
+
 
 //    @Override
 //    public void updateMessage(UUID uuid, String newMessage) {

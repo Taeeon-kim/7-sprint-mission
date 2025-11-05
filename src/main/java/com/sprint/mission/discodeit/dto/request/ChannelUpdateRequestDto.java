@@ -10,8 +10,8 @@ import java.util.UUID;
 /**
  * 채널 수정 요청 DTO, PRIAVTE는 서비스에서 예외 처리(수정 불가)
  */
-@Getter @Setter
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 public class ChannelUpdateRequestDto {
 

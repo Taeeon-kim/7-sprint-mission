@@ -17,7 +17,6 @@ import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
  * participantIds : PRIVATE 채널인 경우에만 포함
  */
 @Getter
-//@AllArgsConstructor
 @ToString
 @Builder
 public class ChannelResponseDto {
@@ -26,17 +25,19 @@ public class ChannelResponseDto {
     private String channelName;
     private ChannelType channelType;
     private Instant createAt;
-//    private Instant updateAt;
-//    private Instant lastMessageAt;
-//    private List<UUID> participantIds;
+    private Instant updateAt;
+    private Instant lastMessageAt;
+    private List<UUID> participantIds;
 
-    public static ChannelResponseDto from(Channel channel) {
-        User user;
+    public static ChannelResponseDto from(Channel channel, Instant lastMessageAt, List<UUID> participantIds) {
         return ChannelResponseDto.builder()
                 .channelId(channel.getUuid())
                 .channelName(channel.getChannelName())
                 .channelType(channel.getChannelType())
                 .createAt(channel.getCreateAt())
+                .updateAt(channel.getUpdatedAt())
+                .lastMessageAt(lastMessageAt)
+                .participantIds(participantIds)
                 .build();
     }
 }

@@ -38,9 +38,9 @@ public class DiscodeitApplication {
         authService.runAuthTest();
         channelService.runChannelTest();
 //        Channel[] channels = channelService.runChannelService();
-        List<User> readUsers = userService.getReadUsers();
-        List<Channel> readChannel = channelService.getReadChannel();
-        messageService.runMessageService(readUsers.toArray(new User[0]), readChannel.toArray(new Channel[0]));
+//        List<User> readUsers = userService.getReadUsers();
+//        List<Channel> readChannel = channelService.getReadChannel();
+//        messageService.runMessageService(readUsers.toArray(new User[0]), readChannel.toArray(new Channel[0]));
     }
 
 }
