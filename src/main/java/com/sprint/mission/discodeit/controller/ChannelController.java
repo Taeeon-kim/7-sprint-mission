@@ -8,14 +8,13 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class ChannelController {
@@ -23,7 +22,6 @@ public class ChannelController {
     private final ChannelService channelService;
 
     @RequestMapping(value = "/channels", method = RequestMethod.GET)
-    @ResponseBody
     public ResponseEntity<List<ChannelResponseDto>> getAllChannels(@RequestParam(required = false) UUID userId) {
         List<ChannelResponseDto> channels = (userId == null) ?
                 channelService.getAllChannels() :
@@ -32,7 +30,6 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/channels", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseEntity<UUID> createChannel(@RequestBody ChannelCreateRequestDto request) {
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request);
         UUID channelId = channelService.createChannel(cmd);
@@ -40,7 +37,6 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/channels/{channelId}", method = RequestMethod.GET)
-    @ResponseBody
     public ResponseEntity<ChannelResponseDto> getChannel(@PathVariable UUID channelId) {
         ChannelResponseDto response = channelService.getChannel(channelId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -48,7 +44,6 @@ public class ChannelController {
 
 
     @RequestMapping(value = "/channels/{channelId}", method = RequestMethod.PATCH)
-    @ResponseBody
     public ResponseEntity<Void> updateChannel(
             @PathVariable UUID channelId,
             @RequestBody ChannelUpdateRequestDto request) {
@@ -57,7 +52,6 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/channels/{channelId}", method = RequestMethod.DELETE)
-    @ResponseBody
     public ResponseEntity<Void> deleteChannel(@PathVariable UUID channelId) {
         channelService.deleteChannel(channelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

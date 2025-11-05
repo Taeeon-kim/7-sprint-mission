@@ -5,12 +5,11 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserStatusController {
@@ -18,7 +17,6 @@ public class UserStatusController {
     private final UserStatusService userStatusService;
 
     @RequestMapping(value = "/user-statuses{statusId}", method = RequestMethod.PUT)
-    @ResponseBody
     public ResponseEntity<Void> updateUserStatus(
             @PathVariable UUID statusId,
             @RequestBody UserStatusUpdateRequestDto requestDto
@@ -28,7 +26,6 @@ public class UserStatusController {
     }
 
     @RequestMapping(value = "/users/{userId}/user-statuses", method = RequestMethod.PATCH)
-    @ResponseBody
     public ResponseEntity<Void> updateUserStatusByUserId(
             @PathVariable UUID userId,
             @RequestBody UserStatusUpdateRequestDto requestDto

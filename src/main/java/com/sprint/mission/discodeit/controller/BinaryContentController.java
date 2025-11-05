@@ -5,14 +5,13 @@ import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class BinaryContentController {
@@ -28,7 +27,6 @@ public class BinaryContentController {
     }
 
     @RequestMapping(value = "/binary-contents", method = RequestMethod.GET)
-    @ResponseBody
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
             @RequestParam(required = false) List<UUID> ids
     ) {
@@ -42,7 +40,6 @@ public class BinaryContentController {
     }
 
     @RequestMapping(value = "/binary-contents", method = RequestMethod.POST, consumes = "multipart/form-data")
-    @ResponseBody
     public ResponseEntity<UUID> createBinaryContent(
             @RequestBody MultipartFile file
     ) {
