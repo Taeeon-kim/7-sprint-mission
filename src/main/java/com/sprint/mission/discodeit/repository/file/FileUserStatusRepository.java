@@ -40,9 +40,6 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
     @Override
     public void delete(UUID uuid) {
-        UserStatus removed = statusMap.remove(uuid);
-        if (removed != null) {
-            System.out.println("[상태 삭제] : " + removed.getStatus());
-        }
+        statusMap.remove(uuid);
     }
 }

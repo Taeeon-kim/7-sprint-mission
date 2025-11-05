@@ -12,7 +12,7 @@ public class FileUserRepository implements UserRepository {
 
     // 파일 저장 경로
     private static final String FILENAME
-            = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\users.sav";
+            = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\users.sav";
 
     private FileUserRepository(){
         loadUserFromFile();
@@ -62,6 +62,13 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
+    public User findById(String userId) {
+        return users.values().stream()
+                .filter(u -> u.getUserId().equals(userId))
+                .findFirst().orElse(null);
+    }
+
+    @Override
     public User findById(UUID uuid) {
         return users.get(uuid);
     }
@@ -77,28 +84,4 @@ public class FileUserRepository implements UserRepository {
         users.remove(uuid);
         saveUserToFile();
     }
-
-
-//    @Override
-//    public List<User> findAll() {
-//        return new ArrayList<>(users.values());
-//    }
-//
-//    @Override
-//    public void updateNickName(UUID uuid, String newName) {
-//        User u = users.get(uuid);
-//        if( u != null ){
-//            u.setNickName(newName);
-//            saveUserToFile();
-//        }
-//    }
-//
-//    @Override
-//    public void updatePassword(UUID uuid, String newPassword) {
-//        User u = users.get(uuid);
-//        if( u != null){
-//            u.setUserPassword(newPassword);
-//            saveUserToFile();
-//        }
-//    }
 }

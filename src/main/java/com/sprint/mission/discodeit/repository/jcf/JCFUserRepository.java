@@ -23,6 +23,11 @@ public class JCFUserRepository implements UserRepository {
     }
 
     @Override
+    public User findById(String userId) {
+        return users.get(userId);
+    }
+
+    @Override
     public User findById(UUID uuid) {
         return users.get(uuid);
     }
@@ -36,16 +41,4 @@ public class JCFUserRepository implements UserRepository {
     public void delete(UUID uuid) {
         users.remove(uuid);
     }
-
-//    @Override
-//    public void updateNickName(UUID uuid, String newName) {
-//        User u = users.get(uuid);
-//        if(u != null) u.setNickName(newName);
-//    }
-//
-//    @Override
-//    public void updatePassword(UUID uuid, String newPassword) {
-//        User u = users.get(uuid);
-//        if(u != null) u.setUserPassword(newPassword);
-//    }
 }
