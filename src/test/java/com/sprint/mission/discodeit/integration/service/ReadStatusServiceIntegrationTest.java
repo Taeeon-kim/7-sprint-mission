@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -44,7 +45,7 @@ public class ReadStatusServiceIntegrationTest {
         readStatusRepository = new JCFReadStatusRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
-        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader);
+        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader, channelRepository);
     }
 
     @AfterEach
@@ -66,7 +67,6 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
             channelRepository.save(channel);
             int before = readStatusRepository.findAll().size();
 
@@ -102,7 +102,6 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
             channelRepository.save(channel);
 
 
@@ -155,7 +154,6 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
             Channel savedChannel = channelRepository.save(channel);
 
             Channel channel2 = Channel.createPrivateChannel(creator.getId());
@@ -229,7 +227,7 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
+
             Channel savedChannel = channelRepository.save(channel);
 
             UUID readStatusId = readStatusService.createReadStatus(
@@ -241,15 +239,15 @@ public class ReadStatusServiceIntegrationTest {
             // when
             Instant expectedReadAt = Instant.ofEpochMilli(1000L);
             readStatusService.updateReadStatus(
-                    readStatusId,
-                    ReadStatusUpdateRequestDto.builder()
-                            .readAt(expectedReadAt)
-                            .build()
+                    ReadStatusUpdateCommand.from(readStatusId,
+                            ReadStatusUpdateRequestDto.builder()
+                                    .readAt(expectedReadAt)
+                                    .build())
             );
 
             // then
             Instant readAt = readStatusRepository.findById(readStatusId).orElseThrow().getReadAt();
-              assertEquals(expectedReadAt, readAt);
+            assertEquals(expectedReadAt, readAt);
 
         }
         //TODO: 예외 추가(isBofre 이아닌 미래값)
@@ -275,7 +273,7 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
+
             Channel savedChannel = channelRepository.save(channel);
 
             UUID readStatusId = readStatusService.createReadStatus(

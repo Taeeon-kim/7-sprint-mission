@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -34,7 +35,6 @@ public class BasicReadStatusService implements ReadStatusService {
         if (requestDto.userId() == null || requestDto.channelId() == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-
 
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
@@ -77,10 +77,10 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     @Override
-    public void updateReadStatus(UUID id, ReadStatusUpdateRequestDto requestDto) {
-        ReadStatus readStatusById = readStatusRepository.findById(id).orElseThrow();
+    public void updateReadStatus(ReadStatusUpdateCommand command) {
+        ReadStatus readStatusById = readStatusRepository.findById(command.id()).orElseThrow();
 
-        boolean isUpdated = readStatusById.updateReadAt(requestDto.readAt());
+        boolean isUpdated = readStatusById.updateReadAt(command.readAt());
         if (isUpdated) {
             readStatusRepository.save(readStatusById);
         }

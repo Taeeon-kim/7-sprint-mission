@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.message.MessageUpdateCommand;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,21 +8,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/api/messages")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class MessageController {
 
     private final MessageService messageService;
 
-    @RequestMapping("/{messageId}")
+    @RequestMapping("/messages/{messageId}")
     public void getMessageById() {
 
     }
 
-    @RequestMapping(value = "/{messageId}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/messages/{messageId}", method = RequestMethod.PATCH)
     @ResponseBody
     public ResponseEntity<Void> updateMessage(@PathVariable UUID messageId, @RequestBody MessageUpdateRequestDto request) {
         MessageUpdateCommand command = MessageUpdateCommand.from(request, messageId);
@@ -31,10 +31,32 @@ public class MessageController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @RequestMapping(value = "/{messageId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/messages/{messageId}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<Void> deleteMessage(@PathVariable UUID messageId) {
         messageService.deleteMessage(messageId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
+    @RequestMapping(value = "/channels/{channelId}/messages", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<UUID> sendMessageByChannelId(
+            @PathVariable UUID channelId,
+            @RequestBody MessageSendRequestDto request
+    ) {
+        MessageSendCommand cmd = MessageSendCommand.from(request, channelId);
+        UUID messageId = messageService.sendMessageToChannel(cmd);
+        return ResponseEntity.ok(messageId);
+    }
+
+
+    @RequestMapping(value = "/channels/{channelId}/messages", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(
+            @PathVariable UUID channelId
+    ) {
+        List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId);
+        return ResponseEntity.ok(allMessagesByChannelId);
     }
 }
