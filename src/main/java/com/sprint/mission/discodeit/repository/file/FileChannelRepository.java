@@ -62,8 +62,8 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public Channel findByChannel(UUID uuid) {
-        return channels.get(uuid);
+    public Optional<Channel> findByChannel(UUID uuid) {
+        return Optional.ofNullable(channels.get(uuid));
     }
 
     @Override
@@ -73,18 +73,7 @@ public class FileChannelRepository implements ChannelRepository {
 
     @Override
     public void deleteChannel(UUID uuid) {
-        Channel channel = channels.get(uuid);
         channels.remove(uuid);
         saveChannelToFile();
     }
-
-//    @Override
-//    public void updateChannel(UUID uuid, String newChannel) {
-//        Channel ch = channels.get(uuid);
-//        if(ch != null){
-//            ch.setChanName(newChannel);
-//            saveChannelToFile();
-//        }
-//    }
-//
 }

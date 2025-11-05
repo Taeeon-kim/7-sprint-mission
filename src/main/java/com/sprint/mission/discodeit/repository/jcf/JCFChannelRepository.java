@@ -23,8 +23,8 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public Channel findByChannel(UUID uuid) {
-        return channels.get(uuid);
+    public Optional<Channel> findByChannel(UUID uuid) {
+        return Optional.ofNullable(channels.get(uuid));
     }
 
     @Override
