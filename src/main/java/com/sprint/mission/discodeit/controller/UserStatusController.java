@@ -11,19 +11,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/api/user-statuses")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserStatusController {
 
     private final UserStatusService userStatusService;
 
-    @RequestMapping(value = "/{statusId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/user-statuses{statusId}", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<Void> updateUserStatus(
             @PathVariable UUID statusId,
             @RequestBody UserStatusUpdateRequestDto requestDto
     ) {
         userStatusService.updateUserStatus(statusId, requestDto);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @RequestMapping(value = "/users/{userId}/user-statuses", method = RequestMethod.PATCH)
+    @ResponseBody
+    public ResponseEntity<Void> updateUserStatusByUserId(
+            @PathVariable UUID userId,
+            @RequestBody UserStatusUpdateRequestDto requestDto
+    ) {
+        userStatusService.updateUserStatusByUserId(userId, requestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
