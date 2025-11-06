@@ -50,6 +50,4 @@ public class ReadStatusController {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);
         return ResponseEntity.ok(allReadStatusesByUserId);
     }
-
-
 }

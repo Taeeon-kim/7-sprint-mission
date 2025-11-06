@@ -33,5 +33,4 @@ public class UserStatusController {
         userStatusService.updateUserStatusByUserId(userId, requestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 }
