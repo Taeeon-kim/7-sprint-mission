@@ -3,8 +3,8 @@ package com.sprint.mission.discodeit.store;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Store {
@@ -36,12 +36,12 @@ public class Store {
     @SuppressWarnings("unchecked")
     public static <K extends Serializable, V extends Serializable> Map<K, V> loadMap(Path file) {
         if (!Files.exists(file)) {
-            return new HashMap<>();
+            return new ConcurrentHashMap<>();
         }
         try (var ois = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(file)))) {
             Object obj = ois.readObject();
             if ((obj instanceof Map<?, ?> map)) {
-                return new HashMap<>((Map<K, V>) map);
+                return new ConcurrentHashMap<>((Map<K, V>) map);
             }
             throw new IllegalStateException("저장된 데이터가 Map이 아님!");
         } catch (IOException e) {

@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ConditionalOnProperty(prefix = "discodeit.repository",
         name = "type",
@@ -14,7 +15,7 @@ import java.util.*;
 @Repository
 public class JCFBinaryContentRepository implements BinaryContentRepository {
 
-    private final Map<UUID, BinaryContent> data = new HashMap<>();
+    private final Map<UUID, BinaryContent> data = new ConcurrentHashMap<>();
 
     @Override
     public BinaryContent save(BinaryContent content) {
