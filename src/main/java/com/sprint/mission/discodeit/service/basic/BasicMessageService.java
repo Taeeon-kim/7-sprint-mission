@@ -5,7 +5,10 @@ import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,6 +21,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
+
+    //의존성 주입
+    private final MessageRepository messageRepository;
+    private final ChannelRepository channelRepository;
+    private final UserRepository userRepository;
+    private final BinaryContentRepository binaryContentRepository;
+
     @Override
     public void createMessage(MessageCreateRequestDto messageCreateRequestDto) {
 
@@ -48,12 +58,6 @@ public class BasicMessageService implements MessageService {
 
     }
 
-//의존성 주입
-//    private final UserService userService;
-//    private final ChannelService channelService;
-//    private final MessageRepository messageRepository;
-//
-//
 //    @Override
 //    public void createMessage(MessageCreateRequestDto messageCreateRequestDto) {
 //        if (messageCreateRequestDto == null) {
