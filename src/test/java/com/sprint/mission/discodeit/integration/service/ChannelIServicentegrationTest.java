@@ -32,8 +32,6 @@ import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ChannelIServicentegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
-
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
     private ReadStatusRepository readStatusRepository;
