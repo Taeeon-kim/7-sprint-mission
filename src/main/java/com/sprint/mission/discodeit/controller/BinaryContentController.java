@@ -39,7 +39,7 @@ public class BinaryContentController {
         return ResponseEntity.ok(binaryContents);
     }
 
-    @RequestMapping(value = "/binary-contents", method = RequestMethod.POST, consumes = "multipart/form-data")
+    @RequestMapping(value = "/binary-contents", method = RequestMethod.POST)
     public ResponseEntity<UUID> createBinaryContent(
             @RequestBody MultipartFile file
     ) {
