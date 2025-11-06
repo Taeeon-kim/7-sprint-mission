@@ -42,7 +42,6 @@ public class ChannelController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-
     @RequestMapping(value = "/channels/{channelId}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateChannel(
             @PathVariable UUID channelId,
@@ -56,7 +55,4 @@ public class ChannelController {
         channelService.deleteChannel(channelId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
-
-
 }

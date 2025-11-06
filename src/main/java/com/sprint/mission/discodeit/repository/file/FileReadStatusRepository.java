@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 @ConditionalOnProperty(prefix = "discodeit.repository",
         name = "type",
         havingValue = "file")

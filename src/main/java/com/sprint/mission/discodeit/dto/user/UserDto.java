@@ -16,9 +16,9 @@ public record UserDto(
         Boolean online
 ) {
     public static UserDto from(User user, UserActiveStatus userStatus) {
-        return new UserDto(user.getId(), 
+        return new UserDto(user.getId(),
                 user.getCreatedAt(),
-                user.getUpdatedAt(), 
+                user.getUpdatedAt(),
                 user.getNickname(),
                 user.getEmail(),
                 user.getProfileId(),

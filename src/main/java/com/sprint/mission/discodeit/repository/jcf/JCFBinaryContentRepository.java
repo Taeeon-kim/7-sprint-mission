@@ -43,8 +43,8 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     @Override
     public List<BinaryContent> findAllByIds(List<UUID> ids) {
         return ids.stream()
-                .map((id)-> data.get(id)) // // O(N) + O(1) = O(N)
-                .filter((binaryContent)-> Objects.nonNull(binaryContent))
+                .map((id) -> data.get(id)) // // O(N) + O(1) = O(N)
+                .filter((binaryContent) -> Objects.nonNull(binaryContent))
                 .toList();
     }
 

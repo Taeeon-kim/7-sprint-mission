@@ -136,7 +136,7 @@ public class BasicUserService implements UserService {
                 user -> UserDto.from(
                         user,
                         userStatusRepository.findByUserId(user.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다.")) // TODO:  N+1 문제 발생, DB 없을때도 이런방식으로 해야되나? 별도 보조인덱스 Map 없는이상 일단 유지, 추후 N+1 개선 신경쓸것
-                        .getUserStatus())
+                                .getUserStatus())
         ).toList();
 
     }

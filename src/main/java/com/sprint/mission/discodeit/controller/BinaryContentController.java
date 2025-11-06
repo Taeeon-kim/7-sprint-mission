@@ -31,7 +31,7 @@ public class BinaryContentController {
             @RequestParam(required = false) List<UUID> ids
     ) {
         List<BinaryContentResponseDto> binaryContents;
-        if (ids== null || ids.isEmpty()) {
+        if (ids == null || ids.isEmpty()) {
             binaryContents = binaryContentService.getAllBinaryContents();
         } else {
             binaryContents = binaryContentService.getBinaryContentsByIds(ids);

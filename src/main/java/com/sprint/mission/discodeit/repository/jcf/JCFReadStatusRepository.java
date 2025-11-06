@@ -48,8 +48,6 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
                 .toList();
     }
 
-
-
     @Override
     public List<ReadStatus> findAllByUserId(UUID userId) {
         return data.values()
