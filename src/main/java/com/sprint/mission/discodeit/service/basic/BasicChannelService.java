@@ -151,26 +151,26 @@ public class BasicChannelService implements ChannelService {
     // 헬퍼 메서드
     private ChannelResponseDto toChannelResponseDto(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        Instant createdAt = null;
+        Instant messageCreatedAt = null;
         // 최신 메세지 하나가져오고
         List<UUID> messageIds = channel.getMessageIds();
         // 해당 메세지의 createdAt 추출하고 response dto에 포함
         if (!messageIds.isEmpty()) {
             UUID currentMessageId = messageIds.get(messageIds.size() - 1);
 
-            createdAt = messageRepository.findById(currentMessageId)
+            messageCreatedAt = messageRepository.findById(currentMessageId)
                     .map(Message::getCreatedAt)
                     .orElse(null);
 
         }
-        return getChannelResponseDto(channel, createdAt);
+        return getChannelResponseDto(channel, messageCreatedAt);
     }
 
-    private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant createdAt) {
+    private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, createdAt);
+            return ChannelResponseDto.from(channel, messageCreatedAt);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, createdAt);
+            return ChannelResponseDto.from(channel, messageCreatedAt);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }
