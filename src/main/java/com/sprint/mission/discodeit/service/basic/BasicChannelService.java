@@ -32,7 +32,7 @@ public class BasicChannelService implements ChannelService {
     private final ReadStatusRepository readStatusRepository;
     private final ChannelFactory channelFactory;
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, UserStatusRepository userStatusRepository, ReadStatusRepository readStatusRepository, PublicChannelCreator publicChannelCreator, PrivateChannelCreator privateChannelCreator, ChannelFactory channelFactory) {
+    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, ReadStatusRepository readStatusRepository, ChannelFactory channelFactory) {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userReader = userReader;

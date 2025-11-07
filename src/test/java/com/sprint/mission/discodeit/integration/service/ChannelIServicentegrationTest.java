@@ -14,6 +14,10 @@ import com.sprint.mission.discodeit.repository.*;
 import com.sprint.mission.discodeit.repository.jcf.*;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import com.sprint.mission.discodeit.service.factory.ChannelCreator;
+import com.sprint.mission.discodeit.service.factory.ChannelFactory;
+import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
+import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +44,8 @@ public class ChannelIServicentegrationTest {
     private UserReader userReader;
     private ChannelReader channelReader;
     private UserStatusRepository userStatusRepository;
+    private List<ChannelCreator> channelCreators ;
+    private ChannelFactory channelFactory;
 
 
     @BeforeEach
@@ -51,14 +57,15 @@ public class ChannelIServicentegrationTest {
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
         userStatusRepository = new JCFUserStatusRepository();
-
+        channelCreators = List.of(new PublicChannelCreator(userReader), new PrivateChannelCreator(userReader));
+        channelFactory = new ChannelFactory(channelCreators);
         channelService = new BasicChannelService(
                 channelRepository,
                 messageRepository,
                 userReader,
                 channelReader,
-                userStatusRepository,
-                readStatusRepository);
+                readStatusRepository,
+                channelFactory);
     }
 
     @Nested
