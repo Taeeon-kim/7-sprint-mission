@@ -98,16 +98,20 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public ChannelResponseDto getChannel(UUID channelId) {
-        return toChannelResponseDto(channelId);
+        Channel channel = channelReader.findChannelOrThrow(channelId);
+        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+        return getChannelResponseDto(channel, messageCreatedAtOfChannel);
     }
 
     @Override
     public List<ChannelResponseDto> getAllChannels() {
-
         List<Channel> channelList = channelRepository.findAll();
         return channelList
                 .stream()
-                .map(channel -> toChannelResponseDto(channel.getId()))
+                .map(channel -> {
+                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                })
                 .toList();
     }
 
@@ -115,26 +119,28 @@ public class BasicChannelService implements ChannelService {
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
         return channelRepository.findAllByUserId(userId)
                 .stream()
-                .map(channel -> toChannelResponseDto(channel.getId()))
+                .map(channel -> {
+                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                })
                 .toList();
     }
 
     // 헬퍼 메서드
-    private ChannelResponseDto toChannelResponseDto(UUID channelId) {
-        Channel channel = channelReader.findChannelOrThrow(channelId);
-        Instant messageCreatedAt = null;
+    private Instant getLatestMessageCreatedAtOfChannel(Channel channel) {
+        Instant messageCreatedAtOfChannel = null;
         // 최신 메세지 하나가져오고
         List<UUID> messageIds = channel.getMessageIds();
         // 해당 메세지의 createdAt 추출하고 response dto에 포함
         if (!messageIds.isEmpty()) {
             UUID currentMessageId = messageIds.get(messageIds.size() - 1);
 
-            messageCreatedAt = messageRepository.findById(currentMessageId)
+            messageCreatedAtOfChannel = messageRepository.findById(currentMessageId)
                     .map(Message::getCreatedAt)
                     .orElse(null);
 
         }
-        return getChannelResponseDto(channel, messageCreatedAt);
+        return messageCreatedAtOfChannel;
     }
 
     private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
