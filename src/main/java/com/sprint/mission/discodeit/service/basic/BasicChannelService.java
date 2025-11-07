@@ -11,6 +11,9 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.factory.ChannelFactory;
+import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
+import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
@@ -27,64 +30,32 @@ public class BasicChannelService implements ChannelService {
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final ReadStatusRepository readStatusRepository;
+    private final ChannelFactory channelFactory;
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, UserStatusRepository userStatusRepository, ReadStatusRepository readStatusRepository) {
+    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, UserStatusRepository userStatusRepository, ReadStatusRepository readStatusRepository, PublicChannelCreator publicChannelCreator, PrivateChannelCreator privateChannelCreator, ChannelFactory channelFactory) {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
         this.readStatusRepository = readStatusRepository;
+        this.channelFactory = channelFactory;
     }
 
     @Override
     public UUID createChannel(ChannelCreateCommand command) {
 
-        User creator = userReader.findUserOrThrow(command.userId());
+        Channel channel = channelFactory.create(command);
 
-        Channel channel = switch (command.type()) {
-            case PUBLIC -> {
-                ChannelCreatePublicParams params = ChannelCreatePublicParams.from(command);
-                yield createPublicChannel(creator.getId(), params);
-            }
-            case PRIVATE -> {
-                new ChannelCreatePrivateParams(command.memberIds());
-                ChannelCreatePrivateParams params = ChannelCreatePrivateParams.from(command);
-                yield createPrivateChannel(creator.getId(), params);
-            }
-            default -> throw new IllegalArgumentException("unsupported channel type: " + command.type());
-        };
         Channel saved = channelRepository.save(channel);
+
+        if (saved.getType() == ChannelType.PRIVATE) {
+            for (UUID UserId : command.memberIds()) {
+                readStatusRepository.save(new ReadStatus(UserId, saved.getId(), Instant.now()));
+            }
+        }
+
         return saved.getId();
     }
-
-    private Channel createPrivateChannel(UUID createdByUserId, ChannelCreatePrivateParams params) {
-        List<UUID> memberIds = params.memberIds();
-
-        if (createdByUserId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        User createdUser = userReader.findUserOrThrow(createdByUserId);
-        Channel channel = Channel.createPrivateChannel(createdUser.getId());
-
-        // NOTE: readStatus 생성 로직 부분
-        memberIds.forEach((memberId) -> {
-            User user = userReader.findUserOrThrow(memberId);
-            channel.addUserId(user.getId()); // TODO: 이부분 뭔가 분리해서 넣는게 나을거같은데 시간상 추후에 고민해볼것
-            ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(), Instant.now());
-            readStatusRepository.save(readStatus);
-        });
-
-        return channel;
-    }
-
-    private Channel createPublicChannel(UUID createdByUserId, ChannelCreatePublicParams requestDto) {
-        if (createdByUserId == null || requestDto.title() == null || requestDto.title().isBlank() || requestDto.description() == null || requestDto.description().isBlank()) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        User user = userReader.findUserOrThrow(createdByUserId);
-        return Channel.createPublicChannel(user.getId(), requestDto.title(), requestDto.description());
-    }
-
 
     @Override
     public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {

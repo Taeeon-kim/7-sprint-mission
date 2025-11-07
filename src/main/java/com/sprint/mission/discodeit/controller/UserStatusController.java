@@ -16,7 +16,7 @@ public class UserStatusController {
 
     private final UserStatusService userStatusService;
 
-    @RequestMapping(value = "/user-statuses/{statusId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/user-statuses/{statusId}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateUserStatus(
             @PathVariable UUID statusId,
             @RequestBody UserStatusUpdateRequestDto requestDto
