@@ -65,13 +65,13 @@ public class AuthServiceIntegrationTest {
 
             // then
             assertAll(
-                    () -> assertEquals(saved.getId(), loginUser.getId()),
-                    () -> assertEquals(saved.getNickname(), loginUser.getNickname()),
-                    () -> assertEquals(saved.getProfileId(), loginUser.getProfileId()),
-                    () -> assertEquals(saved.getRole(), loginUser.getRole()),
-                    () -> assertEquals(saved.getPhoneNumber(), loginUser.getPhoneNumber()),
-                    () -> assertEquals(saved.getEmail(), loginUser.getEmail()),
-                    () -> assertEquals(UserActiveStatus.ONLINE, loginUser.getIsOnline())
+                    () -> assertEquals(saved.getId(), loginUser.id()),
+                    () -> assertEquals(saved.getNickname(), loginUser.nickname()),
+                    () -> assertEquals(saved.getProfileId(), loginUser.profileId()),
+                    () -> assertEquals(saved.getRole(), loginUser.role()),
+                    () -> assertEquals(saved.getPhoneNumber(), loginUser.phoneNumber()),
+                    () -> assertEquals(saved.getEmail(), loginUser.email()),
+                    () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
             );
         }
 

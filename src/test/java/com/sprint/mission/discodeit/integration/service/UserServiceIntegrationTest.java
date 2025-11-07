@@ -153,8 +153,8 @@ public class UserServiceIntegrationTest {
             UserResponseDto userById = userService.getUserById(id);
 
             //then
-            assertEquals("name", userById.getNickname());
-            assertEquals(id, userById.getId());
+            assertEquals("name", userById.nickname());
+            assertEquals(id, userById.id());
         }
 
         @Test

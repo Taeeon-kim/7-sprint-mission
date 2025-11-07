@@ -2,14 +2,12 @@ package com.sprint.mission.discodeit.dto.channel;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
-import lombok.Builder;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Builder
 public record ChannelResponseDto(
         UUID channelId,
         String title,
@@ -25,15 +23,14 @@ public record ChannelResponseDto(
             Channel channel,
             Instant currentMessagedAt
     ) {
-        return ChannelResponseDto.builder()
-                .channelId(channel.getId())
-                .title(channel.getTitle())
-                .description(channel.getDescription())
-                .userIds(channel.getUserIds())
-                .messageIds(channel.getMessageIds())
-                .createdByUserId(channel.getCreatedByUserId())
-                .type(channel.getType())
-                .currentMessagedAt(currentMessagedAt)
-                .build();
+        return new ChannelResponseDto(channel.getId(),
+                channel.getTitle(),
+                channel.getDescription(),
+                channel.getUserIds(),
+                channel.getMessageIds(),
+                channel.getCreatedByUserId(),
+                channel.getType(),
+                currentMessagedAt
+        );
     }
 }

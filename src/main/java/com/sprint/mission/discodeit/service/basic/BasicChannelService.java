@@ -143,7 +143,7 @@ public class BasicChannelService implements ChannelService {
         return messageCreatedAtOfChannel;
     }
 
-    private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
         if (channel.getType() == ChannelType.PUBLIC) {
             return ChannelResponseDto.from(channel, messageCreatedAt);
         } else if (channel.getType() == ChannelType.PRIVATE) {

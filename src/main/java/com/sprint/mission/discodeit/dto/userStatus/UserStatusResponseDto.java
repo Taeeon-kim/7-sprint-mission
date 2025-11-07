@@ -6,7 +6,6 @@ import lombok.Builder;
 import java.time.Instant;
 import java.util.UUID;
 
-@Builder
 public record UserStatusResponseDto(
         UUID id,
         UUID userId,
@@ -14,10 +13,11 @@ public record UserStatusResponseDto(
 ) {
 
     public static UserStatusResponseDto from(UserStatus userStatus) {
-        return UserStatusResponseDto.builder()
-                .id(userStatus.getId())
-                .userId(userStatus.getUserId())
-                .lastActiveAt(userStatus.getLastActiveAt())
-                .build();
+        return new UserStatusResponseDto(
+                userStatus.getId(),
+                userStatus.getUserId(),
+                userStatus.getLastActiveAt()
+        );
+
     }
 }

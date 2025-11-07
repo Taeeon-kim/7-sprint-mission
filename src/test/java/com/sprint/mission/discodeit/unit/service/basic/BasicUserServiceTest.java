@@ -134,11 +134,11 @@ class BasicUserServiceTest {
             // when
             UserResponseDto result = userService.getUserById(user.getId()); // 흐름 검증
 
-            assertEquals(user.getNickname(), result.getNickname()); // 분기 검증
-            assertEquals(user.getEmail(), result.getEmail());
-            assertEquals(user.getPhoneNumber(), result.getPhoneNumber());
-            assertEquals(user.getRole(), result.getRole());
-            assertEquals(user.getProfileId(), result.getProfileId());
+            assertEquals(user.getNickname(), result.nickname()); // 분기 검증
+            assertEquals(user.getEmail(), result.email());
+            assertEquals(user.getPhoneNumber(), result.phoneNumber());
+            assertEquals(user.getRole(), result.role());
+            assertEquals(user.getProfileId(), result.profileId());
 
             // then
             verify(userReader).findUserOrThrow(user.getId()); // 행위검증

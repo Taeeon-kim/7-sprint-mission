@@ -6,7 +6,6 @@ import lombok.Builder;
 import java.time.Instant;
 import java.util.UUID;
 
-@Builder
 public record ReadStatusResponseDto(
         UUID id,
         UUID userId,
@@ -14,11 +13,13 @@ public record ReadStatusResponseDto(
         Instant readAt
 ) {
     public static ReadStatusResponseDto from(ReadStatus readStatus) {
-        return ReadStatusResponseDto.builder()
-                .id(readStatus.getId())
-                .readAt(readStatus.getReadAt())
-                .channelId(readStatus.getChannelId())
-                .userId(readStatus.getUserId())
-                .build();
+        return new ReadStatusResponseDto(
+                readStatus.getId(),
+                readStatus.getUserId(),
+                readStatus.getChannelId(),
+                readStatus.getReadAt()
+        );
+
+
     }
 }
