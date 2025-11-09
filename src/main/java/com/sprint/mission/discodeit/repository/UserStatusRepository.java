@@ -16,9 +16,6 @@ public interface UserStatusRepository {
     // 전체 사용자 상태 목록
     List<UserStatus> findAll();
 
-    // 사용자의 활동마다 호출해 갱신
-    void updateLastActiveAt(UUID userId);
-
     // 계정 삭제시 제거
     void delete(UUID uuid);
 
