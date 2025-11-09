@@ -60,24 +60,29 @@ public class FileMessageRepository implements MessageRepository {
     private final Map<UUID, Message> messages = new LinkedHashMap<>();
 
     @Override
-    public void save(Message message) {
+    public Message save(Message message) {
         messages.put(message.getUuid(), message);
         saveMessageToFile();
+        return message;
     }
 
     @Override
     public Optional<Message> findByMessage(UUID uuid) {
-        return Optional.empty();
+        return Optional.ofNullable(messages.get(uuid));
     }
 
     @Override
     public List<Message> findAll() {
-        return List.of();
+        return new ArrayList<>(messages.values());
     }
 
     @Override
     public List<Message> findAllByChannelId(Channel channel) {
-        return List.of();
+        if(channel == null){ return new ArrayList<>(); }
+        return messages.values().stream()
+                .filter(m->m.getChannelId().equals(channel.getUuid()))
+                .sorted(Comparator.comparing(Message::getCreateAt))
+                .toList();
     }
 
     @Override
@@ -99,34 +104,4 @@ public class FileMessageRepository implements MessageRepository {
         messages.remove(uuid);
         saveMessageToFile();
     }
-
-//    @Override
-//    public Message findByMessage(UUID uuid) {
-//        return messages.get(uuid);
-//    }
-//
-//    @Override
-//    public List<Message> findUserAll(User user) {
-//        return messages.values().stream()
-//                .filter(m->m.getUserId().equals(user.getUserId()))
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    public List<Message> findChannelAll(Channel channel) {
-//        return messages.values().stream()
-//                .filter(m->m.getChannelId().equals(channel.getUuid()))
-//                .collect(Collectors.toList());
-//    }
-
-
-//    @Override
-//    public void updateMessage(UUID uuid, String newMessage) {
-//        Message m = messages.get(uuid);
-//        if( m != null){
-//            m.setInputMsg(newMessage);
-//            saveMessageToFile();
-//        }
-//    }
-
 }

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface MessageRepository {
 
-    void save(Message message); // 메시지 저장
+    Message save(Message message); // 메시지 저장
 
     Optional<Message> findByMessage(UUID uuid); // 메시지 조회
 
