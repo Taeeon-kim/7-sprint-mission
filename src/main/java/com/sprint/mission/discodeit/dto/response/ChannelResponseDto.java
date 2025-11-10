@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.dto.response;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.User;
 import lombok.*;
 
 import java.time.Instant;
@@ -16,7 +17,6 @@ import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
  * participantIds : PRIVATE 채널인 경우에만 포함
  */
 @Getter
-//@AllArgsConstructor
 @ToString
 @Builder
 public class ChannelResponseDto {
@@ -29,15 +29,15 @@ public class ChannelResponseDto {
     private Instant lastMessageAt;
     private List<UUID> participantIds;
 
-    public static ChannelResponseDto from(Channel channel) {
+    public static ChannelResponseDto from(Channel channel, Instant lastMessageAt, List<UUID> participantIds) {
         return ChannelResponseDto.builder()
                 .channelId(channel.getUuid())
-                .channelName(channel.getChanName())
-                .participantIds(channel.getParticipantIds())
-                .channelType(channel.getType())
+                .channelName(channel.getChannelName())
+                .channelType(channel.getChannelType())
                 .createAt(channel.getCreateAt())
-                .updateAt(channel.getLastMessageAt())
-                .lastMessageAt(channel.getLastMessageAt())
+                .updateAt(channel.getUpdatedAt())
+                .lastMessageAt(lastMessageAt)
+                .participantIds(participantIds)
                 .build();
     }
 }

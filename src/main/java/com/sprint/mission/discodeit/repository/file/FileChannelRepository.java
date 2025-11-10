@@ -14,33 +14,23 @@ public class FileChannelRepository implements ChannelRepository {
     private static final String FILENAME
             = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\channels.sav";
 
-    // 임시저장
-    private final Map<UUID, Channel> channels = new HashMap<>();
-
-    // 싱글톤
-    private static final FileChannelRepository INSTANCE = new FileChannelRepository();
-
-    private FileChannelRepository(){
+    private FileChannelRepository() {
         loadChannelFromFile();
     }
 
-    public static FileChannelRepository getInstance(){
-        return INSTANCE;
-    }
-
     //파일 갖고 오기(역직렬화)
-    private void loadChannelFromFile(){
+    private void loadChannelFromFile() {
         File file = new File(FILENAME);
-        if(!file.exists()){
+        if (!file.exists()) {
             return;
         }
 
-        try(ObjectInputStream ois
-                    = new ObjectInputStream(new FileInputStream(file))){
+        try (ObjectInputStream ois
+                     = new ObjectInputStream(new FileInputStream(file))) {
             Object obj = ois.readObject();
-            if(obj instanceof Map<?, ?> map){
-                for(Object key : map.keySet()){
-                    if(key instanceof UUID && map.get(key) instanceof Channel c){
+            if (obj instanceof Map<?, ?> map) {
+                for (Object key : map.keySet()) {
+                    if (key instanceof UUID && map.get(key) instanceof Channel c) {
                         channels.put((UUID) key, c);
                     }
                 }
@@ -52,15 +42,18 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     // 직렬화
-    private void saveChannelToFile(){
-        try(ObjectOutputStream oos
-                    = new ObjectOutputStream(new FileOutputStream(FILENAME))){
+    private void saveChannelToFile() {
+        try (ObjectOutputStream oos
+                     = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
             oos.writeObject(this.channels);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("저장 실패");
             e.printStackTrace();
         }
     }
+
+    // 임시저장
+    private final Map<UUID, Channel> channels = new HashMap<>();
 
     @Override
     public void save(Channel channel) {
@@ -69,8 +62,8 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public Channel findByChannel(UUID uuid) {
-        return channels.get(uuid);
+    public Optional<Channel> findByChannel(UUID uuid) {
+        return Optional.ofNullable(channels.get(uuid));
     }
 
     @Override
@@ -79,17 +72,8 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public void updateChannel(UUID uuid, String newChannel) {
-        Channel ch = channels.get(uuid);
-        if(ch != null){
-            ch.setChanName(newChannel);
-            saveChannelToFile();
-        }
-    }
-
-    @Override
     public void deleteChannel(UUID uuid) {
-        Channel ch = channels.remove(uuid);
+        channels.remove(uuid);
         saveChannelToFile();
     }
 }

@@ -20,9 +20,9 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
         binaryContentMap.put(binaryContent.getUuid(), binaryContent);
 
         // file저장
-        if(binaryContent.getFilePath() != null){
-            System.out.println("[이미지 저장] : " + binaryContent.getFilePath());
-        }
+//        if(binaryContent.getFilePath() != null){
+//            System.out.println("[이미지 저장] : " + binaryContent.getFilePath());
+//        }
     }
 
     @Override
@@ -43,8 +43,8 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     @Override
     public void delete(UUID uuid) {
         BinaryContent removed = binaryContentMap.remove(uuid);
-        if(removed != null){
-            System.out.println("[이미지 삭제] : " + removed.getFilePath());
-        }
+//        if(removed != null){
+//            System.out.println("[이미지 삭제] : " + removed.getFilePath());
+//        }
     }
 }

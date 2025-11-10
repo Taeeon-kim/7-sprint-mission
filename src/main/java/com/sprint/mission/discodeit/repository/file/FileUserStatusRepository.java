@@ -4,10 +4,7 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public class FileUserStatusRepository implements UserStatusRepository {
@@ -25,24 +22,18 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
     @Override
     public UserStatus findByUserId(UUID userId) {
-        return statusMap.get(userId);
+        return statusMap.values().stream()
+                .filter(userStatus -> userStatus.getUserId().equals(userId))
+                .findFirst().orElse(null);
     }
 
     @Override
     public List<UserStatus> findAll() {
-        return List.of();
-    }
-
-    @Override
-    public void updateLastActiveAt(UUID userId) {
-
+        return new ArrayList<>(statusMap.values());
     }
 
     @Override
     public void delete(UUID uuid) {
-        UserStatus removed = statusMap.remove(uuid);
-        if (removed != null) {
-            System.out.println("[상태 삭제] : " + removed.getStatus());
-        }
+        statusMap.remove(uuid);
     }
 }

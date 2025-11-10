@@ -14,18 +14,8 @@ public class FileUserRepository implements UserRepository {
     private static final String FILENAME
             = "D:\\codeit07\\7-sprint-mission\\src\\main\\java\\com\\sprint\\mission\\discodeit\\repository\\file\\users.sav";
 
-    // 임시저장
-    private final Map<UUID, User> users = new HashMap<>();
-
-    //싱글톤
-    private static final FileUserRepository INSTANCE = new FileUserRepository();
-
     private FileUserRepository(){
         loadUserFromFile();
-    }
-
-    public static FileUserRepository getInstance(){
-        return INSTANCE;
     }
 
     // 파일 갖고 오기(역직렬화)
@@ -62,11 +52,20 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
+    // 임시저장
+    private final Map<UUID, User> users = new HashMap<>();
 
     @Override
     public void save(User user) {
         users.put(user.getUuid(), user);
         saveUserToFile();
+    }
+
+    @Override
+    public User findById(String userId) {
+        return users.values().stream()
+                .filter(u -> u.getUserId().equals(userId))
+                .findFirst().orElse(null);
     }
 
     @Override
@@ -80,25 +79,8 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public void updateNickName(UUID uuid, String newName) {
-        User u = users.get(uuid);
-        if( u != null ){
-            u.setNickName(newName);
-            saveUserToFile();
-        }
-    }
-
-    @Override
-    public void updatePassword(UUID uuid, String newPassword) {
-        User u = users.get(uuid);
-        if( u != null){
-            u.setUserPassword(newPassword);
-            saveUserToFile();
-        }
-    }
-
-    @Override
     public void delete(UUID uuid) {
+        User user =  users.get(uuid);
         users.remove(uuid);
         saveUserToFile();
     }

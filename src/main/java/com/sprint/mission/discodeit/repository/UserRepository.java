@@ -9,13 +9,11 @@ public interface UserRepository {
 
     void save(User user); //유저 저장
 
-    User findById(UUID uuid); // 특정 유저 조회
+    User findById(String userId); // 특정 유저 조회
+
+    User findById(UUID uuid);
 
     List<User> findAll(); // 유저 전체 조회
-
-    void updateNickName(UUID uuid, String newName); // 유저 닉네임 수정
-
-    void updatePassword(UUID uuid, String newPassword); // 유저 pw 수정
 
     void delete(UUID uuid); // UUID로 유저 삭제
 }

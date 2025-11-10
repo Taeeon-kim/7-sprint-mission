@@ -13,6 +13,8 @@ public interface ReadStatusRepository {
     // 특정 유저가 특정 채널에서 마지막으로 읽은 시점을 가져옴
     ReadStatus findByUserAndChannel(UUID userId, UUID channelId);
 
+    ReadStatus findById(UUID uuid);
+
     // 채널 참여자별 미확인 메시지 수 계산
     List<ReadStatus> findByChannelId(UUID channelId);
 

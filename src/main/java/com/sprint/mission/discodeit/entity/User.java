@@ -5,32 +5,50 @@ import lombok.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter @Setter @ToString
-//@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@NoArgsConstructor
 public class User extends BaseEntity {
 
-    //명시적으로 선언하는 게 좋대서. 직렬화, 역직렬화 시 클래스 버전 의미
-    private final String userId;  //아이디 string
-    private final String email; // 이메일
-    private String userPassword;    //비밀번호 string 수정가능
-    private String nickName;    //닉네임 = 사용자명 string, 수정가능
-    private UUID profileImageId; // 변경 가능
-    private UserStatus userStatus;
+    private String userId; //가입 Id
+    private String password; //비밀번호
+    private String email; //이메일
+    private String userName; //유저 이름
+    private UUID profileImageId; //프로필
 
-    public void setUserPassword(String userPassword) {
-        this.userPassword = userPassword;
-        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
-    }
-
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
-        setUpdatedAt(Instant.now()); //변경 시 시간 갱신
-    }
-
-    // 프로필 이미지 교체
-    public void setProfileImage(UUID profileImageId) {
+    public User(String userId, String password, String email, String userName, UUID profileImageId) {
+        super();
+        this.userId = userId;
+        this.password = password;
+        this.email = email;
+        this.userName = userName;
         this.profileImageId = profileImageId;
-        setUpdatedAt(Instant.now());
+    }
+
+    public void setPassword(String newPassword) {
+        if (newPassword != null && !newPassword.equals(this.password)) { //비밀번호 변경
+            this.password = newPassword;
+            setUpdatedAt(Instant.now());
+        }
+    }
+
+    public void setEmail(String newEmail) {
+        if (newEmail != null && !newEmail.equals(this.email)) { //이메일 변경
+            this.email = newEmail;
+            setUpdatedAt(Instant.now());
+        }
+    }
+
+    public void setUserName(String newUserName) {
+        if(newUserName !=null&&!newUserName.equals(this.userName)) {
+            this.userName = newUserName;
+            setUpdatedAt(Instant.now());
+        }
+    }
+
+    public void setProfileImageId(UUID newProfileImageId) {
+        if(newProfileImageId !=null&&!newProfileImageId.equals(this.profileImageId)) { //프로필 변경
+            this.profileImageId = newProfileImageId;
+            setUpdatedAt(Instant.now());
+        }
     }
 }

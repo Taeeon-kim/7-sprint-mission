@@ -5,13 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageCreateRequestDto {
-    private UUID senderId;
+    private UUID userId;
+    private String userName;
     private UUID channelId;
-    private String inputMsg;
+    private String channelName;
+    private String content;
+    private List<UUID> attachmentIds =  new ArrayList<>();
 }
