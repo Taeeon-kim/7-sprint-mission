@@ -9,26 +9,27 @@ import java.util.Set;
 import java.util.UUID;
 
 public record ChannelResponseDto(
-        UUID channelId,
-        String title,
+        UUID id,
+        String name,
         String description,
-        Set<UUID> userIds,
+        Set<UUID> participantIds,
         List<UUID> messageIds,
         ChannelType type,
-        Instant currentMessagedAt
+        Instant lastMessagedAt
 
 ) {
     public static ChannelResponseDto from(
             Channel channel,
-            Instant currentMessagedAt
+            Instant lastMessagedAt
     ) {
-        return new ChannelResponseDto(channel.getId(),
+        return new ChannelResponseDto(
+                channel.getId(),
                 channel.getTitle(),
                 channel.getDescription(),
                 channel.getUserIds(),
                 channel.getMessageIds(),
                 channel.getType(),
-                currentMessagedAt
+                lastMessagedAt
         );
     }
 }

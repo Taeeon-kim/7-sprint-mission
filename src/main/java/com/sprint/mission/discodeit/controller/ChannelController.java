@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,9 +30,16 @@ public class ChannelController {
         return ResponseEntity.ok(channels);
     }
 
-    @RequestMapping(value = "/channels", method = RequestMethod.POST)
-    public ResponseEntity<UUID> createChannel(@RequestBody ChannelCreateRequestDto request) {
-        ChannelCreateCommand cmd = ChannelCreateCommand.from(request);
+    @RequestMapping(value = "/channels/public", method = RequestMethod.POST)
+    public ResponseEntity<UUID> createChannelPublic(@RequestBody ChannelCreateRequestDto request) {
+        ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PUBLIC);
+        UUID channelId = channelService.createChannel(cmd);
+        return ResponseEntity.created(URI.create("/api/channels/" + channelId)).body(channelId);
+    }
+
+    @RequestMapping(value = "/channels/private", method = RequestMethod.POST)
+    public ResponseEntity<UUID> createChannelPrivate(@RequestBody ChannelCreateRequestDto request) {
+        ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PRIVATE);
         UUID channelId = channelService.createChannel(cmd);
         return ResponseEntity.created(URI.create("/api/channels/" + channelId)).body(channelId);
     }

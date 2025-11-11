@@ -3,8 +3,6 @@ package com.sprint.mission.discodeit.dto.user;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
 import com.sprint.mission.discodeit.entity.type.RoleType;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
