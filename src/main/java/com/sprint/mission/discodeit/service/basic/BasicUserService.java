@@ -70,7 +70,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public UserResponseDto findById(String userId) {
-        User user = userRepository.findById(userId);
+        User user = userRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("User not found"));
         UserStatus status = new UserStatus(user.getUuid());
         BinaryContent profileContent = null;
         if (user.getProfileImageId() != null) {
@@ -112,10 +112,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public void updateUser(String userId, UserUpdateRequestDto userUpdateRequestDto) {
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            System.out.println("존재하지 않는 유저");
-        }
+        User user = userRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("User not found"));
 
         if (userUpdateRequestDto.getUserName() != null && !userUpdateRequestDto.getUserName().isBlank()) {
             user.setUserName(userUpdateRequestDto.getUserName());
@@ -161,8 +158,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public void deleteUser(UUID uuid) {
-        User user = userRepository.findById(uuid);
-        if (user == null) throw new IllegalArgumentException("삭제하려는 유저가 존재하지 않습니다.");
+        User user = userRepository.findById(uuid).orElseThrow(()->new IllegalArgumentException("User not found"));
 
         // 상태 삭제
         UserStatus status = userStatusRepository.findByUserId(uuid);

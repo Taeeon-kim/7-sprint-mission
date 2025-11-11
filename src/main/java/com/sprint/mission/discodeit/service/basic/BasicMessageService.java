@@ -81,8 +81,8 @@ public class BasicMessageService implements MessageService {
         message.setUpdate(messageUpdateRequestDto.getContent());
 
         List<UUID> attachments = message.getAttachmentIds();
-        if(attachments != null){
-            for(UUID attachmentId : attachments){
+        if (attachments != null) {
+            for (UUID attachmentId : attachments) {
                 binaryContentRepository.findById(attachmentId);
             }
             message.setAttachmentIds(new ArrayList<>());
@@ -97,8 +97,8 @@ public class BasicMessageService implements MessageService {
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 메시지를 찾을 수 없습니다."));
 
         List<UUID> attachments = message.getAttachmentIds();
-        if(attachments != null){
-            for(UUID attachmentId : attachments){
+        if (attachments != null) {
+            for (UUID attachmentId : attachments) {
                 binaryContentRepository.delete(attachmentId);
             }
         }
@@ -144,7 +144,8 @@ public class BasicMessageService implements MessageService {
             List<UUID> attachments = messageCreateRequestDto.getAttachmentIds();
             if (attachments == null) attachments = new ArrayList<>();
             Message message = createMessage(messageCreateRequestDto);
-            System.out.println("[Message] : " + userRepository.findById(messageCreateRequestDto.getUserId()).getUserName()
+            System.out.println("[Message] : " + userRepository.findById(messageCreateRequestDto.getUserId())
+                    .orElseThrow(() -> new RuntimeException("유저 없음")).getUserName()
                     + " : " + messageCreateRequestDto.getChannelName()
                     + " : " + messageCreateRequestDto.getContent()
                     + " | 첨부파일 수: " + attachments.size());
@@ -172,7 +173,7 @@ public class BasicMessageService implements MessageService {
         }
 
         System.out.println("Update Test");
-        Message firstMessage = findUserAllMessage(users.get(0)).get(0);
+        Message firstMessage = findUserAllMessage(users.get(0)).stream().findFirst().orElse(null);
         MessageUpdateRequestDto messageUpdateRequestDto = new MessageUpdateRequestDto(firstMessage.getUuid(), "업데이트 된 메시지");
         updateMessage(messageUpdateRequestDto);
         System.out.println("[Update] : " + findByMessage(firstMessage.getUuid()).getContent());
@@ -181,14 +182,14 @@ public class BasicMessageService implements MessageService {
         Message secondMessage = findUserAllMessage(users.get(1)).get(0);
         deleteMessage(secondMessage.getUuid());
 
-        for(Channel channel : channels){
+        for (Channel channel : channels) {
             List<Message> channelMessages = findChannelAllMessage(channel);
             System.out.println("채널명 : " + channel.getChannelType() + "(" + channel.getChannelName() + ")");
-            if(channelMessages.isEmpty()){
+            if (channelMessages.isEmpty()) {
                 System.out.println("메시지 없음");
             } else {
                 for (Message message : channelMessages) {
-                    System.out.println(" / " + message.getContent() + " / 첨부파일 수 : " +  message.getAttachmentIds().size());
+                    System.out.println(" / " + message.getContent() + " / 첨부파일 수 : " + message.getAttachmentIds().size());
                 }
             }
         }
