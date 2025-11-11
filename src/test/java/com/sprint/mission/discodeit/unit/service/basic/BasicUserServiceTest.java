@@ -60,7 +60,7 @@ class BasicUserServiceTest {
 
 
             // when
-            userService.signUp(new UserSignupRequestDto(nickname, email, password, phone, null)); // 흐름검증
+            userService.signUp(new UserSignupRequestDto(nickname, email, password)); // 흐름검증
 
             // then
             verify(userRepository, times(1)).save(any(User.class)); // 행위 검증
@@ -71,32 +71,27 @@ class BasicUserServiceTest {
         void signUp_shouldThrowException_whenInValidInput() {
             // isBlank
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("", "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto("", "a@b.com", "123")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "", "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "", "pw")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "", "010", null)));
-            assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "")));
 
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto(" ", "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto(" ", "a@b.com", "123")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", " ", "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", " ", "pw")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", " ", "010", null)));
-            assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", " ", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", " ")));
 
             // null
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto(null, "a@b.com", "123", "0101111", null)));
+                    userService.signUp(new UserSignupRequestDto(null, "a@b.com", "123")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", null, "pw", "010", null)));
+                    userService.signUp(new UserSignupRequestDto("nick", null, "pw")));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", null, "010", null)));
-            assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", null, null)));
+                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", null)));
+
 
             verify(userRepository, never()).save(any());
         }

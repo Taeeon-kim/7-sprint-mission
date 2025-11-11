@@ -36,27 +36,27 @@ public class BasicUserService implements UserService {
     @Override
     public UUID signUp(UserSignupRequestDto request) {
         if (
-                request.getNickname() == null ||
-                        request.getNickname().isBlank() ||
+                request.getUsername() == null ||
+                        request.getUsername().isBlank() ||
                         request.getPassword() == null ||
                         request.getPassword().isBlank() ||
-                        request.getEmail() == null || request.getEmail().isBlank() ||
-                        request.getPhoneNumber() == null ||
-                        request.getPhoneNumber().isBlank()
+                        request.getEmail() == null || request.getEmail().isBlank()
+
         ) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByNickname(request.getNickname())) {
+        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByNickname(request.getUsername())) {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
 
-        User newUser = User.create(request.getNickname(),
+        User newUser = User.create(request.getUsername(),
                 request.getEmail(),
                 request.getPassword(),
                 USER,
-                request.getPhoneNumber(),
-                request.getProfileId());
+                null,  // TODO: dto에서 PHone필요없는데 핸드폰관련 체크
+                null // TODO: 추후 이미지 생성후 받은 반환값 넣기
+        );
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
 

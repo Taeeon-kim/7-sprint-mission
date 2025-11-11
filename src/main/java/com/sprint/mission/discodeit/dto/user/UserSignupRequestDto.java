@@ -12,9 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class UserSignupRequestDto {
-    private String nickname;
+    private String username;
     private String email;
     private String password;
-    private String phoneNumber;
-    private UUID profileId;
+//    private String phoneNumber;
+//    private UUID profileId;
 }

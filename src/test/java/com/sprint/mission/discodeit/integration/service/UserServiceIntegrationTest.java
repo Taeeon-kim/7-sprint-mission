@@ -61,7 +61,7 @@ public class UserServiceIntegrationTest {
             int before = userRepository.findAll().size();
 
             //when
-            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password"));
 
             //then
             int after = userRepository.findAll().size();
@@ -72,7 +72,6 @@ public class UserServiceIntegrationTest {
 
             assertEquals("example@email.com", persistedUser.getEmail());
             assertEquals("password", persistedUser.getPassword());
-            assertEquals("010-1111-2222", persistedUser.getPhoneNumber());
 
         }
 
@@ -80,7 +79,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 잘못된 입력은 예외 & DB 변화 없음")
         void signUp_invalid_blocked() {
             assertThrows(IllegalArgumentException.class,
-                    () -> userService.signUp(new UserSignupRequestDto("", "a@b.com", "pw", "010", null)));
+                    () -> userService.signUp(new UserSignupRequestDto("", "a@b.com", "pw")));
             assertEquals(0, userRepository.findAll().size());
         }
 
@@ -88,11 +87,11 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 중복된 이메일일 경우 예외")
         void signup_whenDuplicate_email_thenThrows() {
             // given
-            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password"));
             int before = userRepository.findAll().size();
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("different", "example@email.com", "password", "010-1111-2222", null)));
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("different", "example@email.com", "password")));
 
             // then
             int after = userRepository.findAll().size();
@@ -103,11 +102,11 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 중복된 이름일 경우 예외")
         void signup_whenDuplicate_nickname_thenThrows() {
             // given
-            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password"));
             int before = userRepository.findAll().size();
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("name", "different@email.com", "password", "010-1111-2222", null)));
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("name", "different@email.com", "password")));
 
             // then
             int after = userRepository.findAll().size();
@@ -122,9 +121,8 @@ public class UserServiceIntegrationTest {
             UUID uuid = userService.signUp(
                     new UserSignupRequestDto("name",
                             "example@email.com",
-                            "password",
-                            "010-1111-2222",
-                            null)
+                            "password"
+                            )
             );
 
             // when
@@ -147,7 +145,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원조회 - 저장후 response DTO 반환 조회 성공")
         void getUserById_returns_saved_user() {
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password"));
 
             //when
             UserResponseDto userById = userService.getUserById(id);
@@ -180,7 +178,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원수정 - 이메일만 변경, 나머지 유지")
         void updateUser_updates_only_email() throws InterruptedException {
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw"));
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
             //when
             userService.updateUser(id, new UserUpdateRequestDto(null, "b@c.com", null, null, null));
@@ -188,7 +186,6 @@ public class UserServiceIntegrationTest {
             User after = userRepository.findById(id).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
             assertEquals("nick", after.getNickname());
-            assertEquals("010", after.getPhoneNumber());
 
             // 실제 update호출안된건지 update값 조회
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
@@ -199,19 +196,18 @@ public class UserServiceIntegrationTest {
         void updateUser_no_effect_when_same_values() {
 
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw"));
             User before = userRepository.findById(id).orElseThrow();
             Instant beforeTime = before.getUpdatedAt(); // 스냅샷
 
             //when
-            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", "010", null));
-            userService.updateUser(id,new UserUpdateRequestDto(null, null, null, null, null));
+            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", null, null));
+            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, null));
 
             //then
             User after = userRepository.findById(id).orElseThrow();
             assertEquals(before.getNickname(), after.getNickname());
             assertEquals(before.getEmail(), after.getEmail());
-            assertEquals(before.getPhoneNumber(), after.getPhoneNumber());
 
             assertEquals(beforeTime, after.getUpdatedAt());
         }
@@ -220,7 +216,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][State] 회원수정 - 여러 필드 동시 변경 반영")
         void updateUser_updates_multiple_fields() {
             // given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw"));
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
             UUID profileId = UUID.randomUUID();
             // when
@@ -241,7 +237,7 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 회원삭제 - 삭제 후 조회 시 예외")
         void deleteUser_then_not_found() {
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
+            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw"));
             userService.deleteUser(id);
             assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
         }
@@ -287,8 +283,8 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 회원전체조회 - 여러 명 저장 후 전체 조회")
         void getAllUsers_returns_all() {
-            userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p", "010", null));
-            userService.signUp(new UserSignupRequestDto("b", "b@b.com", "p", "010", null));
+            userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p"));
+            userService.signUp(new UserSignupRequestDto("b", "b@b.com", "p"));
             assertEquals(2, userService.getAllUsers().size());
         }
     }
@@ -299,7 +295,7 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 특정 회원리스트 조회 - 일부 id만 유효 → 유효한 것만 반환")
         void getUsersByIds_returns_only_existing() {
-            UUID id1 = userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p", "010", null));
+            UUID id1 = userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p"));
             UUID id2 = UUID.randomUUID();
             List<User> result = userService.getUsersByIds(List.of(id1, id2));
             assertEquals(1, result.size());

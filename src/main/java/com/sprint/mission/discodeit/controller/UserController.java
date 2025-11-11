@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -21,7 +22,9 @@ public class UserController {
     private final UserService userService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<UUID> createUser(@RequestBody UserSignupRequestDto userSignupRequestDto) {
+    public ResponseEntity<UUID> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
+                                           @RequestPart(value = "profile", required = false) MultipartFile profile
+    ) {
         UUID uuid = userService.signUp(userSignupRequestDto);
         return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
     }

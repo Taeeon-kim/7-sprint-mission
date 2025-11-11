@@ -93,9 +93,7 @@ public class UserStatusServiceIntegrationTest {
                     new UserSignupRequestDto(
                             "name",
                             "email@ee.com",
-                            "pwd",
-                            "010-1111-2222",
-                            null
+                            "pwd"
                     )
             );
 
