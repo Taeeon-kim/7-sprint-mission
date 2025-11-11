@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ConditionalOnProperty(prefix = "discodeit.repository",
         name = "type",
@@ -13,7 +14,7 @@ import java.util.*;
         matchIfMissing = true)
 @Repository
 public class JCFUserStatusRepository implements UserStatusRepository {
-    private final Map<UUID, UserStatus> data = new HashMap<>();
+    private final Map<UUID, UserStatus> data = new ConcurrentHashMap<>();
 
     @Override
     public UserStatus save(UserStatus userStatus) {

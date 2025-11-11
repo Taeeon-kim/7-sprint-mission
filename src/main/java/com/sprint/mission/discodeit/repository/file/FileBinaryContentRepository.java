@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+
 @ConditionalOnProperty(prefix = "discodeit.repository",
         name = "type",
         havingValue = "file")
@@ -15,11 +16,11 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     @Override
     public List<BinaryContent> findAllByIds(List<UUID> ids) {
         Map<UUID, BinaryContent> allBinaryContents = findAllMap();
-        ids.stream()
+
+        return ids.stream()
                 .map(allBinaryContents::get) // // O(N) + O(1) = O(N)
                 .filter(Objects::nonNull)
                 .toList();
-        return List.of();
     }
 
     @Override

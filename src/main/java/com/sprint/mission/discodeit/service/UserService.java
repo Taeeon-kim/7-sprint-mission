@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.user.UserDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
@@ -22,7 +23,7 @@ public interface UserService {
     void updateUser(UUID id, UserUpdateRequestDto userUpdateRequestDto);
 
     // 모든 유저리스트 읽기(관리측면 메서드)
-    List<User> getAllUsers();
+    List<UserDto> getAllUsers();
 
     List<User> getUsersByIds(List<UUID> userIds);
 }

@@ -66,11 +66,11 @@ public class User extends BasicEntity {
 
     public boolean update(UserUpdateParams request) {
         boolean changeFlag = false;
-        changeFlag |= this.updateNickname(request.getNickname());
-        changeFlag |= this.updateEmail(request.getEmail());
-        changeFlag |= this.updatePassword(request.getPassword());
-        changeFlag |= this.updatePhoneNumber(request.getPhoneNumber());
-        changeFlag |= this.updateProfileId(request.getProfileId());
+        changeFlag |= this.updateNickname(request.nickname());
+        changeFlag |= this.updateEmail(request.email());
+        changeFlag |= this.updatePassword(request.password());
+        changeFlag |= this.updatePhoneNumber(request.phoneNumber());
+        changeFlag |= this.updateProfileId(request.profileId());
         if (changeFlag) {
             this.setUpdatedAt(Instant.now());
         }

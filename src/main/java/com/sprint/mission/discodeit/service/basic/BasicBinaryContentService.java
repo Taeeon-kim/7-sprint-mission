@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -30,13 +31,17 @@ public class BasicBinaryContentService implements BinaryContentService {
     }
 
     @Override
-    public BinaryContent getBinaryContent(UUID id) {
-        return binaryContentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을수 없습니다."));
+    public BinaryContentResponseDto getBinaryContent(UUID id) {
+        BinaryContent binaryContent = binaryContentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을수 없습니다."));
+        return BinaryContentResponseDto.from(binaryContent);
     }
 
     @Override
-    public List<BinaryContent> getBinaryContentsByIds(List<UUID> ids) {
-        return binaryContentRepository.findAllByIds(ids);
+    public List<BinaryContentResponseDto> getBinaryContentsByIds(List<UUID> ids) {
+        List<BinaryContent> allByIds = binaryContentRepository.findAllByIds(ids);
+        return allByIds.stream()
+                .map(BinaryContentResponseDto::from)
+                .toList();
     }
 
     @Override
@@ -45,5 +50,13 @@ public class BasicBinaryContentService implements BinaryContentService {
             throw new IllegalArgumentException("전달값이 잘못되었습니다.");
         }
         binaryContentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<BinaryContentResponseDto> getAllBinaryContents() {
+        List<BinaryContent> all = binaryContentRepository.findAll();
+        return all.stream()
+                .map(BinaryContentResponseDto::from)
+                .toList();
     }
 }

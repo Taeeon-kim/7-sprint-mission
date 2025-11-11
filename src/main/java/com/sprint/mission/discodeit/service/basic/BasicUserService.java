@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -60,7 +57,6 @@ public class BasicUserService implements UserService {
                 USER,
                 request.getPhoneNumber(),
                 request.getProfileId());
-
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
 
@@ -122,7 +118,7 @@ public class BasicUserService implements UserService {
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-
+        System.out.println("id = " + id);
         User userById = userReader.findUserOrThrow(id);
         UserUpdateParams params = UserUpdateParams.from(request); // 경계분리
         boolean updated = userById.update(params);
@@ -132,8 +128,17 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> getAllUsers() {
+
+        List<User> all = userRepository.findAll();
+
+        return all.stream().map(
+                user -> UserDto.from(
+                        user,
+                        userStatusRepository.findByUserId(user.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다.")) // TODO:  N+1 문제 발생, DB 없을때도 이런방식으로 해야되나? 별도 보조인덱스 Map 없는이상 일단 유지, 추후 N+1 개선 신경쓸것
+                                .getUserStatus())
+        ).toList();
+
     }
 
     @Override

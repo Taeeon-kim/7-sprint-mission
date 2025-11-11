@@ -11,6 +11,9 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.factory.ChannelFactory;
+import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
+import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
@@ -27,63 +30,32 @@ public class BasicChannelService implements ChannelService {
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final ReadStatusRepository readStatusRepository;
+    private final ChannelFactory channelFactory;
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, UserStatusRepository userStatusRepository, ReadStatusRepository readStatusRepository) {
+    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, ReadStatusRepository readStatusRepository, ChannelFactory channelFactory) {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
         this.readStatusRepository = readStatusRepository;
+        this.channelFactory = channelFactory;
     }
 
     @Override
-    public void createChannel(UUID createdByUserId, ChannelCreateRequestDto requestDto) {
+    public UUID createChannel(ChannelCreateCommand command) {
 
-        User creator = userReader.findUserOrThrow(createdByUserId);
+        Channel channel = channelFactory.create(command);
 
-        Channel channel = switch (requestDto.type()) {
-            case PUBLIC -> {
-                ChannelCreatePublicParams params = ChannelCreatePublicParams.from(requestDto);
-                yield createPublicChannel(creator.getId(), params);
+        Channel saved = channelRepository.save(channel);
+
+        if (saved.getType() == ChannelType.PRIVATE) {
+            for (UUID UserId : command.memberIds()) {
+                readStatusRepository.save(new ReadStatus(UserId, saved.getId(), Instant.now()));
             }
-            case PRIVATE -> {
-                new ChannelCreatePrivateParams(requestDto.memberIds());
-                ChannelCreatePrivateParams params = ChannelCreatePrivateParams.from(requestDto);
-                yield createPrivateChannel(creator.getId(), params);
-            }
-            default -> throw new IllegalArgumentException("unsupported channel type: " + requestDto.type());
-        };
-        channelRepository.save(channel);
-    }
-
-    private Channel createPrivateChannel(UUID createdByUserId, ChannelCreatePrivateParams params) {
-        List<UUID> memberIds = params.memberIds();
-
-        if (createdByUserId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        User createdUser = userReader.findUserOrThrow(createdByUserId);
-        Channel channel = Channel.createPrivateChannel(createdUser.getId());
 
-        // NOTE: readStatus 생성 로직 부분
-        memberIds.forEach((memberId) -> {
-            User user = userReader.findUserOrThrow(memberId);
-            channel.addUserId(user.getId()); // TODO: 이부분 뭔가 분리해서 넣는게 나을거같은데 시간상 추후에 고민해볼것
-            ReadStatus readStatus = new ReadStatus(user.getId(), channel.getId(), Instant.now());
-            readStatusRepository.save(readStatus);
-        });
-
-        return channel;
+        return saved.getId();
     }
-
-    private Channel createPublicChannel(UUID createdByUserId, ChannelCreatePublicParams requestDto) {
-        if (createdByUserId == null || requestDto.title() == null || requestDto.title().isBlank() || requestDto.description() == null || requestDto.description().isBlank()) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
-        }
-        User user = userReader.findUserOrThrow(createdByUserId);
-        return Channel.createPublicChannel(user.getId(), requestDto.title(), requestDto.description());
-    }
-
 
     @Override
     public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {
@@ -126,16 +98,20 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public ChannelResponseDto getChannel(UUID channelId) {
-        return toChannelResponseDto(channelId);
+        Channel channel = channelReader.findChannelOrThrow(channelId);
+        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+        return getChannelResponseDto(channel, messageCreatedAtOfChannel);
     }
 
     @Override
     public List<ChannelResponseDto> getAllChannels() {
-
         List<Channel> channelList = channelRepository.findAll();
         return channelList
                 .stream()
-                .map(channel -> toChannelResponseDto(channel.getId()))
+                .map(channel -> {
+                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                })
                 .toList();
     }
 
@@ -143,33 +119,35 @@ public class BasicChannelService implements ChannelService {
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
         return channelRepository.findAllByUserId(userId)
                 .stream()
-                .map(channel -> toChannelResponseDto(channel.getId()))
+                .map(channel -> {
+                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                })
                 .toList();
     }
 
     // 헬퍼 메서드
-    private ChannelResponseDto toChannelResponseDto(UUID channelId) {
-        Channel channel = channelReader.findChannelOrThrow(channelId);
-        Instant createdAt = null;
+    private Instant getLatestMessageCreatedAtOfChannel(Channel channel) {
+        Instant messageCreatedAtOfChannel = null;
         // 최신 메세지 하나가져오고
         List<UUID> messageIds = channel.getMessageIds();
         // 해당 메세지의 createdAt 추출하고 response dto에 포함
         if (!messageIds.isEmpty()) {
             UUID currentMessageId = messageIds.get(messageIds.size() - 1);
 
-            createdAt = messageRepository.findById(currentMessageId)
+            messageCreatedAtOfChannel = messageRepository.findById(currentMessageId)
                     .map(Message::getCreatedAt)
                     .orElse(null);
 
         }
-        return getChannelResponseDto(channel, createdAt);
+        return messageCreatedAtOfChannel;
     }
 
-    private static ChannelResponseDto getChannelResponseDto(Channel channel, Instant createdAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, createdAt);
+            return ChannelResponseDto.from(channel, messageCreatedAt);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, createdAt);
+            return ChannelResponseDto.from(channel, messageCreatedAt);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }

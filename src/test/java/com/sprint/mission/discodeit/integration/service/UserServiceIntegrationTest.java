@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
@@ -18,7 +18,6 @@ import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import java.time.Instant;
@@ -30,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class UserIntegrationTest {
+public class UserServiceIntegrationTest {
 
     private UserService userService;
     private UserRepository userRepository;
@@ -154,8 +153,8 @@ public class UserIntegrationTest {
             UserResponseDto userById = userService.getUserById(id);
 
             //then
-            assertEquals("name", userById.getNickname());
-            assertEquals(id, userById.getId());
+            assertEquals("name", userById.nickname());
+            assertEquals(id, userById.id());
         }
 
         @Test

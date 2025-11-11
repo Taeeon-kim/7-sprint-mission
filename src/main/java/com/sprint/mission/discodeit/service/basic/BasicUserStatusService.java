@@ -46,22 +46,14 @@ public class BasicUserStatusService implements UserStatusService {
     @Override
     public UserStatusResponseDto getUserStatus(UUID id) {
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        return UserStatusResponseDto.builder()
-                .id(userStatus.getId())
-                .userId(userStatus.getUserId())
-                .lastActiveAt(userStatus.getLastActiveAt())
-                .build();
+        return UserStatusResponseDto.from(userStatus);
     }
 
     @Override
     public List<UserStatusResponseDto> getAllUserStatuses() {
         List<UserStatus> userStatusList = userStatusRepository.findAll();
         return userStatusList.stream()
-                .map(userStatus -> UserStatusResponseDto.builder()
-                        .id(userStatus.getId())
-                        .userId(userStatus.getUserId())
-                        .lastActiveAt(userStatus.getLastActiveAt())
-                        .build())
+                .map(userStatus -> UserStatusResponseDto.from(userStatus))
                 .toList();
     }
 

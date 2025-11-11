@@ -1,7 +1,6 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
-import com.sprint.mission.discodeit.dto.message.MessageSendRequestDto;
-import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -15,13 +14,11 @@ import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -29,14 +26,12 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MessageIntegrationTest {
+public class MessageServiceIntegrationTest {
 
-    private InMemoryStore store;
     private MessageRepository messageRepository;
     private ChannelRepository channelRepository;
     private UserRepository userRepository;
@@ -50,7 +45,6 @@ public class MessageIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        store = new InMemoryStore();
         messageRepository = new JCFMessageRepository();
         channelRepository = new JCFChannelRepository();
         userRepository = new JCFUserRepository();
@@ -106,12 +100,7 @@ public class MessageIntegrationTest {
 
             // When
             UUID messageId = messageService.sendMessageToChannel(
-                    MessageSendRequestDto.builder()
-                            .channelId(publicChannel.getId())
-                            .senderId(sender.getId())
-                            .content("message")
-                            .binaryFileIds(List.of(savedBinaryContent.getId()))
-                            .build()
+                    new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(savedBinaryContent.getId()))
             );
 
 
@@ -174,32 +163,30 @@ public class MessageIntegrationTest {
             channelRepository.save(publicChannel);
 
             // when
-            List<Message> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
+            List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
 
             // then
-            Message foundMessage1 = allMessagesByChannelId.stream()
-                    .filter(message -> message.getId() == message1.getId())
+            MessageResponseDto foundMessage1 = allMessagesByChannelId.stream()
+                    .filter(message -> message.id() == message1.getId())
                     .findFirst()
                     .orElseThrow();
 
-            Message foundMessage2 = allMessagesByChannelId.stream()
-                    .filter(message -> message.getId() == message2.getId())
+            MessageResponseDto foundMessage2 = allMessagesByChannelId.stream()
+                    .filter(message -> message.id() == message2.getId())
                     .findFirst()
                     .orElseThrow();
 
 
             assertAll(
                     () -> assertEquals(2, allMessagesByChannelId.size()),
-                    () -> assertEquals(message1.getId(), foundMessage1.getId()),
-                    () -> assertEquals(message2.getId(), foundMessage2.getId()),
-                    () -> assertEquals(message1.getContent(), foundMessage1.getContent()),
-                    () -> assertEquals(message2.getContent(), foundMessage2.getContent()),
-                    () -> assertEquals(message1.getCreatedAt(), foundMessage1.getCreatedAt()),
-                    () -> assertEquals(message2.getCreatedAt(), foundMessage2.getCreatedAt()),
-                    () -> assertEquals(message1.getChannelId(), foundMessage1.getChannelId()),
-                    () -> assertEquals(message2.getChannelId(), foundMessage2.getChannelId()),
-                    () -> assertEquals(message1.getSenderId(), foundMessage1.getSenderId()),
-                    () -> assertEquals(message2.getSenderId(), foundMessage2.getSenderId())
+                    () -> assertEquals(message1.getId(), foundMessage1.id()),
+                    () -> assertEquals(message2.getId(), foundMessage2.id()),
+                    () -> assertEquals(message1.getContent(), foundMessage1.content()),
+                    () -> assertEquals(message2.getContent(), foundMessage2.content()),
+                    () -> assertEquals(message1.getChannelId(), foundMessage1.channelId()),
+                    () -> assertEquals(message2.getChannelId(), foundMessage2.channelId()),
+                    () -> assertEquals(message1.getSenderId(), foundMessage1.senderId()),
+                    () -> assertEquals(message2.getSenderId(), foundMessage2.senderId())
             );
 
 
@@ -235,10 +222,13 @@ public class MessageIntegrationTest {
 
             // when
             messageService.updateMessage(
-                    message.getId(),
-                    MessageUpdateRequestDto.builder()
-                            .content("updated message")
-                            .build());
+
+                    MessageUpdateCommand.from(
+                            MessageUpdateRequestDto.builder()
+                                    .content("updated message")
+                                    .build(),
+                            message.getId()
+                    ));
 
             // then
             Message findMessage = messageRepository.findById(message.getId()).orElseThrow();

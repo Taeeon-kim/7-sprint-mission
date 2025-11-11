@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
@@ -12,8 +13,8 @@ import java.util.UUID;
 public interface ChannelService {
 
     // 채널 생성
-    void createChannel(
-            UUID createdByUserId,  ChannelCreateRequestDto requestDto
+    UUID createChannel(
+            ChannelCreateCommand createCommand
     );
 
     // 채널 수정 -> 어차피 DB없으니 넘겨주는 값보고 같은지 비교후 다르면 해당 부분수정(그래야 "" 이런것도 지운걸로 인식할테니)
