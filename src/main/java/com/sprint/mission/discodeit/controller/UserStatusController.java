@@ -25,7 +25,7 @@ public class UserStatusController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @RequestMapping(value = "/users/{userId}/user-statuses", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/users/{userId}/userStatus", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateUserStatusByUserId(
             @PathVariable UUID userId,
             @RequestBody UserStatusUpdateRequestDto requestDto

@@ -64,7 +64,7 @@ public class BasicUserStatusService implements UserStatusService {
         }
 
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.lastActiveAt());
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }
@@ -78,7 +78,7 @@ public class BasicUserStatusService implements UserStatusService {
         }
 
         UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.lastActiveAt());
+        boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }
