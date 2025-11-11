@@ -46,7 +46,7 @@ public class ReadStatusController {
 
 
     @RequestMapping(value = "/readStatuses", method = RequestMethod.GET)
-    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam(required = true) UUID userId) {
+    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam UUID userId) {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);
         return ResponseEntity.ok(allReadStatusesByUserId);
     }
