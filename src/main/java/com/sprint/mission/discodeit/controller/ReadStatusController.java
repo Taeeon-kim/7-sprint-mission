@@ -35,7 +35,7 @@ public class ReadStatusController {
     }
 
     @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
-    public ResponseEntity<Void> updateReadStatusByUserId(
+    public ResponseEntity<Void> updateReadStatus(
             @PathVariable UUID id,
             @RequestBody ReadStatusUpdateRequestDto requestDto
     ) {

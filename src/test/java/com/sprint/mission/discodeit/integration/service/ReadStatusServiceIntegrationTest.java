@@ -237,11 +237,11 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             // when
-            Instant expectedReadAt = Instant.ofEpochMilli(1000L);
+            Instant expectedReadAt = Instant.now();
             readStatusService.updateReadStatus(
                     ReadStatusUpdateCommand.from(readStatusId,
                             ReadStatusUpdateRequestDto.builder()
-                                    .readAt(expectedReadAt)
+                                    .newLastReadAt(expectedReadAt)
                                     .build())
             );
 

@@ -39,9 +39,9 @@ public class BasicReadStatusService implements ReadStatusService {
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
 
-        if (channel.getType() == ChannelType.PUBLIC) {
-            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
-        }
+//        if (channel.getType() == ChannelType.PUBLIC) {
+//            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
+//        }
 
         for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
             if (readStatus.getChannelId().equals(channel.getId())) {

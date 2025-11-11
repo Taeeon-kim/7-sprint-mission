@@ -9,6 +9,6 @@ public record ReadStatusUpdateCommand(
 ) {
 
     public static ReadStatusUpdateCommand from(UUID id, ReadStatusUpdateRequestDto requestDto) {
-        return new ReadStatusUpdateCommand(id, requestDto.readAt());
+        return new ReadStatusUpdateCommand(id, requestDto.newLastReadAt());
     }
 }
