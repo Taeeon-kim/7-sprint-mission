@@ -9,9 +9,9 @@ public record MessageSendCommand(
         String content,
         List<UUID> binaryFileIds
 ) {
-    public static MessageSendCommand from(MessageSendRequestDto requestDto, UUID channelId) {
+    public static MessageSendCommand from(MessageSendRequestDto requestDto) {
         return new MessageSendCommand(
-                channelId,
+                requestDto.channelId(),
                 requestDto.senderId(),
                 requestDto.content(),
                 requestDto.binaryFileIds()

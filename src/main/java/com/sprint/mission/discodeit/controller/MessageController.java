@@ -36,20 +36,19 @@ public class MessageController {
     }
 
 
-    @RequestMapping(value = "/channels/{channelId}/messages", method = RequestMethod.POST)
+    @RequestMapping(value = "/messages", method = RequestMethod.POST)
     public ResponseEntity<UUID> sendMessageByChannelId(
-            @PathVariable UUID channelId,
             @RequestBody MessageSendRequestDto request
     ) {
-        MessageSendCommand cmd = MessageSendCommand.from(request, channelId);
+        MessageSendCommand cmd = MessageSendCommand.from(request);
         UUID messageId = messageService.sendMessageToChannel(cmd);
         return ResponseEntity.ok(messageId);
     }
 
 
-    @RequestMapping(value = "/channels/{channelId}/messages", method = RequestMethod.GET)
+    @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(
-            @PathVariable UUID channelId
+            @RequestParam UUID channelId
     ) {
         List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId);
         return ResponseEntity.ok(allMessagesByChannelId);
