@@ -20,13 +20,13 @@ public class ReadStatusController {
 
     private final ReadStatusService readStatusService;
 
-    @RequestMapping(value = "/read-statuses/{readStatusId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/readStatuses/{readStatusId}", method = RequestMethod.GET)
     public ResponseEntity<ReadStatusResponseDto> getReadStatus(@PathVariable UUID readStatusId) {
         ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
         return ResponseEntity.ok(readStatus);
     }
 
-    @RequestMapping(value = "/read-statuses", method = RequestMethod.POST)
+    @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
     public ResponseEntity<UUID> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request
     ) {
@@ -34,7 +34,7 @@ public class ReadStatusController {
         return ResponseEntity.ok(readStatusId);
     }
 
-    @RequestMapping(value = "/read-statuses/{id}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateReadStatusByUserId(
             @PathVariable UUID id,
             @RequestBody ReadStatusUpdateRequestDto requestDto
@@ -45,8 +45,8 @@ public class ReadStatusController {
     }
 
 
-    @RequestMapping(value = "/users/{userId}/read-statuses", method = RequestMethod.GET)
-    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@PathVariable UUID userId) {
+    @RequestMapping(value = "/readStatuses", method = RequestMethod.GET)
+    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam(required = true) UUID userId) {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);
         return ResponseEntity.ok(allReadStatusesByUserId);
     }
