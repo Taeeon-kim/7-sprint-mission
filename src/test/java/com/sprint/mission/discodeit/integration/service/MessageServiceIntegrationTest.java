@@ -73,7 +73,6 @@ public class MessageServiceIntegrationTest {
                     .role(RoleType.USER)
                     .password("password")
                     .nickname("nickname")
-                    .phoneNumber("010-2222-3333")
                     .build();
 
             userRepository.save(sender);
@@ -146,7 +145,6 @@ public class MessageServiceIntegrationTest {
                     .email("ee@exam.com")
                     .profileId(null)
                     .role(RoleType.USER)
-                    .phoneNumber("010-1111-1111")
                     .password("dsfsdfdf")
                     .build();
             userRepository.save(user);
@@ -206,7 +204,6 @@ public class MessageServiceIntegrationTest {
                     .email("ee@exam.com")
                     .profileId(null)
                     .role(RoleType.USER)
-                    .phoneNumber("010-1111-1111")
                     .password("dsfsdfdf")
                     .build();
             userRepository.save(user);
@@ -256,7 +253,6 @@ public class MessageServiceIntegrationTest {
                     .email("ee@exam.com")
                     .profileId(null)
                     .role(RoleType.USER)
-                    .phoneNumber("010-1111-1111")
                     .password("dsfsdfdf")
                     .build();
             userRepository.save(user);

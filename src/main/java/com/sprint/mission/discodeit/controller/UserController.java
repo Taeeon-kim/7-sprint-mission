@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.user.UserDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.service.UserService;
@@ -21,11 +22,12 @@ public class UserController {
 
     private final UserService userService;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, consumes = "multipart/form-data", produces = "application/json")
     public ResponseEntity<UUID> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
                                            @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
-        UUID uuid = userService.signUp(userSignupRequestDto);
+        UserSignupCommand command = UserSignupCommand.from(userSignupRequestDto, profile);
+        UUID uuid = userService.signUp(command);
         return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
     }
 

@@ -63,7 +63,7 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -98,7 +98,7 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -145,12 +145,12 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -218,12 +218,12 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -264,12 +264,12 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             Channel channel = Channel.createPrivateChannel();

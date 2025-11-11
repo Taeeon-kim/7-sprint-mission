@@ -88,7 +88,7 @@ public class UserControllerIntegrationTest {
         void signup_then_success() throws Exception {
             // given
             final String uri ="/api/users";
-            User user = User.create("test", "emaile@edsd.com", "password", RoleType.USER, "010-1111-1111", null);
+            User user = User.create("test", "emaile@edsd.com", "password", RoleType.USER,  null);
 
             // dto
             UserSignupRequestDto request = UserSignupRequestDto.builder()

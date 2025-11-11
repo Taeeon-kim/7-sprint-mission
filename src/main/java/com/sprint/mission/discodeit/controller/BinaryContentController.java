@@ -41,7 +41,7 @@ public class BinaryContentController {
 
     @RequestMapping(value = "/binary-contents", method = RequestMethod.POST)
     public ResponseEntity<UUID> createBinaryContent(
-            @RequestBody MultipartFile file
+            @RequestPart MultipartFile file
     ) {
         BinaryContentUploadCommand fileCommand = BinaryContentUploadCommand.from(file);
         UUID binaryId = binaryContentService.uploadBinaryContent(fileCommand);

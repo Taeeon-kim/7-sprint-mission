@@ -6,7 +6,6 @@ public record UserUpdateParams(
         String nickname,
         String email,
         String password,
-        String phoneNumber,
         UUID profileId
 ) {
 
@@ -15,7 +14,6 @@ public record UserUpdateParams(
                 dto.getNickname(),
                 dto.getEmail(),
                 dto.getPassword(),
-                dto.getPhoneNumber(),
                 dto.getProfileId()
         );
 

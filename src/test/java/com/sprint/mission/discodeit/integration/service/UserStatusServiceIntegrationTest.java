@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
@@ -61,7 +62,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 유저상태 생성 - 생성후 조회시 동일 데이터 반환 ")
         void create_persists_and_returns_same_data() {
             // given
-            User user = User.create("name", "emaile@example.com", "pwd", RoleType.USER, "010", null);
+            User user = User.create("name", "emaile@example.com", "pwd", RoleType.USER, null);
             User savedUser = userRepository.save(user);
             int before = userStatusRepository.findAll().size();
 
@@ -89,13 +90,8 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][negative] 유저상태 생성 - 이미 등록된 유저 중복 등록시 예외 발생")
         void create_whenDuplicate_thenThrows() {
             // given
-            UUID signedUserId = userService.signUp(
-                    new UserSignupRequestDto(
-                            "name",
-                            "email@ee.com",
-                            "pwd"
-                    )
-            );
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "email@ee.com", "pwd"), null);
+            UUID signedUserId = userService.signUp(command);
 
             // when & then
             assertThrows(IllegalArgumentException.class,
@@ -117,7 +113,6 @@ public class UserStatusServiceIntegrationTest {
                     .nickname("name")
                     .email("ab@email.com")
                     .password("password")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .profileId(null)
                     .build();
@@ -173,7 +168,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)
@@ -182,7 +176,6 @@ public class UserStatusServiceIntegrationTest {
             User user2 = User.builder()
                     .nickname("name2")
                     .email("email2@example.com")
-                    .phoneNumber("010-2222-4444")
                     .role(RoleType.USER)
                     .password("pwd2")
                     .profileId(null)
@@ -211,7 +204,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)
@@ -246,7 +238,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)
@@ -279,7 +270,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)
@@ -314,7 +304,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)
@@ -345,7 +334,6 @@ public class UserStatusServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("emaile@example.com")
-                    .phoneNumber("010-1111-2222")
                     .role(RoleType.USER)
                     .password("pwd")
                     .profileId(null)

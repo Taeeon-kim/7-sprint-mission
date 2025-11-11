@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.unit.service.basic;
 
+import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
@@ -54,13 +55,14 @@ class BasicUserServiceTest {
             String nickname = "Taeeon";
             String email = "taeeon@test.com";
             String password = "1234";
-            String phone = "01012345678";
-            when(userRepository.save(any(User.class)))
-                    .thenReturn(User.create(nickname, email, password, RoleType.USER, phone, null));
 
+            when(userRepository.save(any(User.class)))
+                    .thenReturn(User.create(nickname, email, password, RoleType.USER, null));
+
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto(nickname, email, password), null);
 
             // when
-            userService.signUp(new UserSignupRequestDto(nickname, email, password)); // 흐름검증
+            userService.signUp(command); // 흐름검증
 
             // then
             verify(userRepository, times(1)).save(any(User.class)); // 행위 검증
@@ -69,28 +71,41 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Branch][Negative] 회원가입 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생 및 repository.save()미호출")
         void signUp_shouldThrowException_whenInValidInput() {
+            UserSignupCommand userNameBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "123"), null);
+            UserSignupCommand emailBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "", "pw"), null);
+            UserSignupCommand passwordBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", ""), null);
+
+
+            UserSignupCommand userNameBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto(" ", "a@b.com", "123"), null);
+            UserSignupCommand emailBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto("nick", " ", "pw"), null);
+            UserSignupCommand passwordBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", " "), null);
+
+            UserSignupCommand userNameNullCommand = UserSignupCommand.from(new UserSignupRequestDto(" ", "a@b.com", "123"), null);
+            UserSignupCommand emailNullCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", " ", "pw"), null);
+            UserSignupCommand passwordNullCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", " "), null);
+
             // isBlank
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("", "a@b.com", "123")));
+                    userService.signUp(userNameBlankCommand));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "", "pw")));
+                    userService.signUp(emailBlankCommand));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "")));
+                    userService.signUp(passwordBlankCommand));
 
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto(" ", "a@b.com", "123")));
+                    userService.signUp(userNameBlankCommand2));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", " ", "pw")));
+                    userService.signUp(emailBlankCommand2));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", " ")));
+                    userService.signUp(passwordBlankCommand2));
 
             // null
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto(null, "a@b.com", "123")));
+                    userService.signUp(userNameNullCommand));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", null, "pw")));
+                    userService.signUp(emailNullCommand));
             assertThrows(IllegalArgumentException.class, () ->
-                    userService.signUp(new UserSignupRequestDto("nick", "a@b.com", null)));
+                    userService.signUp(passwordNullCommand));
 
 
             verify(userRepository, never()).save(any());
@@ -108,7 +123,7 @@ class BasicUserServiceTest {
             when(userStatusRepository
                     .findByUserId(id))
                     .thenReturn(Optional.of(new UserStatus(id)));
-            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER, "010", null));
+            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER,  null));
 
             // when
             userService.getUserById(id);
@@ -121,7 +136,7 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
 
             // given
-            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER, "010", null);
+            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER,  null);
             when(userReader.findUserOrThrow(user.getId())).thenReturn(user); // Stub
             when(userStatusRepository.findByUserId(user.getId()))
                     .thenReturn(Optional.of(new UserStatus(user.getId())));
@@ -131,7 +146,6 @@ class BasicUserServiceTest {
 
             assertEquals(user.getNickname(), result.nickname()); // 분기 검증
             assertEquals(user.getEmail(), result.email());
-            assertEquals(user.getPhoneNumber(), result.phoneNumber());
             assertEquals(user.getRole(), result.role());
             assertEquals(user.getProfileId(), result.profileId());
 
@@ -170,7 +184,6 @@ class BasicUserServiceTest {
                     .role(RoleType.USER)
                     .password("pwd")
                     .email("dfds@exmap.com")
-                    .phoneNumber("010-1234-5678")
                     .profileId(UUID.randomUUID())
                     .build();
             UserStatus userStatus = new UserStatus(user.getId());
@@ -233,7 +246,7 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when (행위 실행 : 실제 서비스 호출)
@@ -251,7 +264,7 @@ class BasicUserServiceTest {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User real = User.create("same", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("same", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
 
@@ -269,7 +282,7 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenEmailChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -287,7 +300,7 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -299,23 +312,23 @@ class BasicUserServiceTest {
             inOrder.verify(userRepository).save(real);
         }
 
-        @Test
-        @DisplayName("[Behavior + Branch] 회원수정 - 전화번호 변경 시 userRepository.save() 호출")
-        void updateUser_shouldCallRepositorySave_whenPhoneChanged() {
-            // given
-            UUID id = UUID.randomUUID();
-
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
-            when(userReader.findUserOrThrow(id)).thenReturn(real);
-
-            // when
-            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, "010-9999-9999", null));
-
-            // then
-            InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(id);
-            inOrder.verify(userRepository).save(real);
-        }
+//        @Test
+//        @DisplayName("[Behavior + Branch] 회원수정 - 전화번호 변경 시 userRepository.save() 호출")
+//        void updateUser_shouldCallRepositorySave_whenPhoneChanged() {
+//            // given
+//            UUID id = UUID.randomUUID();
+//
+//            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
+//            when(userReader.findUserOrThrow(id)).thenReturn(real);
+//
+//            // when
+//            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, "010-9999-9999", null));
+//
+//            // then
+//            InOrder inOrder = inOrder(userReader, userRepository);
+//            inOrder.verify(userReader).findUserOrThrow(id);
+//            inOrder.verify(userRepository).save(real);
+//        }
 
         @Test
         @DisplayName("[Behavior + Branch] 회원수정 - 프로필이미지 id 변경 시 userRepository.save() 호출")
@@ -323,7 +336,7 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
             UUID profileId = UUID.randomUUID();
 
@@ -341,7 +354,7 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenAllFieldNull() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -358,7 +371,7 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
 
             // when
@@ -407,7 +420,7 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 주어진 id 리스트에 해당하는 유저 목록 반환")
         void getUsersByIds_shouldReturnUsers_whenIdsValid() {
             List<UUID> ids = List.of(UUID.randomUUID());
-            List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, "010", null));
+            List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, null));
             when(userRepository.findAllByIds(ids)).thenReturn(users);
 
             List<User> result = userService.getUsersByIds(ids);

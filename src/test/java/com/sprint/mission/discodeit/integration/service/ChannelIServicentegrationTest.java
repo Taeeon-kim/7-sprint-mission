@@ -81,7 +81,6 @@ public class ChannelIServicentegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
@@ -117,7 +116,7 @@ public class ChannelIServicentegrationTest {
         void createChannel_public_throws_when_invalid_fields() {
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             // DTO 시그니처: (title, description, type, memberIds)
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(" ", null, null);
@@ -132,15 +131,15 @@ public class ChannelIServicentegrationTest {
             // given
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             User m1 = userRepository.save(User.builder()
                     .nickname("m1").email("m1@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             User m2 = userRepository.save(User.builder()
                     .nickname("m2").email("m2@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             ChannelCreateRequestDto dto = new ChannelCreateRequestDto(
                     null, null, List.of(m1.getId(), m2.getId())
@@ -188,7 +187,7 @@ public class ChannelIServicentegrationTest {
         void createChannel_private_throws_when_member_not_found() {
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
                     null, null, List.of(UUID.randomUUID()) // 존재하지 않는 유저
@@ -218,7 +217,6 @@ public class ChannelIServicentegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
@@ -271,7 +269,6 @@ public class ChannelIServicentegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
@@ -304,7 +301,7 @@ public class ChannelIServicentegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel channel = channelRepository.save(
                     Channel.createPublicChannel("공지", "전체 공지")
@@ -334,7 +331,6 @@ public class ChannelIServicentegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
@@ -408,7 +404,6 @@ public class ChannelIServicentegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
@@ -431,7 +426,6 @@ public class ChannelIServicentegrationTest {
                     .email("aaaaac@ex.com")
                     .password("p111w")
                     .role(RoleType.USER)
-                    .phoneNumber("010-1111-2222")
                     .build());
 
             User member2 = userRepository.save(User.builder()
@@ -439,7 +433,6 @@ public class ChannelIServicentegrationTest {
                     .email("xxxx@ex.com")
                     .password("xxx")
                     .role(RoleType.USER)
-                    .phoneNumber("010-3333-4444")
                     .build());
 
 
@@ -495,7 +488,7 @@ public class ChannelIServicentegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel channel = channelRepository.save(
                     Channel.createPublicChannel("공지", "전체 공지")
@@ -546,7 +539,7 @@ public class ChannelIServicentegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel privateChannel = channelRepository.save(
                     Channel.createPrivateChannel()
@@ -571,17 +564,17 @@ public class ChannelIServicentegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member1 = userRepository.save(
                     User.builder().nickname("member1").email("csdd@ex.com")
-                            .password("pssw").role(RoleType.USER).phoneNumber("010-2222-2222").build()
+                            .password("pssw").role(RoleType.USER).build()
             );
 
             User member2 = userRepository.save(
                     User.builder().nickname("member2").email("cfffsdd@ex.com")
-                            .password("pssssw").role(RoleType.USER).phoneNumber("010-3333-4444").build()
+                            .password("pssssw").role(RoleType.USER).build()
             );
             ChannelCreateRequestDto dto = ChannelCreateRequestDto.builder()
                     .name("private")

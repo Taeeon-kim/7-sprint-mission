@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.*;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -10,6 +11,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,28 +36,33 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UUID signUp(UserSignupRequestDto request) {
+    public UUID signUp(UserSignupCommand userSignupCommand) { // TODO: 추후 Command로 분리
         if (
-                request.getUsername() == null ||
-                        request.getUsername().isBlank() ||
-                        request.getPassword() == null ||
-                        request.getPassword().isBlank() ||
-                        request.getEmail() == null || request.getEmail().isBlank()
+                userSignupCommand.username() == null ||
+                        userSignupCommand.username().isBlank() ||
+                        userSignupCommand.password() == null ||
+                        userSignupCommand.password().isBlank() ||
+                        userSignupCommand.email() == null || userSignupCommand.email().isBlank()
 
         ) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        if (userRepository.existsByEmail(request.getEmail()) || userRepository.existsByNickname(request.getUsername())) {
+        if (userRepository.existsByEmail(userSignupCommand.email()) || userRepository.existsByNickname(userSignupCommand.username())) {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
 
-        User newUser = User.create(request.getUsername(),
-                request.getEmail(),
-                request.getPassword(),
+        UUID profileBinaryId = userSignupCommand.profile().map(file -> {
+            BinaryContent binaryContent = new BinaryContent(file.fileName(), file.contentType(), file.bytes());
+            BinaryContent saved = binaryContentRepository.save(binaryContent);
+            return saved.getId();
+        }).orElse(null);
+
+        User newUser = User.create(userSignupCommand.username(),
+                userSignupCommand.email(),
+                userSignupCommand.password(),
                 USER,
-                null,  // TODO: dto에서 PHone필요없는데 핸드폰관련 체크
-                null // TODO: 추후 이미지 생성후 받은 반환값 넣기
+                profileBinaryId
         );
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가

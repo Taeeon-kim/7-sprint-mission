@@ -46,7 +46,6 @@ public class AuthServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .profileId(null)
                     .role(RoleType.USER)
                     .password("password")
@@ -69,7 +68,6 @@ public class AuthServiceIntegrationTest {
                     () -> assertEquals(saved.getNickname(), loginUser.nickname()),
                     () -> assertEquals(saved.getProfileId(), loginUser.profileId()),
                     () -> assertEquals(saved.getRole(), loginUser.role()),
-                    () -> assertEquals(saved.getPhoneNumber(), loginUser.phoneNumber()),
                     () -> assertEquals(saved.getEmail(), loginUser.email()),
                     () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
             );
@@ -84,7 +82,6 @@ public class AuthServiceIntegrationTest {
                     .role(RoleType.USER)
                     .profileId(null)
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .nickname("name")
                     .password("password")
                     .build();
