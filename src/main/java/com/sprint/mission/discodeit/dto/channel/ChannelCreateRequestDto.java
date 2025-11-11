@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @Builder
 public record ChannelCreateRequestDto(
-        UUID userId,
         String title,
         String description,
         ChannelType type,

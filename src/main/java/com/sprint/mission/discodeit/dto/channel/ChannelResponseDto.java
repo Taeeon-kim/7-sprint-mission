@@ -14,7 +14,6 @@ public record ChannelResponseDto(
         String description,
         Set<UUID> userIds,
         List<UUID> messageIds,
-        UUID createdByUserId,
         ChannelType type,
         Instant currentMessagedAt
 
@@ -28,7 +27,6 @@ public record ChannelResponseDto(
                 channel.getDescription(),
                 channel.getUserIds(),
                 channel.getMessageIds(),
-                channel.getCreatedByUserId(),
                 channel.getType(),
                 currentMessagedAt
         );

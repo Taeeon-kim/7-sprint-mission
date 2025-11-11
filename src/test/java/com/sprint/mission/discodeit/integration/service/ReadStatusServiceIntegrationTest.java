@@ -66,7 +66,7 @@ public class ReadStatusServiceIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             channelRepository.save(channel);
             int before = readStatusRepository.findAll().size();
 
@@ -101,7 +101,7 @@ public class ReadStatusServiceIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             channelRepository.save(channel);
 
 
@@ -153,10 +153,10 @@ public class ReadStatusServiceIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             Channel savedChannel = channelRepository.save(channel);
 
-            Channel channel2 = Channel.createPrivateChannel(creator.getId());
+            Channel channel2 = Channel.createPrivateChannel();
             Channel savedChannel2 = channelRepository.save(channel2);
 
 
@@ -226,7 +226,7 @@ public class ReadStatusServiceIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
 
             Channel savedChannel = channelRepository.save(channel);
 
@@ -272,7 +272,7 @@ public class ReadStatusServiceIntegrationTest {
                             .password("pw").role(RoleType.USER).phoneNumber("010").build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
 
             Channel savedChannel = channelRepository.save(channel);
 

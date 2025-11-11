@@ -77,7 +77,7 @@ public class MessageServiceIntegrationTest {
                     .build();
 
             userRepository.save(sender);
-            Channel publicChannel = Channel.createPublicChannel(sender.getId(), "channel", "description");
+            Channel publicChannel = Channel.createPublicChannel("channel", "description");
             publicChannel.addUserId(sender.getId());
             channelRepository.save(publicChannel);
 
@@ -151,7 +151,7 @@ public class MessageServiceIntegrationTest {
                     .build();
             userRepository.save(user);
 
-            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            Channel publicChannel = Channel.createPublicChannel( "title", "description");
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 
@@ -211,7 +211,7 @@ public class MessageServiceIntegrationTest {
                     .build();
             userRepository.save(user);
 
-            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            Channel publicChannel = Channel.createPublicChannel( "title", "description");
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 
@@ -261,7 +261,7 @@ public class MessageServiceIntegrationTest {
                     .build();
             userRepository.save(user);
 
-            Channel publicChannel = Channel.createPublicChannel(user.getId(), "title", "description");
+            Channel publicChannel = Channel.createPublicChannel("title", "description");
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 

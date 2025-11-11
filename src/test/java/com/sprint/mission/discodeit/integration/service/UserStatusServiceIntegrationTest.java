@@ -229,7 +229,7 @@ public class UserStatusServiceIntegrationTest {
             // then
             UserStatus userStatus = userStatusRepository.findById(savedStatus.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
             assertNotEquals(userStatus.getLastActiveAt(), before);
-            assertEquals(userStatus.getLastActiveAt(), updateDto.lastActiveAt());
+            assertEquals(userStatus.getLastActiveAt(), updateDto.newLastActiveAt());
         }
 
         @Test
@@ -297,7 +297,7 @@ public class UserStatusServiceIntegrationTest {
             // then
             UserStatus userStatus = userStatusRepository.findByUserId(savedStatus.getUserId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
             assertNotEquals(userStatus.getLastActiveAt(), before);
-            assertEquals(userStatus.getLastActiveAt(), updateDto.lastActiveAt());
+            assertEquals(userStatus.getLastActiveAt(), updateDto.newLastActiveAt());
         }
 
         @Test
