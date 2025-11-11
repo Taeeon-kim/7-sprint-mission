@@ -18,7 +18,7 @@ public class BinaryContentController {
 
     private final BinaryContentService binaryContentService;
 
-    @RequestMapping("/binary-contents/{id}")
+    @RequestMapping("/binaryContents/{id}")
     public ResponseEntity<BinaryContentResponseDto> getBinaryContent(
             @PathVariable UUID id
     ) {
@@ -26,7 +26,7 @@ public class BinaryContentController {
         return ResponseEntity.ok(binaryContent);
     }
 
-    @RequestMapping(value = "/binary-contents", method = RequestMethod.GET)
+    @RequestMapping(value = "/binaryContents", method = RequestMethod.GET)
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
             @RequestParam(required = false) List<UUID> ids
     ) {
@@ -39,7 +39,7 @@ public class BinaryContentController {
         return ResponseEntity.ok(binaryContents);
     }
 
-    @RequestMapping(value = "/binary-contents", method = RequestMethod.POST)
+    @RequestMapping(value = "/binaryContents", method = RequestMethod.POST)
     public ResponseEntity<UUID> createBinaryContent(
             @RequestPart MultipartFile file
     ) {
