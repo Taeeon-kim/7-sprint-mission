@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ public class BinaryContent implements Serializable {
         this.id = UUID.randomUUID();
     }
 
+    @Builder
     public BinaryContent(String fileName, String contentType, byte[] bytes) {
         this();
         this.fileName = fileName;

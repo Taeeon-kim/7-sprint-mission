@@ -2,9 +2,13 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
@@ -24,6 +28,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ReadStatusRepository readStatusRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
+    private final ChannelRepository channelRepository;
 
     @Override
     public UUID createReadStatus(ReadStatusCreateRequestDto requestDto) {
@@ -31,9 +36,12 @@ public class BasicReadStatusService implements ReadStatusService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
-
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
+
+//        if (channel.getType() == ChannelType.PUBLIC) {
+//            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
+//        }
 
         for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
             if (readStatus.getChannelId().equals(channel.getId())) {
@@ -41,6 +49,7 @@ public class BasicReadStatusService implements ReadStatusService {
             }
         }
 
+        channel.addUserId(requestDto.userId());
 
         ReadStatus readStatus = ReadStatus.builder()
                 .userId(user.getId())
@@ -48,6 +57,7 @@ public class BasicReadStatusService implements ReadStatusService {
                 .readAt(Instant.now())
                 .build();
 
+        channelRepository.save(channel);
         ReadStatus saved = readStatusRepository.save(readStatus);
         return saved.getId();
     }
@@ -65,4 +75,20 @@ public class BasicReadStatusService implements ReadStatusService {
                 .map(ReadStatusResponseDto::from)
                 .toList();
     }
+
+    @Override
+    public void updateReadStatus(ReadStatusUpdateCommand command) {
+        ReadStatus readStatusById = readStatusRepository.findById(command.id()).orElseThrow();
+
+        boolean isUpdated = readStatusById.updateReadAt(command.readAt());
+        if (isUpdated) {
+            readStatusRepository.save(readStatusById);
+        }
+    }
+
+    @Override
+    public void deleteReadStatus(UUID id) {
+        readStatusRepository.deleteById(id);
+    }
+
 }

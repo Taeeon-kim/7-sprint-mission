@@ -3,13 +3,16 @@ package com.sprint.mission.discodeit.repository.file;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.store.Store;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",  // 접두어
+        name = "type", // 참조해야할 속성 키값
+        havingValue = "file") //
 @Repository
 public class FileUserRepository implements UserRepository {
-
 
     @Override
     public User save(User user) {

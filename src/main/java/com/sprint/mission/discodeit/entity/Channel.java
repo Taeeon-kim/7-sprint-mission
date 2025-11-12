@@ -19,11 +19,10 @@ public class Channel extends BasicEntity {
     private String description;
     private final Set<UUID> userIds;
     private final List<UUID> messageIds; // TODO: 추후 DB 및 레포지토리 계층 사용시 효율성을 위해 Message객체가아닌 messageId만 받는것 고려할 것, 채널이 모든 객체 정보를 가질 필요가있는지 먼저 생각
-    private final UUID createdByUserId; // NOTE: 작성자는 수정못하게 final, 해당 유저가 지워질걸 고려해서 User가아닌 userId로 받기
     private final ChannelType type;
 
 
-    private Channel(String title, String description, UUID createdByUserId, ChannelType type) {
+    private Channel(String title, String description, ChannelType type) {
 
         if (type == ChannelType.PUBLIC) {
             if (title == null || title.isBlank()) {
@@ -34,24 +33,21 @@ public class Channel extends BasicEntity {
             }
 
         }
-        if (createdByUserId == null) {
-            throw new IllegalArgumentException("createdByUserId is null");
-        }
+
 
         this.title = title;
         this.description = description;
-        this.createdByUserId = createdByUserId;
         this.type = type;
         this.userIds = new HashSet<>();
         this.messageIds = new ArrayList<>();
     }
 
-    public static Channel createPublicChannel(UUID createdByUserId, String title, String description) {
-        return new Channel(title, description, createdByUserId, ChannelType.PUBLIC);
+    public static Channel createPublicChannel(String title, String description) {
+        return new Channel(title, description, ChannelType.PUBLIC);
     }
 
-    public static Channel createPrivateChannel(UUID createdByUserId) {
-        return new Channel(null, null, createdByUserId, ChannelType.PRIVATE);
+    public static Channel createPrivateChannel() {
+        return new Channel(null, null, ChannelType.PRIVATE);
     }
 
 
@@ -99,10 +95,6 @@ public class Channel extends BasicEntity {
         return messageIds.stream().toList();
     }
 
-    public UUID getCreatedByUserId() {
-        return createdByUserId;
-    }
-
 
     // TODO: Users 에대한 업데이트는 좀더 고려할것 일반적으로 값만 대입하는게 아닌 List로 User를 지우는지,추가하는지 에대한 내용
     // 만약 User내용자체가 바뀌었다면 Channel에서 고려할사항은 아님 어차피 주소값이 있기때문에 알아서 바뀐 User로 될거니깐
@@ -133,9 +125,8 @@ public class Channel extends BasicEntity {
         boolean changeFlag = false;
         changeFlag |= this.updateTitle(params.title());
         changeFlag |= this.updateDescription(params.description());
-        if(changeFlag){
-
-        this.setUpdatedAt(Instant.now());
+        if (changeFlag) {
+            this.setUpdatedAt(Instant.now());
         }
         return changeFlag;
     }

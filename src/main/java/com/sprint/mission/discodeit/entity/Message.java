@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+
 public class Message extends BasicEntity {
     private static final long serialVersionUID = 1L;
     private String content;
@@ -15,6 +17,7 @@ public class Message extends BasicEntity {
     private final UUID channelId; // TODO: Channel과 연관관계 체크할것
     private List<UUID> attachmentIds;
 
+    @Builder
     public Message(String content, UUID senderId, UUID channelId, List<UUID> attachmentIds) {
 
         if (content == null || content.isBlank()) {
@@ -31,7 +34,7 @@ public class Message extends BasicEntity {
         this.senderId = senderId;
 //        this.receiverId = receiverId;
         this.channelId = channelId;
-        this.attachmentIds = (attachmentIds == null || attachmentIds.isEmpty()) ? new ArrayList<>() : attachmentIds;
+        this.attachmentIds = (attachmentIds == null) ? new ArrayList<>() : attachmentIds;
     }
 
 

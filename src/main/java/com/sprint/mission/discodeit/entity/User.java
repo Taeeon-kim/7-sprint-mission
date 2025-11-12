@@ -16,7 +16,6 @@ public class User extends BasicEntity {
     private String email;
     private String password;
     private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
-    private String phoneNumber;
     private UUID profileId;
 //    private final List<User> friends;
 
@@ -25,7 +24,7 @@ public class User extends BasicEntity {
     }
 
     @Builder
-    private User(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
+    private User(String nickname, String email, String password, RoleType role, UUID profileId) {
         super();
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
@@ -40,7 +39,6 @@ public class User extends BasicEntity {
         this.email = email;
         this.password = password;
         this.role = role;
-        this.phoneNumber = phoneNumber;
         this.profileId = profileId;
     }
 
@@ -51,7 +49,6 @@ public class User extends BasicEntity {
         this.email = other.email;
         this.password = other.password;
         this.role = other.role;
-        this.phoneNumber = other.phoneNumber;
         this.profileId = other.profileId;
 //        this.friends = new ArrayList<>(other.friends);
     }
@@ -60,17 +57,16 @@ public class User extends BasicEntity {
         return new User(other);
     }
 
-    public static User create(String nickname, String email, String password, RoleType role, String phoneNumber, UUID profileId) {
-        return new User(nickname, email, password, role, phoneNumber, profileId);
+    public static User create(String nickname, String email, String password, RoleType role, UUID profileId) {
+        return new User(nickname, email, password, role, profileId);
     }
 
     public boolean update(UserUpdateParams request) {
         boolean changeFlag = false;
-        changeFlag |= this.updateNickname(request.getNickname());
-        changeFlag |= this.updateEmail(request.getEmail());
-        changeFlag |= this.updatePassword(request.getPassword());
-        changeFlag |= this.updatePhoneNumber(request.getPhoneNumber());
-        changeFlag |= this.updateProfileId(request.getProfileId());
+        changeFlag |= this.updateNickname(request.nickname());
+        changeFlag |= this.updateEmail(request.email());
+        changeFlag |= this.updatePassword(request.password());
+        changeFlag |= this.updateProfileId(request.profileId());
         if (changeFlag) {
             this.setUpdatedAt(Instant.now());
         }
@@ -105,14 +101,6 @@ public class User extends BasicEntity {
     public boolean updateEmail(String email) {
         if (email != null && !email.isBlank() && !email.equals(this.email)) {
             this.email = email;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean updatePhoneNumber(String phoneNumber) {
-        if (phoneNumber != null && !phoneNumber.isBlank() && !phoneNumber.equals(this.phoneNumber)) {
-            this.phoneNumber = phoneNumber;
             return true;
         }
         return false;

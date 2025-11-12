@@ -2,17 +2,20 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true)
+@Repository
 public class JCFBinaryContentRepository implements BinaryContentRepository {
 
-    private final Map<UUID, BinaryContent> data;
-
-    public JCFBinaryContentRepository(Map<UUID, BinaryContent> data) {
-        this.data = data;
-    }
-
+    private final Map<UUID, BinaryContent> data = new ConcurrentHashMap<>();
 
     @Override
     public BinaryContent save(BinaryContent content) {
@@ -40,8 +43,13 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     @Override
     public List<BinaryContent> findAllByIds(List<UUID> ids) {
         return ids.stream()
-                .map((id)-> data.get(id)) // // O(N) + O(1) = O(N)
-                .filter((binaryContent)-> Objects.nonNull(binaryContent))
+                .map((id) -> data.get(id)) // // O(N) + O(1) = O(N)
+                .filter((binaryContent) -> Objects.nonNull(binaryContent))
                 .toList();
+    }
+
+    @Override
+    public Map<UUID, BinaryContent> findAllMap() {
+        return data;
     }
 }

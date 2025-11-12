@@ -1,7 +1,9 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -16,9 +18,9 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -27,8 +29,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReadStatusIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
+public class ReadStatusServiceIntegrationTest {
+
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
     private ReadStatusRepository readStatusRepository;
@@ -38,12 +40,12 @@ public class ReadStatusIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        channelRepository = new JCFChannelRepository(store.channels);
-        readStatusRepository = new JCFReadStatusRepository(store.readStatuses);
+        userRepository = new JCFUserRepository();
+        channelRepository = new JCFChannelRepository();
+        readStatusRepository = new JCFReadStatusRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
-        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader);
+        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader, channelRepository);
     }
 
     @AfterEach
@@ -61,11 +63,10 @@ public class ReadStatusIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             channelRepository.save(channel);
             int before = readStatusRepository.findAll().size();
 
@@ -97,11 +98,10 @@ public class ReadStatusIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             channelRepository.save(channel);
 
 
@@ -145,19 +145,18 @@ public class ReadStatusIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
-            Channel channel = Channel.createPrivateChannel(creator.getId());
-            channel.addUserId(creator.getId());
+            Channel channel = Channel.createPrivateChannel();
             Channel savedChannel = channelRepository.save(channel);
 
-            Channel channel2 = Channel.createPrivateChannel(creator.getId());
+            Channel channel2 = Channel.createPrivateChannel();
             Channel savedChannel2 = channelRepository.save(channel2);
 
 
@@ -204,11 +203,94 @@ public class ReadStatusIntegrationTest {
                     () -> assertEquals(2, allReadStatusesByUserId2.size()),
                     () -> assertEquals(Set.of(readStatusId3, readStatusId4), readStatusIds2),
                     () -> assertTrue(allReadStatusesByUserId2.stream().allMatch(readStatus -> readStatus.userId().equals(member.getId())))
-
-
             );
 
         }
+    }
+
+    @Nested
+    @DisplayName("updateReadStatus")
+    class updateReadStatus {
+
+        @Test
+        @DisplayName("[Integration][Positive] 읽음상태 수정 - 변경값 비교 일치")
+        void updateReadStatus_then_changed_values() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).build()
+            );
+
+            User member = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).build()
+            );
+
+            Channel channel = Channel.createPrivateChannel();
+
+            Channel savedChannel = channelRepository.save(channel);
+
+            UUID readStatusId = readStatusService.createReadStatus(
+                    ReadStatusCreateRequestDto.builder()
+                            .userId(creator.getId())
+                            .channelId(channel.getId()).build()
+            );
+
+            // when
+            Instant expectedReadAt = Instant.now();
+            readStatusService.updateReadStatus(
+                    ReadStatusUpdateCommand.from(readStatusId,
+                            ReadStatusUpdateRequestDto.builder()
+                                    .newLastReadAt(expectedReadAt)
+                                    .build())
+            );
+
+            // then
+            Instant readAt = readStatusRepository.findById(readStatusId).orElseThrow().getReadAt();
+            assertEquals(expectedReadAt, readAt);
+
+        }
+        //TODO: 예외 추가(isBofre 이아닌 미래값)
+    }
+
+    @Nested
+    @DisplayName("deleteReadStatus")
+    class deleteReadStatus {
+
+
+        @Test
+        @DisplayName("[Integration][Positive] 읽음상태 삭제 - 삭제 후 조회 불가")
+        void deleteReadStatus_then_not_found() {
+            // given
+            User creator = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).build()
+            );
+
+            User member = userRepository.save(
+                    User.builder().nickname("creator").email("c@ex.com")
+                            .password("pw").role(RoleType.USER).build()
+            );
+
+            Channel channel = Channel.createPrivateChannel();
+
+            Channel savedChannel = channelRepository.save(channel);
+
+            UUID readStatusId = readStatusService.createReadStatus(
+                    ReadStatusCreateRequestDto.builder()
+                            .userId(creator.getId())
+                            .channelId(channel.getId()).build()
+            );
+
+            // when
+            readStatusService.deleteReadStatus(readStatusId);
+
+            // then
+            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+
+
+        }
+
     }
 
 }

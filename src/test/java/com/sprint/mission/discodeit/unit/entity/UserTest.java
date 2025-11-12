@@ -1,5 +1,6 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.unit.entity;
 
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserTest {
 
     private User newUser() {
-        return User.create("name", "example@email.com", "password123", RoleType.USER, "010-1111-1111", null);
+        return User.create("name", "example@email.com", "password123", RoleType.USER, null);
     }
 
     @Nested
@@ -23,15 +24,15 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 필수입력값 유효하지않으면 예외")
         void constructor_shouldThrowException_whenRequiredFieldsInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create(null, null, null, null, null, null));
+                    () -> User.create(null, null, null, null, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create(null, "a@b.com", "pw", RoleType.USER, "010", null));
+                    () -> User.create(null, "a@b.com", "pw", RoleType.USER, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "invalid", "pw", RoleType.USER, "010", null));
+                    () -> User.create("nick", "invalid", "pw", RoleType.USER, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "a@b.com", "", RoleType.USER, "010", null));
+                    () -> User.create("nick", "a@b.com", "", RoleType.USER, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "a@b.com", "pw", null, "010", null));
+                    () -> User.create("nick", "a@b.com", "pw", null, null));
         }
 
 
@@ -39,7 +40,7 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 이메일 형식이 잘못되면 예외")
         void constructor_shouldThrow_whenEmailInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("name", "invalid", "pw", RoleType.USER, "010", null));
+                    () -> User.create("name", "invalid", "pw", RoleType.USER, null));
         }
 
         @Test
@@ -51,7 +52,6 @@ public class UserTest {
             assertEquals("example@email.com", u.getEmail());
             assertEquals("password123", u.getPassword());
             assertEquals(RoleType.USER, u.getRole());
-            assertEquals("010-1111-1111", u.getPhoneNumber());
             assertNotNull(u.getId());
             assertNotNull(u.getCreatedAt());
             assertNotNull(u.getUpdatedAt());
@@ -159,36 +159,36 @@ public class UserTest {
         }
     }
 
-    @Nested
-    @DisplayName("User 전화번호 변경 규칙")
-    class PhoneRule {
-        @Test
-        @DisplayName("[Rule][Positive] 유효하고 기존과 다르면 변경된다")
-        void updatePhone_shouldChange_whenValidAndDifferent() {
-            User u = newUser();
-            assertTrue(u.updatePhoneNumber("011"));
-            assertEquals("011", u.getPhoneNumber());
-        }
-
-        @Test
-        @DisplayName("[Rule][Negative] 전화번호가 null/blank면 변경되지 않는다")
-        void updatePhone_shouldNotChange_whenNullOrBlank() {
-            User u = newUser();
-            assertFalse(u.updatePhoneNumber(null));
-            assertEquals("010-1111-1111", u.getPhoneNumber());
-
-            assertFalse(u.updatePhoneNumber(""));
-            assertEquals("010-1111-1111", u.getPhoneNumber());
-        }
-
-        @Test
-        @DisplayName("[Rule][Negative] 전화번호가 동일하면 변경되지 않는다")
-        void updatePhone_shouldNotChange_whenSame() {
-            User u = newUser();
-            assertFalse(u.updatePhoneNumber("010-1111-1111"));
-            assertEquals("010-1111-1111", u.getPhoneNumber());
-        }
-    }
+//    @Nested
+//    @DisplayName("User 전화번호 변경 규칙")
+//    class PhoneRule {
+//        @Test
+//        @DisplayName("[Rule][Positive] 유효하고 기존과 다르면 변경된다")
+//        void updatePhone_shouldChange_whenValidAndDifferent() {
+//            User u = newUser();
+//            assertTrue(u.updatePhoneNumber("011"));
+//            assertEquals("011", u.getPhoneNumber());
+//        }
+//
+//        @Test
+//        @DisplayName("[Rule][Negative] 전화번호가 null/blank면 변경되지 않는다")
+//        void updatePhone_shouldNotChange_whenNullOrBlank() {
+//            User u = newUser();
+//            assertFalse(u.updatePhoneNumber(null));
+//            assertEquals("010-1111-1111", u.getPhoneNumber());
+//
+//            assertFalse(u.updatePhoneNumber(""));
+//            assertEquals("010-1111-1111", u.getPhoneNumber());
+//        }
+//
+//        @Test
+//        @DisplayName("[Rule][Negative] 전화번호가 동일하면 변경되지 않는다")
+//        void updatePhone_shouldNotChange_whenSame() {
+//            User u = newUser();
+//            assertFalse(u.updatePhoneNumber("010-1111-1111"));
+//            assertEquals("010-1111-1111", u.getPhoneNumber());
+//        }
+//    }
 
     @Nested
     @DisplayName("User 복사 생성자 상태")
@@ -207,7 +207,6 @@ public class UserTest {
             assertEquals(original.getEmail(), copy.getEmail());
             assertEquals(original.getPassword(), copy.getPassword());
             assertEquals(original.getRole(), copy.getRole());
-            assertEquals(original.getPhoneNumber(), copy.getPhoneNumber());
             assertNotSame(original, copy);
         }
     }

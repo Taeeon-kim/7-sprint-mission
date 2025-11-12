@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.store.Store;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,6 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",  // 접두어
+        name = "type", // 참조해야할 속성 키값
+        havingValue = "file") //
 @Repository
 public class FileChannelRepository implements ChannelRepository {
 

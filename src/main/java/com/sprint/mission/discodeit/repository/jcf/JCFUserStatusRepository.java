@@ -2,18 +2,19 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+@ConditionalOnProperty(prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true)
+@Repository
 public class JCFUserStatusRepository implements UserStatusRepository {
-    private final Map<UUID, UserStatus> data;
-
-    public JCFUserStatusRepository(Map<UUID, UserStatus> data) {
-        this.data = data;
-    }
+    private final Map<UUID, UserStatus> data = new ConcurrentHashMap<>();
 
     @Override
     public UserStatus save(UserStatus userStatus) {
@@ -51,5 +52,10 @@ public class JCFUserStatusRepository implements UserStatusRepository {
         return data.values()
                 .stream()
                 .anyMatch((userStatus) -> userStatus.getUserId().equals(userId));
+    }
+
+    @Override
+    public Map<UUID, UserStatus> findAllMap() {
+        return data;
     }
 }

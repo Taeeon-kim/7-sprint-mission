@@ -1,5 +1,6 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateRequestDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
@@ -13,9 +14,12 @@ import com.sprint.mission.discodeit.repository.*;
 import com.sprint.mission.discodeit.repository.jcf.*;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import com.sprint.mission.discodeit.service.factory.ChannelCreator;
+import com.sprint.mission.discodeit.service.factory.ChannelFactory;
+import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
+import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,9 +35,7 @@ import java.util.stream.Collectors;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ChannelIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
-
+public class ChannelIServicentegrationTest {
     private UserRepository userRepository;
     private ChannelRepository channelRepository;
     private ReadStatusRepository readStatusRepository;
@@ -42,25 +44,28 @@ public class ChannelIntegrationTest {
     private UserReader userReader;
     private ChannelReader channelReader;
     private UserStatusRepository userStatusRepository;
+    private List<ChannelCreator> channelCreators;
+    private ChannelFactory channelFactory;
 
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        channelRepository = new JCFChannelRepository(store.channels);
-        readStatusRepository = new JCFReadStatusRepository(store.readStatuses);
-        messageRepository = new JCFMessageRepository(store.messages);
+        userRepository = new JCFUserRepository();
+        channelRepository = new JCFChannelRepository();
+        readStatusRepository = new JCFReadStatusRepository();
+        messageRepository = new JCFMessageRepository();
         userReader = new UserReader(userRepository);
         channelReader = new ChannelReader(channelRepository);
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
-
+        userStatusRepository = new JCFUserStatusRepository();
+        channelCreators = List.of(new PublicChannelCreator(userReader), new PrivateChannelCreator(userReader));
+        channelFactory = new ChannelFactory(channelCreators);
         channelService = new BasicChannelService(
                 channelRepository,
                 messageRepository,
                 userReader,
                 channelReader,
-                userStatusRepository,
-                readStatusRepository);
+                readStatusRepository,
+                channelFactory);
     }
 
     @Nested
@@ -76,17 +81,18 @@ public class ChannelIntegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
-                    "공지", "전체 공지", ChannelType.PUBLIC, null // memberIds 없음
+                    "공지", "전체 공지", null // memberIds 없음
             );
+
+            ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto, ChannelType.PUBLIC);
             int beforeChannelSize = channelRepository.findAll().size();
             int beforeReadStatusSize = readStatusRepository.findAll().size();
 
             // when
-            channelService.createChannel(creator.getId(), channelCreateRequestDto);
+            channelService.createChannel(cmd);
 
             // then
             int afterChannelSize = channelRepository.findAll().size();
@@ -101,8 +107,7 @@ public class ChannelIntegrationTest {
             assertAll(
                     () -> assertEquals(ChannelType.PUBLIC, saved.getType()),
                     () -> assertEquals("공지", saved.getTitle()),
-                    () -> assertEquals("전체 공지", saved.getDescription()),
-                    () -> assertEquals(creator.getId(), saved.getCreatedByUserId())
+                    () -> assertEquals("전체 공지", saved.getDescription())
             );
         }
 
@@ -111,13 +116,13 @@ public class ChannelIntegrationTest {
         void createChannel_public_throws_when_invalid_fields() {
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             // DTO 시그니처: (title, description, type, memberIds)
-            ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(" ", null, ChannelType.PUBLIC, null);
-
+            ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(" ", null, null);
+            ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto, ChannelType.PUBLIC);
             assertThrows(IllegalArgumentException.class,
-                    () -> channelService.createChannel(creator.getId(), channelCreateRequestDto));
+                    () -> channelService.createChannel(cmd));
         }
 
         @Test
@@ -126,25 +131,25 @@ public class ChannelIntegrationTest {
             // given
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             User m1 = userRepository.save(User.builder()
                     .nickname("m1").email("m1@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             User m2 = userRepository.save(User.builder()
                     .nickname("m2").email("m2@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             ChannelCreateRequestDto dto = new ChannelCreateRequestDto(
-                    null, null, ChannelType.PRIVATE, List.of(m1.getId(), m2.getId())
+                    null, null, List.of(m1.getId(), m2.getId())
             );
-
+            ChannelCreateCommand cmd = ChannelCreateCommand.from(dto, ChannelType.PRIVATE);
             int beforeChannelSize = channelRepository.findAll().size();
             int beforeReadStatusSize = readStatusRepository.findAll().size();
 
             // when
-            channelService.createChannel(creator.getId(), dto);
+            channelService.createChannel(cmd);
 
             // then
             int afterChannelSize = channelRepository.findAll().size();
@@ -159,8 +164,7 @@ public class ChannelIntegrationTest {
             assertAll(
                     () -> assertEquals(ChannelType.PRIVATE, channel.getType()),
                     () -> assertNull(channel.getTitle()),
-                    () -> assertNull(channel.getDescription()),
-                    () -> assertEquals(creator.getId(), channel.getCreatedByUserId())
+                    () -> assertNull(channel.getDescription())
             );
 
             // ReadStatus 검증
@@ -183,14 +187,16 @@ public class ChannelIntegrationTest {
         void createChannel_private_throws_when_member_not_found() {
             User creator = userRepository.save(User.builder()
                     .nickname("c").email("c@ex.com").password("pw")
-                    .role(RoleType.USER).phoneNumber("010").build());
+                    .role(RoleType.USER).build());
 
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
-                    null, null, ChannelType.PRIVATE, List.of(UUID.randomUUID()) // 존재하지 않는 유저
+                    null, null, List.of(UUID.randomUUID()) // 존재하지 않는 유저
             );
 
+            ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto, ChannelType.PRIVATE);
+
             assertThrows(NoSuchElementException.class,
-                    () -> channelService.createChannel(creator.getId(), channelCreateRequestDto)); // userReader.findUserOrThrow(memberId)에서 터짐
+                    () -> channelService.createChannel(cmd)); // userReader.findUserOrThrow(memberId)에서 터짐
         }
 
     }
@@ -211,12 +217,11 @@ public class ChannelIntegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
 
             // 메시지 두 개 저장 (시간 차이 확인용)
@@ -237,14 +242,13 @@ public class ChannelIntegrationTest {
 
             // then
             assertAll(
-                    () -> assertEquals(channel.getId(), result.channelId()),
-                    () -> assertEquals("공지", result.title()),
+                    () -> assertEquals(channel.getId(), result.id()),
+                    () -> assertEquals("공지", result.name()),
                     () -> assertEquals("전체 공지", result.description()),
                     () -> assertEquals(ChannelType.PUBLIC, result.type()),
-                    () -> assertEquals(creator.getId(), result.createdByUserId()),
                     // 최신 메시지 시간 검증
-                    () -> assertNotNull(result.currentMessagedAt()),
-                    () -> assertEquals(m2.getCreatedAt(), result.currentMessagedAt())
+                    () -> assertNotNull(result.lastMessagedAt()),
+                    () -> assertEquals(m2.getCreatedAt(), result.lastMessagedAt())
             );
         }
 
@@ -265,12 +269,11 @@ public class ChannelIntegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
 
             // 메세지만 생성
@@ -284,12 +287,11 @@ public class ChannelIntegrationTest {
 
             //  then
             assertAll(
-                    () -> assertEquals(channel.getId(), responsedChannel.channelId()),
-                    () -> assertEquals("공지", responsedChannel.title()),
+                    () -> assertEquals(channel.getId(), responsedChannel.id()),
+                    () -> assertEquals("공지", responsedChannel.name()),
                     () -> assertEquals("전체 공지", responsedChannel.description()),
                     () -> assertEquals(ChannelType.PUBLIC, responsedChannel.type()),
-                    () -> assertEquals(creator.getId(), responsedChannel.createdByUserId()),
-                    () -> assertNull(responsedChannel.currentMessagedAt()) // 핵심 검증
+                    () -> assertNull(responsedChannel.lastMessagedAt()) // 핵심 검증
             );
         }
 
@@ -299,17 +301,17 @@ public class ChannelIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
 
             // when
             ChannelResponseDto dto = channelService.getChannel(channel.getId());
 
             // then
-            assertNull(dto.currentMessagedAt());
+            assertNull(dto.lastMessagedAt());
         }
 
     }
@@ -329,13 +331,12 @@ public class ChannelIntegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
             // Channel A
             Channel channelA = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
             Message messageA1 = messageRepository.save(new Message("A1", channelA.getId(), creator.getId(), null));
             channelA.addMessageId(messageA1.getId());
@@ -346,7 +347,7 @@ public class ChannelIntegrationTest {
 
             // Channel B
             Channel channelB = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "잡담", "자유 채팅방")
+                    Channel.createPublicChannel("잡담", "자유 채팅방")
             );
             Message messageB1 = messageRepository.save(new Message("B1", channelB.getId(), creator.getId(), null));
             channelB.addMessageId(messageB1.getId());
@@ -354,7 +355,7 @@ public class ChannelIntegrationTest {
 
 
             Channel channelC = channelRepository.save(
-                    Channel.createPrivateChannel(creator.getId())
+                    Channel.createPrivateChannel()
             );
             channelRepository.save(channelB);
 
@@ -366,25 +367,25 @@ public class ChannelIntegrationTest {
 
             // 채널별 DTO 찾기
             ChannelResponseDto dtoA = result.stream()
-                    .filter(r -> r.channelId().equals(channelA.getId()))
+                    .filter(r -> r.id().equals(channelA.getId()))
                     .findFirst()
                     .orElseThrow();
 
             ChannelResponseDto dtoB = result.stream()
-                    .filter(r -> r.channelId().equals(channelB.getId()))
+                    .filter(r -> r.id().equals(channelB.getId()))
                     .findFirst()
                     .orElseThrow();
 
             assertAll(
                     // Channel A
-                    () -> assertEquals("공지", dtoA.title()),
+                    () -> assertEquals("공지", dtoA.name()),
                     () -> assertEquals("전체 공지", dtoA.description()),
-                    () -> assertEquals(messageA2.getCreatedAt(), dtoA.currentMessagedAt()),
+                    () -> assertEquals(messageA2.getCreatedAt(), dtoA.lastMessagedAt()),
 
                     // Channel B
-                    () -> assertEquals("잡담", dtoB.title()),
+                    () -> assertEquals("잡담", dtoB.name()),
                     () -> assertEquals("자유 채팅방", dtoB.description()),
-                    () -> assertEquals(messageB1.getCreatedAt(), dtoB.currentMessagedAt())
+                    () -> assertEquals(messageB1.getCreatedAt(), dtoB.lastMessagedAt())
             );
         }
     }
@@ -403,21 +404,20 @@ public class ChannelIntegrationTest {
                             .email("c@ex.com")
                             .password("pw")
                             .role(RoleType.USER)
-                            .phoneNumber("010")
                             .build()
             );
 
             Channel channelA = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
             Channel channelB = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "자유", "자유 게시판채널")
+                    Channel.createPublicChannel("자유", "자유 게시판채널")
             );
             Channel channelC = channelRepository.save(
-                    Channel.createPrivateChannel(creator.getId())
+                    Channel.createPrivateChannel()
             );
             Channel channelD = channelRepository.save(
-                    Channel.createPrivateChannel(creator.getId())
+                    Channel.createPrivateChannel()
             );
 
             // joined member
@@ -426,7 +426,6 @@ public class ChannelIntegrationTest {
                     .email("aaaaac@ex.com")
                     .password("p111w")
                     .role(RoleType.USER)
-                    .phoneNumber("010-1111-2222")
                     .build());
 
             User member2 = userRepository.save(User.builder()
@@ -434,7 +433,6 @@ public class ChannelIntegrationTest {
                     .email("xxxx@ex.com")
                     .password("xxx")
                     .role(RoleType.USER)
-                    .phoneNumber("010-3333-4444")
                     .build());
 
 
@@ -449,7 +447,7 @@ public class ChannelIntegrationTest {
             // then
             // 포함/제외 채널 id 세트 검증 (순서 무시)
             Set<UUID> actualIds = result.stream()
-                    .map(ChannelResponseDto::channelId)
+                    .map(ChannelResponseDto::id)
                     .collect(Collectors.toSet());
 
             assertAll(
@@ -468,11 +466,11 @@ public class ChannelIntegrationTest {
 
                     // userIds 정책 검증
                     () -> result.forEach(dto -> {
-                        if (dto.channelId().equals(channelC.getId())) {
-                            assertNotNull(dto.userIds(), "비공개 채널은 참여자 정보 제공");
-                            assertTrue(dto.userIds().contains(member1.getId()));
+                        if (dto.id().equals(channelC.getId())) {
+                            assertNotNull(dto.participantIds(), "비공개 채널은 참여자 정보 제공");
+                            assertTrue(dto.participantIds().contains(member1.getId()));
                         } else {
-                            assertTrue(dto.userIds().isEmpty(), "공개 채널은 맴버가 없어야한다");
+                            assertTrue(dto.participantIds().isEmpty(), "공개 채널은 맴버가 없어야한다");
                         }
                     })
             );
@@ -490,10 +488,10 @@ public class ChannelIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel channel = channelRepository.save(
-                    Channel.createPublicChannel(creator.getId(), "공지", "전체 공지")
+                    Channel.createPublicChannel("공지", "전체 공지")
             );
 
 
@@ -509,7 +507,6 @@ public class ChannelIntegrationTest {
             String beforeTitle = channel.getTitle();
             String beforeDesc = channel.getDescription();
             ChannelType beforeType = channel.getType();
-            UUID beforeCreatedBy = channel.getCreatedByUserId();
             Instant beforeCreatedAt = channel.getCreatedAt();
 
 
@@ -523,7 +520,6 @@ public class ChannelIntegrationTest {
                     () -> assertEquals(channel.getId(), updatedChannel.getId()),
                     () -> assertEquals(channelId, updatedChannel.getId()),
                     () -> assertEquals(beforeType, updatedChannel.getType()),
-                    () -> assertEquals(beforeCreatedBy, updatedChannel.getCreatedByUserId()),
                     () -> assertEquals(beforeCreatedAt, updatedChannel.getCreatedAt()),
 
                     // 변경된 필드
@@ -543,10 +539,10 @@ public class ChannelIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
             Channel privateChannel = channelRepository.save(
-                    Channel.createPrivateChannel(creator.getId())
+                    Channel.createPrivateChannel()
             );
 
             ChannelUpdateRequestDto request = ChannelUpdateRequestDto.builder()
@@ -568,28 +564,28 @@ public class ChannelIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).phoneNumber("010").build()
+                            .password("pw").role(RoleType.USER).build()
             );
 
             User member1 = userRepository.save(
                     User.builder().nickname("member1").email("csdd@ex.com")
-                            .password("pssw").role(RoleType.USER).phoneNumber("010-2222-2222").build()
+                            .password("pssw").role(RoleType.USER).build()
             );
 
             User member2 = userRepository.save(
                     User.builder().nickname("member2").email("cfffsdd@ex.com")
-                            .password("pssssw").role(RoleType.USER).phoneNumber("010-3333-4444").build()
+                            .password("pssssw").role(RoleType.USER).build()
             );
+            ChannelCreateRequestDto dto = ChannelCreateRequestDto.builder()
+                    .name("private")
+                    .description("private")
+                    .participantIds(List.of(member1.getId(), member2.getId()))
+                    .build();
 
+            ChannelCreateCommand cmd = ChannelCreateCommand.from(dto, ChannelType.PRIVATE);
 
-            channelService.createChannel(
-                    creator.getId(), ChannelCreateRequestDto.builder()
-                            .title("private")
-                            .description("private")
-                            .type(ChannelType.PRIVATE)
-                            .memberIds(List.of(member1.getId(), member2.getId()))
-                            .build()
-            );
+            channelService.createChannel(cmd); // TODO: 추후 service 의존도 빼고 repository로 만들것
+
             // 방금 생긴 채널 식별 (가장 최근/사이즈 차이로 추적)
             List<Channel> afterCreate = channelRepository.findAll();
             Channel channel = afterCreate.get(afterCreate.size() - 1); // in-memory라면 OK (JPA면 정밀 조회 권장)

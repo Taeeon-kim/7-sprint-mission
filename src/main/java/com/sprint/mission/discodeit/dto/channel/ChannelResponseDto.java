@@ -2,38 +2,34 @@ package com.sprint.mission.discodeit.dto.channel;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
-import lombok.Builder;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Builder
 public record ChannelResponseDto(
-        UUID channelId,
-        String title,
+        UUID id,
+        String name,
         String description,
-        Set<UUID> userIds,
+        Set<UUID> participantIds,
         List<UUID> messageIds,
-        UUID createdByUserId,
         ChannelType type,
-        Instant currentMessagedAt
+        Instant lastMessagedAt
 
 ) {
     public static ChannelResponseDto from(
             Channel channel,
-            Instant currentMessagedAt
+            Instant lastMessagedAt
     ) {
-        return ChannelResponseDto.builder()
-                .channelId(channel.getId())
-                .title(channel.getTitle())
-                .description(channel.getDescription())
-                .userIds(channel.getUserIds())
-                .messageIds(channel.getMessageIds())
-                .createdByUserId(channel.getCreatedByUserId())
-                .type(channel.getType())
-                .currentMessagedAt(currentMessagedAt)
-                .build();
+        return new ChannelResponseDto(
+                channel.getId(),
+                channel.getTitle(),
+                channel.getDescription(),
+                channel.getUserIds(),
+                channel.getMessageIds(),
+                channel.getType(),
+                lastMessagedAt
+        );
     }
 }

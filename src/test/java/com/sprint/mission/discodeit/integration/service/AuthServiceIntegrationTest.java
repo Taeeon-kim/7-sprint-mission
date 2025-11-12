@@ -1,5 +1,6 @@
-package com.sprint.mission.discodeit.integration;
+package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.auth.AuthLoginRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
@@ -11,29 +12,28 @@ import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.service.AuthService;
 import com.sprint.mission.discodeit.service.basic.BasicAuthService;
-import com.sprint.mission.discodeit.store.InMemoryStore;
 import org.junit.jupiter.api.*;
 
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AuthIntegrationTest {
-    private final InMemoryStore store = new InMemoryStore();
+public class AuthServiceIntegrationTest {
+
     private UserRepository userRepository;
     private AuthService authService;
     private UserStatusRepository userStatusRepository;
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository(store.users);
-        userStatusRepository = new JCFUserStatusRepository(store.userStatusses);
+        userRepository = new JCFUserRepository();
+        userStatusRepository = new JCFUserStatusRepository();
         authService = new BasicAuthService(userRepository, userStatusRepository);
     }
 
     @AfterEach
     void tearDown() {
-        store.users.clear();
+
     }
 
     @Nested
@@ -46,7 +46,6 @@ public class AuthIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .profileId(null)
                     .role(RoleType.USER)
                     .password("password")
@@ -58,17 +57,19 @@ public class AuthIntegrationTest {
             userStatusRepository.save(userStatus);
 
             // when
-            UserResponseDto loginUser = authService.login(saved.getNickname(), saved.getPassword());
+            UserResponseDto loginUser = authService.login(AuthLoginRequestDto.builder()
+                    .username(saved.getNickname())
+                    .password(saved.getPassword())
+                    .build());
 
             // then
             assertAll(
-                    () -> assertEquals(saved.getId(), loginUser.getId()),
-                    () -> assertEquals(saved.getNickname(), loginUser.getNickname()),
-                    () -> assertEquals(saved.getProfileId(), loginUser.getProfileId()),
-                    () -> assertEquals(saved.getRole(), loginUser.getRole()),
-                    () -> assertEquals(saved.getPhoneNumber(), loginUser.getPhoneNumber()),
-                    () -> assertEquals(saved.getEmail(), loginUser.getEmail()),
-                    () -> assertEquals(UserActiveStatus.ONLINE, loginUser.getIsOnline())
+                    () -> assertEquals(saved.getId(), loginUser.id()),
+                    () -> assertEquals(saved.getNickname(), loginUser.nickname()),
+                    () -> assertEquals(saved.getProfileId(), loginUser.profileId()),
+                    () -> assertEquals(saved.getRole(), loginUser.role()),
+                    () -> assertEquals(saved.getEmail(), loginUser.email()),
+                    () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
             );
         }
 
@@ -81,7 +82,6 @@ public class AuthIntegrationTest {
                     .role(RoleType.USER)
                     .profileId(null)
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .nickname("name")
                     .password("password")
                     .build();
@@ -91,8 +91,16 @@ public class AuthIntegrationTest {
 
             // when & then
             assertAll(
-                    ()-> assertThrows(NoSuchElementException.class, () -> authService.login(saved.getNickname(), "wrongPassword")),
-                    ()-> assertThrows(NoSuchElementException.class, () -> authService.login("wrongNickname", saved.getPassword()))
+                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                            .username(saved.getNickname())
+                            .password("wrongPassword")
+                            .build())),
+                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                                    .username("wrongName")
+                                    .password(saved.getPassword())
+                                    .build()
+                            )
+                    )
             );
         }
     }

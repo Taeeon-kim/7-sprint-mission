@@ -1,10 +1,16 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateCommand;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
@@ -21,27 +27,32 @@ public class BasicMessageService implements MessageService {
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final MessageReader messageReader;
+    private final BinaryContentRepository binaryContentRepository;
+    private final BinaryContentService binaryContentService;
 
-    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader) {
+    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService) {
         this.messageRepository = messageRepository;
         this.channelRepository = channelRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
         this.messageReader = messageReader;
+        this.binaryContentRepository = binaryContentRepository;
+        this.binaryContentService = binaryContentService;
     }
 
 
     @Override
-    public List<Message> getAllMessages() {
+    public List<MessageResponseDto> getAllMessages() {
         Map<UUID, Message> allMessages = messageRepository.findAllMap();
         return allMessages.values()
                 .stream()
                 .sorted(Comparator.comparing(Message::getCreatedAt))
+                .map(MessageResponseDto::from)
                 .toList();
     }
 
     @Override
-    public List<Message> getAllMessagesOfChannel(UUID channelId) {
+    public List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
@@ -52,6 +63,7 @@ public class BasicMessageService implements MessageService {
                 .map(allMessages::get)
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(Message::getCreatedAt))
+                .map(MessageResponseDto::from)
                 .toList();
     }
 
@@ -61,27 +73,38 @@ public class BasicMessageService implements MessageService {
     }
 
 
-    public void sendMessageToChannel(UUID channelId, UUID senderId, String content) { // TODO: 추후 컨트롤러 계층생성시 파라미터를 DTO로 변경(파라미터가 길어질시)
-        if (content == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+    public UUID sendMessageToChannel(MessageSendCommand command) {
+        if (command.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         // NOTE: 1. 보내려는 유저가 맞는지 확인
-        User sender = userReader.findUserOrThrow(senderId);
+        User sender = userReader.findUserOrThrow(command.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
-        Channel channel = channelReader.findChannelOrThrow(channelId);
+        Channel channel = channelReader.findChannelOrThrow(command.channelId());
         boolean isMember = channel.isMember(sender.getId());
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
-        Message message = new Message(content, sender.getId(), channel.getId(), null);
+
+        List<UUID> profileBinaryIds = command.profiles().stream()
+                .map(binaryContentService::uploadBinaryContent).toList();
+
+        Message message = Message.builder()
+                .content(command.content())
+                .senderId(sender.getId())
+                .channelId(channel.getId())
+                .attachmentIds(profileBinaryIds)
+                .build();
+
         channel.addMessageId(message.getId());
         boolean messageSaved = false;
         try {
             // NOTE: 3. 메세지를 전역 Message 저장소에 저장
-            messageRepository.save(message);
+            Message savedMessage = messageRepository.save(message);
             messageSaved = true;
             // NOTE: 4. 해당 채널에 messageId 추가 및 업데이트
             channelRepository.save(channel);
+            return savedMessage.getId();
         } catch (Exception e) {
             channel.removeMessageId(message.getId());
             if (messageSaved) {
@@ -99,15 +122,15 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public void updateMessage(UUID messageId, String content) {
-        if (messageId == null || content == null || content.trim().isEmpty()) {
+    public void updateMessage(MessageUpdateCommand command) {
+        if (command.messageId() == null || command.content() == null || command.content().trim().isEmpty()) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        Message message = messageReader.findMessageOrThrow(messageId);
+        Message message = messageReader.findMessageOrThrow(command.messageId());
         boolean isUpdated = false;
-        if (!content.equals(message.getContent())) {
-            isUpdated = message.updateContent(content);
+        if (!command.content().equals(message.getContent())) {
+            isUpdated = message.updateContent(command.content());
         }
 
         if (isUpdated) {
@@ -127,6 +150,9 @@ public class BasicMessageService implements MessageService {
             Channel channel = channelReader.findChannelOrThrow(message.getChannelId());
             channel.removeMessageId(message.getId());
             channelRepository.save(channel);
+            for (UUID uuid : message.getAttachmentIds()) {
+                binaryContentRepository.deleteById(uuid);
+            }
         }
     }
 }
