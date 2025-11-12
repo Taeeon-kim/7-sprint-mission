@@ -11,8 +11,10 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
+import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
@@ -36,6 +38,7 @@ public class UserServiceIntegrationTest {
     private UserStatusRepository userStatusRepository;
     private UserStatusService userStatusService;
     private BinaryContentRepository binaryContentRepository;
+    private BinaryContentService binaryContentService;
 
     // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
@@ -45,7 +48,15 @@ public class UserServiceIntegrationTest {
         userStatusRepository = new JCFUserStatusRepository();
         binaryContentRepository = new JCFBinaryContentRepository();
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
+        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
+        userService = new BasicUserService(
+                userRepository,
+                userReader,
+                userStatusService,
+                userStatusRepository,
+                binaryContentRepository,
+                binaryContentService
+        );
     }
 
 

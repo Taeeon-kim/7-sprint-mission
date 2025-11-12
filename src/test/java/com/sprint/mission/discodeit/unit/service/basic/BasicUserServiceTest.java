@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
@@ -31,6 +32,7 @@ class BasicUserServiceTest {
     private UserStatusService userStatusService;
     private BasicUserService userService;
     private BinaryContentRepository binaryContentRepository;
+    private BinaryContentService binaryContentService;
 
     @BeforeEach
     void setUp() {
@@ -39,7 +41,8 @@ class BasicUserServiceTest {
         userStatusRepository = mock(UserStatusRepository.class);
         userStatusService = mock(UserStatusService.class);
         binaryContentRepository = mock(BinaryContentRepository.class);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
+        binaryContentService = mock(BinaryContentService.class);
+        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository, binaryContentService);
     }
 
     // --- grouped by use-case with @Nested ---
@@ -329,7 +332,7 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
 
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(id)).thenReturn(real);
+            when(userReader.findUserOrThrow(any())).thenReturn(real);
 
             MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
             UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), mockMultipartFile);
@@ -340,7 +343,7 @@ class BasicUserServiceTest {
                                     binaryCommand.contentType(),
                                     binaryCommand.bytes()
                             )).orElse(null);
-            when(binaryContentRepository.save(any())).thenReturn(binaryContent);
+            when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryContent.getId());
             // when
             userService.updateUser(updateCommand);
 
