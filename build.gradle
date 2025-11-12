@@ -15,6 +15,10 @@ java {
 	}
 }
 
+bootJar {
+    archiveFileName = "app.jar"
+}
+
 test {
     finalizedBy jacocoTestReport
 }
