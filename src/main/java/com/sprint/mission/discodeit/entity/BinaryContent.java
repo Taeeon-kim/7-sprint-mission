@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -13,7 +14,6 @@ import java.util.UUID;
  * User, Message 도메인 모델과의 의존 관계 방향성을 고려해 id 참조 필드 추가
  */
 @Getter @ToString
-@AllArgsConstructor
 public class BinaryContent {
 
     private UUID uuid;
@@ -23,4 +23,11 @@ public class BinaryContent {
     private String contentType; //파일 타입
     private byte[] bytes; //파일 내 실제 데이터
 
+    public BinaryContent(String fileName, String contentType, byte[] bytes) {
+        this.uuid = UUID.randomUUID();
+        this.createAt = Instant.now();
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.bytes = bytes;
+    }
 }

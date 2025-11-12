@@ -49,8 +49,8 @@ public class BasicUserService implements UserService {
                 && !userCreateRequestDto.getProfileImagePath().isEmpty()) {
             try{
                 BinaryContent profile = new BinaryContent(
-                        UUID.randomUUID(),
-                        Instant.now(),
+//                        UUID.randomUUID(),
+//                        Instant.now(),
                         userCreateRequestDto.getProfileImagePath().getOriginalFilename(),
                         userCreateRequestDto.getProfileImagePath().getContentType(),
                         userCreateRequestDto.getProfileImagePath().getBytes()
@@ -103,8 +103,8 @@ public class BasicUserService implements UserService {
                     }
                     if (profileContent == null) {
                         profileContent = new BinaryContent(
-                                UUID.randomUUID(),
-                                Instant.now(),
+//                                UUID.randomUUID(),
+//                                Instant.now(),
                                 null,
                                 "image/png",
                                 new byte[0]
@@ -132,8 +132,8 @@ public class BasicUserService implements UserService {
             try {
                 UUID existingProfileId = user.getProfileImageId(); // 기존 프로필 UUID
                 BinaryContent newProfile = new BinaryContent(
-                        UUID.randomUUID(),
-                        Instant.now(),
+//                        UUID.randomUUID(),
+//                        Instant.now(),
                         userUpdateRequestDto.getProfileImage().getOriginalFilename(),
                         userUpdateRequestDto.getProfileImage().getContentType(),
                         userUpdateRequestDto.getProfileImage().getBytes()
