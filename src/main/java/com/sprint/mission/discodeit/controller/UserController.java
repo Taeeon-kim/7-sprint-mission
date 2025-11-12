@@ -2,8 +2,10 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.service.UserService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,7 +21,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @RequestMapping(method = RequestMethod.POST, consumes = "multipart/form-data", produces = "application/json")
+    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UUID> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
                                            @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
@@ -28,7 +30,7 @@ public class UserController {
         return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
     }
 
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH,  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUser(
             @PathVariable UUID userId,
             @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
