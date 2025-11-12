@@ -18,11 +18,6 @@ public class MessageController {
 
     private final MessageService messageService;
 
-//    @RequestMapping("/messages/{messageId}")
-//    public void getMessageById() {
-//
-//    }
-
     @RequestMapping(value = "/messages/{messageId}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateMessage(@PathVariable UUID messageId, @RequestBody MessageUpdateRequestDto request) {
         MessageUpdateCommand command = MessageUpdateCommand.from(request, messageId);

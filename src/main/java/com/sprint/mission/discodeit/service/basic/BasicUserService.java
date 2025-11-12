@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
@@ -26,13 +27,15 @@ public class BasicUserService implements UserService {
     private final UserReader userReader;
     private final UserStatusService userStatusService;
     private final BinaryContentRepository binaryContentRepository;
+    private final BinaryContentService binaryContentService;
 
-    public BasicUserService(UserRepository userRepository, UserReader userReader, UserStatusService userStatusService, UserStatusRepository userStatusRepository, BinaryContentRepository binaryContentRepository) {
+    public BasicUserService(UserRepository userRepository, UserReader userReader, UserStatusService userStatusService, UserStatusRepository userStatusRepository, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService) {
         this.userRepository = userRepository;
         this.userReader = userReader;
         this.userStatusService = userStatusService;
         this.userStatusRepository = userStatusRepository;
         this.binaryContentRepository = binaryContentRepository;
+        this.binaryContentService = binaryContentService;
     }
 
     @Override
@@ -52,11 +55,7 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
 
-        UUID profileBinaryId = userSignupCommand.profile().map(file -> {
-            BinaryContent binaryContent = new BinaryContent(file.fileName(), file.contentType(), file.bytes());
-            BinaryContent saved = binaryContentRepository.save(binaryContent);
-            return saved.getId();
-        }).orElse(null);
+        UUID profileBinaryId = userSignupCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null);
 
         User newUser = User.create(userSignupCommand.username(),
                 userSignupCommand.email(),
@@ -128,11 +127,7 @@ public class BasicUserService implements UserService {
 
         User userById = userReader.findUserOrThrow(updateCommand.id());
 
-        UUID profileBinaryId = updateCommand.profile().map(file -> {
-            BinaryContent binaryContent = new BinaryContent(file.fileName(), file.contentType(), file.bytes());
-            BinaryContent saved = binaryContentRepository.save(binaryContent);
-            return saved.getId();
-        }).orElse(null);
+        UUID profileBinaryId = updateCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null);
 
         UserUpdateParams params = UserUpdateParams.from(updateCommand, profileBinaryId); // 경계분리
         boolean updated = userById.update(params);
