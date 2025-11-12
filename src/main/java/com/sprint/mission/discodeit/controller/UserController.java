@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.user.UserDto;
-import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,9 +31,11 @@ public class UserController {
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateUser(
             @PathVariable UUID userId,
-            @RequestBody UserUpdateRequestDto request
+            @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
+            @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
-        userService.updateUser(userId, request);
+        UserUpdateCommand command = UserUpdateCommand.from(userId, request, profile);
+        userService.updateUser(command);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

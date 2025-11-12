@@ -1,9 +1,7 @@
 package com.sprint.mission.discodeit.unit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
@@ -18,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.*;
 
@@ -123,7 +122,7 @@ class BasicUserServiceTest {
             when(userStatusRepository
                     .findByUserId(id))
                     .thenReturn(Optional.of(new UserStatus(id)));
-            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER,  null));
+            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER, null));
 
             // when
             userService.getUserById(id);
@@ -136,7 +135,7 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
 
             // given
-            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER,  null);
+            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(user.getId())).thenReturn(user); // Stub
             when(userStatusRepository.findByUserId(user.getId()))
                     .thenReturn(Optional.of(new UserStatus(user.getId())));
@@ -220,19 +219,11 @@ class BasicUserServiceTest {
             //given
             UUID id = UUID.randomUUID();
             when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
-
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("new", null, null), null);
             //when+then
             assertThrows(
                     NoSuchElementException.class,
-                    () -> userService.updateUser(id,
-                            new UserUpdateRequestDto(
-                                    "new",
-                                    null,
-                                    null,
-                                    null,
-                                    null
-                            )
-                    )
+                    () -> userService.updateUser(updateCommand)
             );
 
             //then
@@ -248,9 +239,9 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
-
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("new", null, null), null);
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(id, new UserUpdateRequestDto("new", null, null, null, null));
+            userService.updateUser(updateCommand);
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
@@ -266,10 +257,10 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
             User real = User.create("same", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
-
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("same", null, null), null);
 
             // when (행위 실행 : 실제 서비스 호출)
-            userService.updateUser(id, new UserUpdateRequestDto("same", null, null, null, null));
+            userService.updateUser(updateCommand);
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
@@ -284,9 +275,9 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
-
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, "change@email.com", null), null);
             // when
-            userService.updateUser(id, new UserUpdateRequestDto(null, "change@email.com", null, null, null));
+            userService.updateUser(updateCommand);
 
             // then (순서 + 위임 검증)
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -302,9 +293,10 @@ class BasicUserServiceTest {
 
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, "vjhsngr"), null);
 
             // when
-            userService.updateUser(id, new UserUpdateRequestDto(null, null, "vjhsngr", null, null));
+            userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -336,12 +328,21 @@ class BasicUserServiceTest {
             // given
             UUID id = UUID.randomUUID();
 
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
-            UUID profileId = UUID.randomUUID();
 
+            MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), mockMultipartFile);
+            BinaryContent binaryContent = updateCommand.profile()
+                    .map((binaryCommand) ->
+                            new BinaryContent(
+                                    binaryCommand.fileName(),
+                                    binaryCommand.contentType(),
+                                    binaryCommand.bytes()
+                            )).orElse(null);
+            when(binaryContentRepository.save(any())).thenReturn(binaryContent);
             // when
-            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, profileId));
+            userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -354,11 +355,11 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenAllFieldNull() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
-
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), null);
             // when
-            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, null));
+            userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
@@ -371,11 +372,12 @@ class BasicUserServiceTest {
         void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER,  null);
+            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
 
             // when
-            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", "010", null));
+            userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);

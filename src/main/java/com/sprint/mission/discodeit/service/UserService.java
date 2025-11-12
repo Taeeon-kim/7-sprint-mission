@@ -18,7 +18,7 @@ public interface UserService {
     void deleteUser(UUID userId);
 
     // 정보수정
-    void updateUser(UUID id, UserUpdateRequestDto userUpdateRequestDto);
+    void updateUser(UserUpdateCommand updateCommand);
 
     // 모든 유저리스트 읽기(관리측면 메서드)
     List<UserDto> getAllUsers();

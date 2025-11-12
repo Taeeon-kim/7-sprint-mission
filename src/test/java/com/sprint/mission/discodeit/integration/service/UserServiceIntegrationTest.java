@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
-import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
@@ -20,6 +17,7 @@ import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.Instant;
 import java.util.List;
@@ -186,8 +184,9 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
             UUID id = userService.signUp(command);
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, "b@c.com", null), null);
             //when
-            userService.updateUser(id, new UserUpdateRequestDto(null, "b@c.com", null, null, null));
+            userService.updateUser(updateCommand);
             //then
             User after = userRepository.findById(id).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
@@ -206,10 +205,13 @@ public class UserServiceIntegrationTest {
             UUID id = userService.signUp(command);
             User before = userRepository.findById(id).orElseThrow();
             Instant beforeTime = before.getUpdatedAt(); // 스냅샷
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
+            UserUpdateCommand updateCommand2 = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), null);
+
 
             //when
-            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", null, null));
-            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, null, null));
+            userService.updateUser(updateCommand);
+            userService.updateUser(updateCommand2);
 
             //then
             User after = userRepository.findById(id).orElseThrow();
@@ -226,13 +228,15 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
             UUID id = userService.signUp(command);
             Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
-            UUID profileId = UUID.randomUUID();
+            MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick2", "b@c.com", "pw2"), mockMultipartFile);
+
             // when
-            userService.updateUser(id, new UserUpdateRequestDto("nick2", "b@c.com", "pw2", "011", profileId));
+            userService.updateUser(updateCommand);
             User after = userRepository.findById(id).orElseThrow();
             assertEquals("nick2", after.getNickname());
             assertEquals("b@c.com", after.getEmail());
-            assertEquals(profileId, after.getProfileId());
+            assertNotNull(after.getProfileId());
 
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
         }

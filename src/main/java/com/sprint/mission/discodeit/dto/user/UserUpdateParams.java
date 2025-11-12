@@ -9,12 +9,12 @@ public record UserUpdateParams(
         UUID profileId
 ) {
 
-    public static UserUpdateParams from(UserUpdateRequestDto dto) {
+    public static UserUpdateParams from(UserUpdateCommand updateCommand, UUID profileBinaryId) {
         return new UserUpdateParams(
-                dto.getNickname(),
-                dto.getEmail(),
-                dto.getPassword(),
-                dto.getProfileId()
+                updateCommand.username(),
+                updateCommand.email(),
+                updateCommand.password(),
+                profileBinaryId
         );
 
     }

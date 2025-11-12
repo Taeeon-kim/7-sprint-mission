@@ -36,7 +36,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UUID signUp(UserSignupCommand userSignupCommand) { // TODO: 추후 Command로 분리
+    public UUID signUp(UserSignupCommand userSignupCommand) {
         if (
                 userSignupCommand.username() == null ||
                         userSignupCommand.username().isBlank() ||
@@ -120,14 +120,21 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public void updateUser(UUID id, UserUpdateRequestDto request) {
-        if (id == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
+    public void updateUser(UserUpdateCommand updateCommand) {
+        if (updateCommand.id() == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        System.out.println("id = " + id);
-        User userById = userReader.findUserOrThrow(id);
-        UserUpdateParams params = UserUpdateParams.from(request); // 경계분리
+
+        User userById = userReader.findUserOrThrow(updateCommand.id());
+
+        UUID profileBinaryId = updateCommand.profile().map(file -> {
+            BinaryContent binaryContent = new BinaryContent(file.fileName(), file.contentType(), file.bytes());
+            BinaryContent saved = binaryContentRepository.save(binaryContent);
+            return saved.getId();
+        }).orElse(null);
+
+        UserUpdateParams params = UserUpdateParams.from(updateCommand, profileBinaryId); // 경계분리
         boolean updated = userById.update(params);
         if (updated) {
             userRepository.save(userById); // user repository 사용 책임 분리
