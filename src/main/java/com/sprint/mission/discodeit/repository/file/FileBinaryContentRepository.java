@@ -68,7 +68,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     public void save(BinaryContent binaryContent) {
         // 메모리 저장
         binaryContentMap.put(binaryContent.getUuid(), binaryContent);
-        loadBinaryContentFromFile();
+        saveBinaryContentToFile();
     }
 
     @Override
@@ -89,6 +89,6 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     @Override
     public void delete(UUID uuid) {
         BinaryContent removed = binaryContentMap.remove(uuid);
-        loadBinaryContentFromFile();
+        saveBinaryContentToFile();
     }
 }

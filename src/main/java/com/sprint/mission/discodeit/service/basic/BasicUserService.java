@@ -30,9 +30,9 @@ public class BasicUserService implements UserService {
     public void createUser(UserCreateRequestDto userCreateRequestDto) {
         //유저 생성
         boolean exists = userRepository.findAll().stream()
-                .anyMatch(user -> user.getUserId().equals(userCreateRequestDto.getUserId())
-                        || user.getUserName().equals(userCreateRequestDto.getUserName())
-                        || user.getEmail().equals(userCreateRequestDto.getEmail()));
+                .anyMatch(user -> userCreateRequestDto.getUserId().equals(user.getUserId())
+                        || userCreateRequestDto.getUserName().equals(user.getUserName())
+                        || userCreateRequestDto.getEmail().equals(user.getEmail()));
         if (exists) {
             throw new IllegalStateException("이미 존재하는 ID 혹은 Name 혹은 Email 입니다.");
         }
@@ -46,16 +46,20 @@ public class BasicUserService implements UserService {
 
         //프로필 이미지 등록(선택)
         if (userCreateRequestDto.getProfileImagePath() != null
-                && !userCreateRequestDto.getProfileImagePath().isBlank()) {
-            BinaryContent profile = new BinaryContent(
-                    UUID.randomUUID(),
-                    Instant.now(),
-                    userCreateRequestDto.getProfileImagePath(),
-                    "image/png",
-                    new byte[0]
-            );
-            binaryContentRepository.save(profile);
-            user.setProfileImageId(profile.getUuid());
+                && !userCreateRequestDto.getProfileImagePath().isEmpty()) {
+            try{
+                BinaryContent profile = new BinaryContent(
+                        UUID.randomUUID(),
+                        Instant.now(),
+                        userCreateRequestDto.getProfileImagePath().getOriginalFilename(),
+                        userCreateRequestDto.getProfileImagePath().getContentType(),
+                        userCreateRequestDto.getProfileImagePath().getBytes()
+                );
+                binaryContentRepository.save(profile);
+                user.setProfileImageId(profile.getUuid());
+            } catch(Exception e){
+                userCreateRequestDto.setProfileImagePath(null);
+            }
         }
         // 유저 상태 생성
         UserStatus status = new UserStatus(user.getUuid());
@@ -70,21 +74,21 @@ public class BasicUserService implements UserService {
 
     @Override
     public UserResponseDto findById(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         UserStatus status = new UserStatus(user.getUuid());
         BinaryContent profileContent = null;
         if (user.getProfileImageId() != null) {
             profileContent = binaryContentRepository.findById(user.getProfileImageId());
         }
-        if (profileContent == null) {
-            profileContent = new BinaryContent(
-                    UUID.randomUUID(),
-                    Instant.now(),
-                    "",
-                    "image/png",
-                    new byte[0]
-            );
-        }
+//        if (profileContent == null) {
+//            profileContent = new BinaryContent(
+//                    UUID.randomUUID(),
+//                    Instant.now(),
+//                    "",
+//                    "image/png",
+//                    new byte[0]
+//            );
+//        }
         return UserResponseDto.from(user, status, profileContent);
     }
 
@@ -112,7 +116,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public void updateUser(String userId, UserUpdateRequestDto userUpdateRequestDto) {
-        User user = userRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (userUpdateRequestDto.getUserName() != null && !userUpdateRequestDto.getUserName().isBlank()) {
             user.setUserName(userUpdateRequestDto.getUserName());
@@ -123,29 +127,34 @@ public class BasicUserService implements UserService {
         }
 
         // 프로필 이미지 교체
-        if (userUpdateRequestDto.getProfileImagePath() != null && !userUpdateRequestDto.getProfileImagePath().isBlank()) {
-            UUID existingProfileId = user.getProfileImageId(); // 기존 프로필 UUID
-            BinaryContent newProfile = new BinaryContent(
-                    UUID.randomUUID(),
-                    Instant.now(),
-                    userUpdateRequestDto.getProfileImagePath(),
-                    "image/png",
-                    new byte[0]
-            );
-            binaryContentRepository.save(newProfile);
+        if (userUpdateRequestDto.getProfileImage() != null
+                && !userUpdateRequestDto.getProfileImage().isEmpty()) {
+            try {
+                UUID existingProfileId = user.getProfileImageId(); // 기존 프로필 UUID
+                BinaryContent newProfile = new BinaryContent(
+                        UUID.randomUUID(),
+                        Instant.now(),
+                        userUpdateRequestDto.getProfileImage().getOriginalFilename(),
+                        userUpdateRequestDto.getProfileImage().getContentType(),
+                        userUpdateRequestDto.getProfileImage().getBytes()
+                );
+                binaryContentRepository.save(newProfile);
+//
+//                // user의 profileImageId 업데이트
+//                user.setProfileImageId(newProfile.getUuid());
 
-            // user의 profileImageId 업데이트
-            user.setProfileImageId(newProfile.getUuid());
-
-            // 기존 프로필 삭제
-            if (existingProfileId != null) {
-                try {
-                    binaryContentRepository.delete(existingProfileId);
-                } catch (Exception e) {
-                    System.out.println("기존 프로필 삭제 중 문제 발생 : " + e.getMessage());
+                // 기존 프로필 삭제
+                if (existingProfileId != null) {
+                    try {
+                        binaryContentRepository.delete(existingProfileId);
+                    } catch (Exception e) {
+                        System.out.println("기존 프로필 삭제 중 문제 발생 : " + e.getMessage());
+                    }
                 }
+                user.setProfileImageId(newProfile.getUuid());
+            } catch (Exception e) {
+                throw new RuntimeException("프로필 업로드 중 오류 발생" + e.getMessage());
             }
-            user.setProfileImageId(newProfile.getUuid());
         }
 
         if (userUpdateRequestDto.getNewPassword() != null && !userUpdateRequestDto.getNewPassword().isBlank()) {
@@ -158,7 +167,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public void deleteUser(UUID uuid) {
-        User user = userRepository.findById(uuid).orElseThrow(()->new IllegalArgumentException("User not found"));
+        User user = userRepository.findById(uuid).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // 상태 삭제
         UserStatus status = userStatusRepository.findByUserId(uuid);
@@ -198,7 +207,7 @@ public class BasicUserService implements UserService {
         User userUpdate = userRepository.findAll().stream()
                 .filter(u -> u.getUserId().equals("test02"))
                 .findFirst().orElseThrow(() -> new RuntimeException("수정할 유저를 찾을 수 없습니다."));
-        updateUser(userUpdate.getUserId(), new UserUpdateRequestDto("Minsu", "", "0123456pw", "고양이.png"));
+//        updateUser(userUpdate.getUserId(), new UserUpdateRequestDto("Minsu", "", "0123456pw", "고양이.png"));
 
         // 수정 후 단건 조회
         UserResponseDto userResponseDto = findById(userUpdate.getUserId());

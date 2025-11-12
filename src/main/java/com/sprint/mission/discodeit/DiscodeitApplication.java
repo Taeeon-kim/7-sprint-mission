@@ -28,19 +28,16 @@ public class DiscodeitApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = SpringApplication.run(DiscodeitApplication.class, args);
-
-        BasicUserService userService = ctx.getBean(BasicUserService.class);
-        BasicChannelService channelService = ctx.getBean(BasicChannelService.class);
-        BasicMessageService messageService = ctx.getBean(BasicMessageService.class);
-        BasicAuthService  authService = ctx.getBean(BasicAuthService.class);
-
-        userService.runTest();
-        authService.runAuthTest();
-        channelService.runChannelTest();
-//        Channel[] channels = channelService.runChannelService();
-//        List<User> readUsers = userService.getReadUsers();
-//        List<Channel> readChannel = channelService.getReadChannel();
-        messageService.runMessageTest();
+//
+//        BasicUserService userService = ctx.getBean(BasicUserService.class);
+//        BasicChannelService channelService = ctx.getBean(BasicChannelService.class);
+//        BasicMessageService messageService = ctx.getBean(BasicMessageService.class);
+//        BasicAuthService  authService = ctx.getBean(BasicAuthService.class);
+//
+//        userService.runTest();
+//        authService.runAuthTest();
+//        channelService.runChannelTest();
+//        messageService.runMessageTest();
     }
 
 }

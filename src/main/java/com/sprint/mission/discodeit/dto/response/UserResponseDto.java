@@ -23,7 +23,7 @@ public class UserResponseDto {
                 .userName(user.getUserName())
                 .userEmail(user.getEmail())
                 .userStatus(userStatus != null ? userStatus.getStatus().name() : null)
-                .profileImagePath(binaryContent.getFileName())
+                .profileImagePath(binaryContent != null ? binaryContent.getFileName() : null)
                 .build();
     }
 }
