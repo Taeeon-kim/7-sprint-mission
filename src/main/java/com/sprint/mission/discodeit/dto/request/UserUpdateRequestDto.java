@@ -12,5 +12,5 @@ public class UserUpdateRequestDto {
     private String userName;
     private String email;
     private String newPassword;
-    private MultipartFile profileImageㅖ; //선택적으로 이미지 대체
+    private MultipartFile profileImage; //선택적으로 이미지 대체
 }
