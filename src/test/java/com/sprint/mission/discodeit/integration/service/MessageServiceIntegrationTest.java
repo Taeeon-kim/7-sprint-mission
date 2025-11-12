@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -14,7 +15,9 @@ import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
@@ -41,6 +44,7 @@ public class MessageServiceIntegrationTest {
 
     private MessageService messageService;
     private BinaryContentRepository binaryContentRepository;
+    private BinaryContentService binaryContentService;
 
 
     @BeforeEach
@@ -52,7 +56,16 @@ public class MessageServiceIntegrationTest {
         channelReader = new ChannelReader(channelRepository);
         messageReader = new MessageReader(messageRepository);
         binaryContentRepository = new JCFBinaryContentRepository();
-        messageService = new BasicMessageService(messageRepository, channelRepository, userReader, channelReader, messageReader, binaryContentRepository);
+        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
+        messageService = new BasicMessageService(
+                messageRepository,
+                channelRepository,
+                userReader,
+                channelReader,
+                messageReader,
+                binaryContentRepository,
+                binaryContentService
+        );
 
     }
 
@@ -88,42 +101,31 @@ public class MessageServiceIntegrationTest {
                     "test".getBytes()      // file content
             );
 
-            BinaryContent binaryContent = BinaryContent.builder()
-                    .bytes(file.getBytes())
-                    .contentType(file.getContentType())
-                    .fileName(file.getOriginalFilename())
-                    .build();
-
-            BinaryContent savedBinaryContent = binaryContentRepository.save(binaryContent);
-
+            BinaryContentUploadCommand binaryContentUploadCommand = BinaryContentUploadCommand.from(file);
 
             // When
             UUID messageId = messageService.sendMessageToChannel(
-                    new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(savedBinaryContent.getId()))
+                    new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(binaryContentUploadCommand))
             );
 
 
             // Then
             Message message = messageRepository.findById(messageId).orElseThrow();
             List<UUID> attachmentIds = message.getAttachmentIds();
-            UUID attachmentId = attachmentIds
-                    .stream()
-                    .filter(id -> id.equals(savedBinaryContent.getId()))
-                    .findFirst()
-                    .orElseThrow();
+            List<BinaryContent> binaryContentByIds = attachmentIds.stream()
+                    .map(attachmentId -> binaryContentRepository.findById(attachmentId).orElseThrow())
+                    .toList();
 
-            BinaryContent binaryContentById = binaryContentRepository.findById(attachmentId).orElseThrow();
 
             assertAll(
                     () -> assertEquals(messageId, message.getId()),
                     () -> assertEquals(sender.getId(), message.getSenderId()),
                     () -> assertEquals(publicChannel.getId(), message.getChannelId()),
                     () -> assertEquals("message", message.getContent()),
-                    () -> assertTrue(message.getAttachmentIds().contains(savedBinaryContent.getId())),
-                    () -> assertEquals(savedBinaryContent.getContentType(), binaryContentById.getContentType()),
-                    () -> assertEquals(savedBinaryContent.getFileName(), binaryContentById.getFileName()),
-                    () -> assertEquals(savedBinaryContent.getBytes(), binaryContentById.getBytes()),
-                    () -> assertEquals(savedBinaryContent.getCreatedAt(), binaryContentById.getCreatedAt())
+                    () -> assertEquals(message.getAttachmentIds(), binaryContentByIds.stream().map(BinaryContent::getId).toList()),
+                    () -> assertEquals(binaryContentUploadCommand.contentType(), binaryContentByIds.get(0).getContentType()),
+                    () -> assertEquals(binaryContentUploadCommand.fileName(), binaryContentByIds.get(0).getFileName()),
+                    () -> assertEquals(binaryContentUploadCommand.bytes(), binaryContentByIds.get(0).getBytes())
             );
 
         }
@@ -149,7 +151,7 @@ public class MessageServiceIntegrationTest {
                     .build();
             userRepository.save(user);
 
-            Channel publicChannel = Channel.createPublicChannel( "title", "description");
+            Channel publicChannel = Channel.createPublicChannel("title", "description");
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 
@@ -174,7 +176,6 @@ public class MessageServiceIntegrationTest {
                     .findFirst()
                     .orElseThrow();
 
-
             assertAll(
                     () -> assertEquals(2, allMessagesByChannelId.size()),
                     () -> assertEquals(message1.getId(), foundMessage1.id()),
@@ -183,8 +184,8 @@ public class MessageServiceIntegrationTest {
                     () -> assertEquals(message2.getContent(), foundMessage2.content()),
                     () -> assertEquals(message1.getChannelId(), foundMessage1.channelId()),
                     () -> assertEquals(message2.getChannelId(), foundMessage2.channelId()),
-                    () -> assertEquals(message1.getSenderId(), foundMessage1.senderId()),
-                    () -> assertEquals(message2.getSenderId(), foundMessage2.senderId())
+                    () -> assertEquals(message1.getSenderId(), foundMessage1.authorId()),
+                    () -> assertEquals(message2.getSenderId(), foundMessage2.authorId())
             );
 
 
@@ -208,7 +209,7 @@ public class MessageServiceIntegrationTest {
                     .build();
             userRepository.save(user);
 
-            Channel publicChannel = Channel.createPublicChannel( "title", "description");
+            Channel publicChannel = Channel.createPublicChannel("title", "description");
             publicChannel.addUserId(user.getId());
             channelRepository.save(publicChannel);
 

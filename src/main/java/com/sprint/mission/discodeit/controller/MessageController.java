@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,10 +39,11 @@ public class MessageController {
 
     @RequestMapping(value = "/messages", method = RequestMethod.POST)
     public ResponseEntity<UUID> sendMessageByChannelId(
-            @RequestBody MessageSendRequestDto request
+            @RequestPart("messageCreateRequest") MessageSendRequestDto request,
+            @RequestPart(value = "attachments", required = false) List<MultipartFile> files
     ) {
-        MessageSendCommand cmd = MessageSendCommand.from(request);
-        UUID messageId = messageService.sendMessageToChannel(cmd);
+        MessageSendCommand messageSendCommand = MessageSendCommand.from(request, files);
+        UUID messageId = messageService.sendMessageToChannel(messageSendCommand);
         return ResponseEntity.ok(messageId);
     }
 

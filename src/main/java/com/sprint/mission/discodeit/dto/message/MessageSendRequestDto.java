@@ -7,10 +7,9 @@ import java.util.UUID;
 
 @Builder
 public record MessageSendRequestDto(
-        UUID senderId,
+        UUID authorId,
         UUID channelId,
-        String content,
-        List<UUID> binaryFileIds
+        String content
 ) {
 }
 

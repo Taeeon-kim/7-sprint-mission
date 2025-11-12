@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
@@ -27,14 +28,16 @@ public class BasicMessageService implements MessageService {
     private final ChannelReader channelReader;
     private final MessageReader messageReader;
     private final BinaryContentRepository binaryContentRepository;
+    private final BinaryContentService binaryContentService;
 
-    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository) {
+    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService) {
         this.messageRepository = messageRepository;
         this.channelRepository = channelRepository;
         this.userReader = userReader;
         this.channelReader = channelReader;
         this.messageReader = messageReader;
         this.binaryContentRepository = binaryContentRepository;
+        this.binaryContentService = binaryContentService;
     }
 
 
@@ -82,11 +85,15 @@ public class BasicMessageService implements MessageService {
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
+
+        List<UUID> profileBinaryIds = command.profiles().stream()
+                .map(binaryContentService::uploadBinaryContent).toList();
+
         Message message = Message.builder()
                 .content(command.content())
                 .senderId(sender.getId())
                 .channelId(channel.getId())
-                .attachmentIds(command.binaryFileIds())
+                .attachmentIds(profileBinaryIds)
                 .build();
 
         channel.addMessageId(message.getId());
