@@ -73,6 +73,13 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
+    public Optional<Channel> findByChannelName(String channelName) {
+        return channels.values().stream()
+                .filter(c -> c.getChannelName().equals(channelName))
+                .findFirst();
+    }
+
+    @Override
     public List<Channel> findAll() {
         return new ArrayList<>(channels.values());
     }
