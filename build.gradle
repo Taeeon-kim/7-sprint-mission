@@ -15,9 +15,9 @@ java {
 	}
 }
 
-//bootJar {
-//    archiveFileName = "app.jar"
-//}
+bootJar {
+    archiveFileName = "app.jar"
+}
 
 test {
     finalizedBy jacocoTestReport
