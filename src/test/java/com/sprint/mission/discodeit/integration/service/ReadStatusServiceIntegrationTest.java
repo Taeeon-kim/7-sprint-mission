@@ -71,7 +71,7 @@ public class ReadStatusServiceIntegrationTest {
             int before = readStatusRepository.findAll().size();
 
             // When
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
@@ -80,7 +80,7 @@ public class ReadStatusServiceIntegrationTest {
             // Then
             int after = readStatusRepository.findAll().size();
             assertEquals(before + 1, after);
-            ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow();
+            ReadStatus readStatus = readStatusRepository.findById(responseDto.id()).orElseThrow();
             assertEquals(creator.getId(), readStatus.getUserId());
             assertEquals(channel.getId(), readStatus.getChannelId());
             assertNotNull(readStatus.getReadAt());
@@ -105,14 +105,14 @@ public class ReadStatusServiceIntegrationTest {
             channelRepository.save(channel);
 
 
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
             // when
-            ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
+            ReadStatusResponseDto readStatus = readStatusService.getReadStatus(responseDto.id());
 
             // then
             assertEquals(creator.getId(), readStatus.userId());
@@ -160,27 +160,27 @@ public class ReadStatusServiceIntegrationTest {
             Channel savedChannel2 = channelRepository.save(channel2);
 
 
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
 
-            UUID readStatusId2 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto2 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel2.getId()).build()
             );
 
 
-            UUID readStatusId3 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto3 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(member.getId())
                             .channelId(channel.getId()).build()
             );
 
-            UUID readStatusId4 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto4 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(member.getId())
                             .channelId(channel2.getId()).build()
@@ -198,10 +198,10 @@ public class ReadStatusServiceIntegrationTest {
 
             assertAll(
                     () -> assertEquals(2, allReadStatusesByUserId.size()),
-                    () -> assertEquals(Set.of(readStatusId, readStatusId2), readStatusIds),
+                    () -> assertEquals(Set.of(responseDto.id(), responseDto2.id()), readStatusIds),
                     () -> assertTrue(allReadStatusesByUserId.stream().allMatch(readStatus -> readStatus.userId().equals(creator.getId()))),
                     () -> assertEquals(2, allReadStatusesByUserId2.size()),
-                    () -> assertEquals(Set.of(readStatusId3, readStatusId4), readStatusIds2),
+                    () -> assertEquals(Set.of(responseDto3.id(), responseDto4.id()), readStatusIds2),
                     () -> assertTrue(allReadStatusesByUserId2.stream().allMatch(readStatus -> readStatus.userId().equals(member.getId())))
             );
 
@@ -230,7 +230,7 @@ public class ReadStatusServiceIntegrationTest {
 
             Channel savedChannel = channelRepository.save(channel);
 
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
@@ -239,14 +239,14 @@ public class ReadStatusServiceIntegrationTest {
             // when
             Instant expectedReadAt = Instant.now();
             readStatusService.updateReadStatus(
-                    ReadStatusUpdateCommand.from(readStatusId,
+                    ReadStatusUpdateCommand.from(responseDto.id(),
                             ReadStatusUpdateRequestDto.builder()
                                     .newLastReadAt(expectedReadAt)
                                     .build())
             );
 
             // then
-            Instant readAt = readStatusRepository.findById(readStatusId).orElseThrow().getReadAt();
+            Instant readAt = readStatusRepository.findById(responseDto.id()).orElseThrow().getReadAt();
             assertEquals(expectedReadAt, readAt);
 
         }
@@ -276,17 +276,17 @@ public class ReadStatusServiceIntegrationTest {
 
             Channel savedChannel = channelRepository.save(channel);
 
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
             // when
-            readStatusService.deleteReadStatus(readStatusId);
+            readStatusService.deleteReadStatus(responseDto.id());
 
             // then
-            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(responseDto.id()));
 
 
         }

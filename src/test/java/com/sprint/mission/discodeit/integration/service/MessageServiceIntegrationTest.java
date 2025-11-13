@@ -104,13 +104,13 @@ public class MessageServiceIntegrationTest {
             BinaryContentUploadCommand binaryContentUploadCommand = BinaryContentUploadCommand.from(file);
 
             // When
-            UUID messageId = messageService.sendMessageToChannel(
+            MessageResponseDto responseDto = messageService.sendMessageToChannel(
                     new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(binaryContentUploadCommand))
             );
 
 
             // Then
-            Message message = messageRepository.findById(messageId).orElseThrow();
+            Message message = messageRepository.findById(responseDto.id()).orElseThrow();
             List<UUID> attachmentIds = message.getAttachmentIds();
             List<BinaryContent> binaryContentByIds = attachmentIds.stream()
                     .map(attachmentId -> binaryContentRepository.findById(attachmentId).orElseThrow())
@@ -118,7 +118,7 @@ public class MessageServiceIntegrationTest {
 
 
             assertAll(
-                    () -> assertEquals(messageId, message.getId()),
+                    () -> assertEquals(responseDto.id(), message.getId()),
                     () -> assertEquals(sender.getId(), message.getSenderId()),
                     () -> assertEquals(publicChannel.getId(), message.getChannelId()),
                     () -> assertEquals("message", message.getContent()),
