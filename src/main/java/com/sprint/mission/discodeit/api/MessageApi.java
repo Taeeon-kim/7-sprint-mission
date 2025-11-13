@@ -23,7 +23,7 @@ public interface MessageApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<MessageUpdateResponseDto> updateMessage(UUID messageId, MessageUpdateRequestDto request);
@@ -34,7 +34,7 @@ public interface MessageApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<Void> deleteMessage(UUID messageId);
@@ -45,7 +45,7 @@ public interface MessageApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<MessageResponseDto> sendMessageByChannelId(MessageSendRequestDto request, List<MultipartFile> files);
@@ -56,7 +56,7 @@ public interface MessageApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(UUID channelId);

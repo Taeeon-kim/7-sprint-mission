@@ -57,12 +57,12 @@ public interface UserApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             ),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))),
             @ApiResponse(responseCode = "500", description = "서버 에러",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string")))
     })
     ResponseEntity<Void> deleteUser(UUID userId);
 

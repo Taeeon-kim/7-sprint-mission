@@ -22,7 +22,7 @@ public interface ReadStatusApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ReadStatusResponseDto> getReadStatus(UUID readStatusId);
@@ -33,7 +33,7 @@ public interface ReadStatusApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ReadStatusResponseDto> createReadStatus(ReadStatusCreateRequestDto request);
@@ -44,7 +44,7 @@ public interface ReadStatusApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ReadStatusUpdateResponseDto> updateReadStatus(UUID id, ReadStatusUpdateRequestDto requestDto);

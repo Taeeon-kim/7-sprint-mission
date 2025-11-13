@@ -23,7 +23,7 @@ public interface BinaryContentApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<BinaryContentResponseDto> getBinaryContent(UUID id);
@@ -34,7 +34,7 @@ public interface BinaryContentApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(List<UUID> ids);
@@ -45,7 +45,7 @@ public interface BinaryContentApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<UUID> createBinaryContent(MultipartFile file);

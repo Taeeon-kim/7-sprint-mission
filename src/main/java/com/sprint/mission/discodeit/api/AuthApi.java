@@ -19,12 +19,12 @@ public interface AuthApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "찾을수없습니다",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<UserResponseDto> login(AuthLoginRequestDto authLoginRequestDto);

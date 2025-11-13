@@ -24,7 +24,7 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<List<ChannelResponseDto>> getAllChannels(UUID userId);
@@ -35,7 +35,7 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ChannelResponseDto> createChannelPublic(ChannelCreateRequestDto request);
@@ -46,7 +46,7 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ChannelResponseDto> createChannelPrivate(ChannelCreateRequestDto request);
@@ -57,7 +57,7 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<ChannelResponseDto> getChannel(UUID channelId);
@@ -79,7 +79,7 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
     ResponseEntity<Void> deleteChannel(UUID channelId);
