@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.api.ReadStatusApi;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
@@ -16,16 +17,18 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class ReadStatusController {
+public class ReadStatusController implements ReadStatusApi {
 
     private final ReadStatusService readStatusService;
 
+    @Override
     @RequestMapping(value = "/readStatuses/{readStatusId}", method = RequestMethod.GET)
     public ResponseEntity<ReadStatusResponseDto> getReadStatus(@PathVariable UUID readStatusId) {
         ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
         return ResponseEntity.ok(readStatus);
     }
 
+    @Override
     @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
     public ResponseEntity<UUID> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request
@@ -34,6 +37,7 @@ public class ReadStatusController {
         return ResponseEntity.ok(readStatusId);
     }
 
+    @Override
     @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateReadStatus(
             @PathVariable UUID id,
@@ -44,7 +48,7 @@ public class ReadStatusController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
+    @Override
     @RequestMapping(value = "/readStatuses", method = RequestMethod.GET)
     public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam UUID userId) {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);

@@ -6,8 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-
-public record MessageResponseDto(
+public record MessageUpdateResponseDto(
         UUID id,
         UUID channelId,
         UUID authorId,
@@ -15,11 +14,9 @@ public record MessageResponseDto(
         List<UUID> attachmentIds,
         Instant createdAt,
         Instant updatedAt
-
 ) {
-
-    public static MessageResponseDto from(Message message) {
-        return new MessageResponseDto(
+    public static MessageUpdateResponseDto from(Message message) {
+        return new MessageUpdateResponseDto(
                 message.getId(),
                 message.getChannelId(),
                 message.getSenderId(),

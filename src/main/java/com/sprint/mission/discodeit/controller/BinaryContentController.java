@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.api.BinaryContentApi;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -15,10 +16,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/binaryContents")
 @RequiredArgsConstructor
-public class BinaryContentController {
+public class BinaryContentController implements BinaryContentApi {
 
     private final BinaryContentService binaryContentService;
 
+    @Override
     @RequestMapping("/{id}")
     public ResponseEntity<BinaryContentResponseDto> getBinaryContent(
             @PathVariable UUID id
@@ -27,6 +29,7 @@ public class BinaryContentController {
         return ResponseEntity.ok(binaryContent);
     }
 
+    @Override
     @RequestMapping
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
             @RequestParam(required = false) List<UUID> ids
@@ -40,6 +43,7 @@ public class BinaryContentController {
         return ResponseEntity.ok(binaryContents);
     }
 
+    @Override
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UUID> createBinaryContent(
             @RequestPart MultipartFile file
