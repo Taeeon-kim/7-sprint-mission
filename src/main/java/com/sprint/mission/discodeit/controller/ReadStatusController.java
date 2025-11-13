@@ -1,10 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.api.ReadStatusApi;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.*;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,22 +27,22 @@ public class ReadStatusController implements ReadStatusApi {
 
     @Override
     @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
-    public ResponseEntity<UUID> createReadStatus(
+    public ResponseEntity<ReadStatusResponseDto> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request
     ) {
-        UUID readStatusId = readStatusService.createReadStatus(request);
-        return ResponseEntity.ok(readStatusId);
+        ReadStatusResponseDto responseDto = readStatusService.createReadStatus(request);
+        return ResponseEntity.ok(responseDto);
     }
 
     @Override
     @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
-    public ResponseEntity<Void> updateReadStatus(
+    public ResponseEntity<ReadStatusUpdateResponseDto> updateReadStatus(
             @PathVariable UUID id,
             @RequestBody ReadStatusUpdateRequestDto requestDto
     ) {
         ReadStatusUpdateCommand command = ReadStatusUpdateCommand.from(id, requestDto);
-        readStatusService.updateReadStatus(command);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        ReadStatusUpdateResponseDto updateResponseDto = readStatusService.updateReadStatus(command);
+        return ResponseEntity.status(HttpStatus.OK).body(updateResponseDto);
     }
 
     @Override
