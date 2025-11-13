@@ -9,7 +9,7 @@ public record ReadStatusUpdateResponseDto(
         UUID id,
         UUID userId,
         UUID channelId,
-        Instant readAt,
+        Instant lastReadAt,
         Instant createdAt,
         Instant updatedAt
 
