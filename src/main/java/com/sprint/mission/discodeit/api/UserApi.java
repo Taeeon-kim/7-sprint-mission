@@ -23,12 +23,12 @@ public interface UserApi {
 
     @Operation(summary = "유저 수정")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "수정 성공"),
+            @ApiResponse(responseCode = "200", description = "수정 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    ResponseEntity<Void> updateUser(
+    ResponseEntity<UserResponseDto> updateUser(
             UUID userId,
             UserUpdateRequestDto request,
             MultipartFile profile

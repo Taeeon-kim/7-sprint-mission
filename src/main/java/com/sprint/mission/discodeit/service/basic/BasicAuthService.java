@@ -26,7 +26,7 @@ public class BasicAuthService implements AuthService {
         List<User> all = userRepository.findAll(); // TODO: 전용 레포지토리 만들어서 사용해도됨 findByUserNameAndPassword
         User findUser = all.stream()
                 .filter((user) -> (user.getNickname().equals(request.username())) && (user.getPassword().equals(request.password())))
-                .findFirst().orElseThrow(() -> new NoSuchElementException("이름 또는 비밀번호를 다시 확인해주세요"));
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("이름 또는 비밀번호를 다시 확인해주세요"));
         // TODO: userState를 null이 아닌 online 값으로 추가
         UserStatus userStatus = userStatusRepository.findByUserId(findUser.getId()).orElseThrow(() -> new NoSuchElementException("유저 상태가없습니다."));
         userStatus.markAsActive();

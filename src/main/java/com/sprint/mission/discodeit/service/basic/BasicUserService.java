@@ -38,7 +38,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UUID signUp(UserSignupCommand userSignupCommand) {
+    public UserResponseDto signUp(UserSignupCommand userSignupCommand) {
         if (
                 userSignupCommand.username() == null ||
                         userSignupCommand.username().isBlank() ||
@@ -72,7 +72,7 @@ public class BasicUserService implements UserService {
         // TODO: 추후 @Trnsactional전 보상로직 try catch 할거 생각
         // TODO: 여기서 이전에 알려준 dispatcher 사용? event 기반? 추후 리펙토링에 추가할것
 
-        return savedUser.getId();
+        return UserResponseDto.from(savedUser, null);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public void updateUser(UserUpdateCommand updateCommand) {
+    public UserResponseDto updateUser(UserUpdateCommand updateCommand) {
         if (updateCommand.id() == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -131,8 +131,10 @@ public class BasicUserService implements UserService {
         UserUpdateParams params = UserUpdateParams.from(updateCommand, profileBinaryId); // 경계분리
         boolean updated = userById.update(params);
         if (updated) {
-            userRepository.save(userById); // user repository 사용 책임 분리
+            User saved = userRepository.save(userById);// user repository 사용 책임 분리
+            return UserResponseDto.from(saved, null);
         }
+        return null;
     }
 
     @Override

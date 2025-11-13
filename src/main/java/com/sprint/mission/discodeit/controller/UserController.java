@@ -33,14 +33,14 @@ public class UserController implements UserApi {
 
     @Override
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH,  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUser(
+    public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID userId,
             @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
             @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
         UserUpdateCommand command = UserUpdateCommand.from(userId, request, profile);
-        userService.updateUser(command);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        UserResponseDto userResponseDto = userService.updateUser(command);
+        return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
     }
 
     @Override

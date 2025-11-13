@@ -29,8 +29,6 @@ public record UserResponseDto(
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );
-
-
     }
 
 }
