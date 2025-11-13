@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
 import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
@@ -95,11 +96,11 @@ public class UserStatusServiceIntegrationTest {
         void create_whenDuplicate_thenThrows() {
             // given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "email@ee.com", "pwd"), null);
-            UUID signedUserId = userService.signUp(command);
+            UserResponseDto responseDto = userService.signUp(command);
 
             // when & then
             assertThrows(IllegalArgumentException.class,
-                    () -> userStatusService.createUserStatus(new UserStatusRequestDto(signedUserId)));
+                    () -> userStatusService.createUserStatus(new UserStatusRequestDto(responseDto.id())));
 
         }
 

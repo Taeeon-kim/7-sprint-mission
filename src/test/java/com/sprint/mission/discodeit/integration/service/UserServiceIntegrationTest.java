@@ -71,12 +71,12 @@ public class UserServiceIntegrationTest {
 
             //when
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
-            UUID id = userService.signUp(command);
+            UserResponseDto userResponseDto = userService.signUp(command);
 
             //then
             int after = userRepository.findAll().size();
             assertEquals(before + 1, after);
-            User persistedUser = userRepository.findById(id)
+            User persistedUser = userRepository.findById(userResponseDto.id())
                     .orElseThrow(() -> new AssertionError("User not found"));
             assertEquals("name", persistedUser.getNickname());
 
@@ -136,15 +136,15 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name",
                     "example@email.com",
                     "password"), null);
-            UUID uuid = userService.signUp(command);
+            UserResponseDto responseDto = userService.signUp(command);
 
             // when
             UserStatus userStatusbByUserId = userStatusRepository
-                    .findByUserId(uuid).orElseThrow(() -> new NoSuchElementException("회원정보없음"));
+                    .findByUserId(responseDto.id()).orElseThrow(() -> new NoSuchElementException("회원정보없음"));
 
             // then
             assertNotNull(userStatusbByUserId);
-            assertEquals(uuid, userStatusbByUserId.getUserId());
+            assertEquals(responseDto.id(), userStatusbByUserId.getUserId());
 
         }
 
@@ -159,14 +159,14 @@ public class UserServiceIntegrationTest {
         void getUserById_returns_saved_user() {
             //given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
-            UUID id = userService.signUp(command);
+            UserResponseDto responseDto = userService.signUp(command);
 
             //when
-            UserResponseDto userById = userService.getUserById(id);
+            UserResponseDto userById = userService.getUserById(responseDto.id());
 
             //then
             assertEquals("name", userById.nickname());
-            assertEquals(id, userById.id());
+            assertEquals(responseDto.id(), userById.id());
         }
 
         @Test
@@ -193,13 +193,13 @@ public class UserServiceIntegrationTest {
         void updateUser_updates_only_email() throws InterruptedException {
             //given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
-            UUID id = userService.signUp(command);
-            Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, "b@c.com", null), null);
+            UserResponseDto responseDto = userService.signUp(command);
+            Instant beforeTime = userRepository.findById(responseDto.id()).orElseThrow().getUpdatedAt();
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto(null, "b@c.com", null), null);
             //when
             userService.updateUser(updateCommand);
             //then
-            User after = userRepository.findById(id).orElseThrow();
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
             assertEquals("nick", after.getNickname());
 
@@ -213,11 +213,11 @@ public class UserServiceIntegrationTest {
 
             //given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
-            UUID id = userService.signUp(command);
-            User before = userRepository.findById(id).orElseThrow();
+            UserResponseDto responseDto = userService.signUp(command);
+            User before = userRepository.findById(responseDto.id()).orElseThrow();
             Instant beforeTime = before.getUpdatedAt(); // 스냅샷
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
-            UserUpdateCommand updateCommand2 = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), null);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
+            UserUpdateCommand updateCommand2 = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto(null, null, null), null);
 
 
             //when
@@ -225,7 +225,7 @@ public class UserServiceIntegrationTest {
             userService.updateUser(updateCommand2);
 
             //then
-            User after = userRepository.findById(id).orElseThrow();
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals(before.getNickname(), after.getNickname());
             assertEquals(before.getEmail(), after.getEmail());
 
@@ -237,14 +237,14 @@ public class UserServiceIntegrationTest {
         void updateUser_updates_multiple_fields() {
             // given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
-            UUID id = userService.signUp(command);
-            Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
+            UserResponseDto responseDto = userService.signUp(command);
+            Instant beforeTime = userRepository.findById(responseDto.id()).orElseThrow().getUpdatedAt();
             MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick2", "b@c.com", "pw2"), mockMultipartFile);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto("nick2", "b@c.com", "pw2"), mockMultipartFile);
 
             // when
             userService.updateUser(updateCommand);
-            User after = userRepository.findById(id).orElseThrow();
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("nick2", after.getNickname());
             assertEquals("b@c.com", after.getEmail());
             assertNotNull(after.getProfileId());
@@ -260,9 +260,9 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow] 회원삭제 - 삭제 후 조회 시 예외")
         void deleteUser_then_not_found() {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
-            UUID id = userService.signUp(command);
-            userService.deleteUser(id);
-            assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
+            UserResponseDto responseDto = userService.signUp(command);
+            userService.deleteUser(responseDto.id());
+            assertThrows(NoSuchElementException.class, () -> userService.getUserById(responseDto.id()));
         }
 
         @Test
@@ -321,11 +321,11 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow] 특정 회원리스트 조회 - 일부 id만 유효 → 유효한 것만 반환")
         void getUsersByIds_returns_only_existing() {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
-            UUID id1 = userService.signUp(command);
+            UserResponseDto responseDto = userService.signUp(command);
             UUID id2 = UUID.randomUUID();
-            List<User> result = userService.getUsersByIds(List.of(id1, id2));
+            List<User> result = userService.getUsersByIds(List.of(responseDto.id(), id2));
             assertEquals(1, result.size());
-            assertEquals(id1, result.get(0).getId());
+            assertEquals(responseDto.id(), result.get(0).getId());
         }
 
         @Test

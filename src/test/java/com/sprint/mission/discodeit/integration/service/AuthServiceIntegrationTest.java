@@ -91,11 +91,11 @@ public class AuthServiceIntegrationTest {
 
             // when & then
             assertAll(
-                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
                             .username(saved.getNickname())
                             .password("wrongPassword")
                             .build())),
-                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
                                     .username("wrongName")
                                     .password(saved.getPassword())
                                     .build()

@@ -239,16 +239,17 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenNicknameChanged() {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
-            UUID id = UUID.randomUUID();
+
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(id)).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("new", null, null), null);
+            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto("new", null, null), null);
+            when(userRepository.save(real)).thenReturn(real);
             // when (행위 실행 : 실제 서비스 호출)
             userService.updateUser(updateCommand);
             InOrder inOrder = inOrder(userReader, userRepository);
 
             // then (검증 : 협력자 호출/순서 확인)
-            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userReader).findUserOrThrow(real.getId());
             inOrder.verify(userRepository).save(real);
         }
 
@@ -275,16 +276,17 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch] 회원수정 - 이메일 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenEmailChanged() {
             // given
-            UUID id = UUID.randomUUID();
+//            UUID id = UUID.randomUUID();
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(id)).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, "change@email.com", null), null);
+            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, "change@email.com", null), null);
+            when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then (순서 + 위임 검증)
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userReader).findUserOrThrow(real.getId());
             inOrder.verify(userRepository).save(any(User.class));
         }
 
@@ -292,18 +294,18 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch] 회원수정 - 비밀번호 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenPasswordChanged() {
             // given
-            UUID id = UUID.randomUUID();
+
 
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(id)).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, "vjhsngr"), null);
-
+            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, null, "vjhsngr"), null);
+            when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userReader).findUserOrThrow(real.getId());
             inOrder.verify(userRepository).save(real);
         }
 
@@ -329,13 +331,12 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch] 회원수정 - 프로필이미지 id 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenProfileIdChanged() {
             // given
-            UUID id = UUID.randomUUID();
 
             User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
             when(userReader.findUserOrThrow(any())).thenReturn(real);
 
             MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), mockMultipartFile);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, null, null), mockMultipartFile);
             BinaryContent binaryContent = updateCommand.profile()
                     .map((binaryCommand) ->
                             new BinaryContent(
@@ -344,12 +345,13 @@ class BasicUserServiceTest {
                                     binaryCommand.bytes()
                             )).orElse(null);
             when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryContent.getId());
+            when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(id);
+            inOrder.verify(userReader).findUserOrThrow(real.getId());
             inOrder.verify(userRepository).save(real);
         }
 
