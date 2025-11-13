@@ -23,12 +23,12 @@ public class UserController implements UserApi {
 
     @Override
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UUID> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
+    public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
                                            @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
         UserSignupCommand command = UserSignupCommand.from(userSignupRequestDto, profile);
-        UUID uuid = userService.signUp(command);
-        return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
+        UserResponseDto responseDto = userService.signUp(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @Override

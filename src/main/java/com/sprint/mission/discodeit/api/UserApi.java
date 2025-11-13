@@ -19,7 +19,7 @@ public interface UserApi {
             @ApiResponse(responseCode = "201", description = "성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    ResponseEntity<UUID> createUser(UserSignupRequestDto userSignupRequestDto, MultipartFile profile);
+    ResponseEntity<UserResponseDto> createUser(UserSignupRequestDto userSignupRequestDto, MultipartFile profile);
 
     @Operation(summary = "유저 수정")
     @ApiResponses({
