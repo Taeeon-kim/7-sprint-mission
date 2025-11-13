@@ -18,7 +18,7 @@ public class MessageResponseDto {
     private Instant createAt;
     private Instant updateAt;
 
-    private static MessageResponseDto from (Message message){
+    public static MessageResponseDto from (Message message){
         return MessageResponseDto.builder()
                 .messageId(message.getUuid())
                 .content(message.getContent())

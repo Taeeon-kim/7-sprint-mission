@@ -21,8 +21,8 @@ public class BasicBinaryContentService implements BinaryContentService {
     @Override
     public BinaryContentResponseDto create(BinaryContentCreateRequestDto binaryContentCreateRequestDto) {
         BinaryContent entity = new BinaryContent(
-                UUID.randomUUID(),
-                Instant.now(),
+//                UUID.randomUUID(),
+//                Instant.now(),
                 binaryContentCreateRequestDto.getFileName(),
                 binaryContentCreateRequestDto.getContentType(),
                 binaryContentCreateRequestDto.getBytes()

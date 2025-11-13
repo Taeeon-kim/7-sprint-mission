@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface BinaryContentRepository {
 
     // 저장
-    void save(BinaryContent binaryContent);
+    BinaryContent save(BinaryContent binaryContent);
 
     // 조회
     BinaryContent findById(UUID uuid);

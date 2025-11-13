@@ -5,13 +5,15 @@ import com.sprint.mission.discodeit.dto.request.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
 
-    Message createMessage(MessageCreateRequestDto messageCreateRequestDto); //메시지 전송
+    Message createMessage(MessageCreateRequestDto messageCreateRequestDto,
+                          List<MultipartFile> files); //메시지 전송
 
     Message findByMessage(UUID uuid); //메시지 조회
 
@@ -19,7 +21,8 @@ public interface MessageService {
 
     List<Message> findChannelAllMessage(Channel channels); // 채널 관련 전체 메시지 조회
 
-    void updateMessage(MessageUpdateRequestDto messageUpdateRequestDto); //수정
+    Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto,
+                          List<MultipartFile> files); //수정
 
     void deleteMessage(UUID uuid); //삭제
 

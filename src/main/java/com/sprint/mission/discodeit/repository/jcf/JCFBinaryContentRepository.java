@@ -22,9 +22,10 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     private final Map<UUID, BinaryContent> binaryContentMap = new HashMap<>();
 
     @Override
-    public void save(BinaryContent binaryContent) {
+    public BinaryContent save(BinaryContent binaryContent) {
         // 메모리 저장
         binaryContentMap.put(binaryContent.getUuid(), binaryContent);
+        return binaryContent;
     }
 
     @Override
