@@ -34,18 +34,18 @@ public class ChannelController implements ChannelApi {
 
     @Override
     @RequestMapping(value = "/channels/public", method = RequestMethod.POST)
-    public ResponseEntity<UUID> createChannelPublic(@RequestBody ChannelCreateRequestDto request) {
+    public ResponseEntity<ChannelResponseDto> createChannelPublic(@RequestBody ChannelCreateRequestDto request) {
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PUBLIC);
-        UUID channelId = channelService.createChannel(cmd);
-        return ResponseEntity.created(URI.create("/api/channels/" + channelId)).body(channelId);
+        ChannelResponseDto responseDto = channelService.createChannel(cmd);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @Override
     @RequestMapping(value = "/channels/private", method = RequestMethod.POST)
-    public ResponseEntity<UUID> createChannelPrivate(@RequestBody ChannelCreateRequestDto request) {
+    public ResponseEntity<ChannelResponseDto> createChannelPrivate(@RequestBody ChannelCreateRequestDto request) {
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PRIVATE);
-        UUID channelId = channelService.createChannel(cmd);
-        return ResponseEntity.created(URI.create("/api/channels/" + channelId)).body(channelId);
+        ChannelResponseDto responseDto = channelService.createChannel(cmd);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @Override

@@ -11,9 +11,9 @@ public interface ChannelApi {
 
     ResponseEntity<List<ChannelResponseDto>> getAllChannels(UUID userId);
 
-    ResponseEntity<UUID> createChannelPublic(ChannelCreateRequestDto request);
+    ResponseEntity<ChannelResponseDto> createChannelPublic(ChannelCreateRequestDto request);
 
-    ResponseEntity<UUID> createChannelPrivate(ChannelCreateRequestDto request);
+    ResponseEntity<ChannelResponseDto> createChannelPrivate(ChannelCreateRequestDto request);
 
     ResponseEntity<ChannelResponseDto> getChannel(UUID channelId);
 
