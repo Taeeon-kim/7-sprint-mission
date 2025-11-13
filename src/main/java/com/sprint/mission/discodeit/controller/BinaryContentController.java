@@ -21,7 +21,7 @@ public class BinaryContentController implements BinaryContentApi {
     private final BinaryContentService binaryContentService;
 
     @Override
-    @RequestMapping("/{id}")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<BinaryContentResponseDto> getBinaryContent(
             @PathVariable UUID id
     ) {
@@ -30,7 +30,7 @@ public class BinaryContentController implements BinaryContentApi {
     }
 
     @Override
-    @RequestMapping
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
             @RequestParam(required = false) List<UUID> ids
     ) {
