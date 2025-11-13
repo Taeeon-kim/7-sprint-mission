@@ -5,8 +5,10 @@ import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 
+@Tag(name = "Auth API", description = "인증 관련 API")
 public interface AuthApi {
     @Operation(summary = "로그인 요청")
     @ApiResponses({

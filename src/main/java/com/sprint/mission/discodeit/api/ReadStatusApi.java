@@ -4,13 +4,13 @@ import com.sprint.mission.discodeit.dto.readStatus.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "ReadStatus API", description = "유저 해당 채널 메세지 읽음 관련 API")
 public interface ReadStatusApi {
 
     @Operation(summary = "유저 상태 조회")

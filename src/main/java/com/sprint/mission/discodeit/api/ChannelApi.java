@@ -6,10 +6,12 @@ import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Channel API", description = "채널 관련 API")
 public interface ChannelApi {
 
     @Operation(summary = "모든 채널 조회")
