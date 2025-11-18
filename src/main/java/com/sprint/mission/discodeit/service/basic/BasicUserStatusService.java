@@ -25,10 +25,9 @@ public class BasicUserStatusService implements UserStatusService {
 
     @Override
     public UserStatusResponseDto create(UserStatusCreateRequestDto userStatusCreateRequestDto) {
-        User user = userRepository.findById(userStatusCreateRequestDto.getUserId());
-        if(user==null){
-            throw new RuntimeException("유저를 찾을 수 없습니다.");
-        }
+        User user = userRepository.findById(userStatusCreateRequestDto.getUserId())
+                .orElseThrow(()->new IllegalArgumentException("User not found"));
+
         UserStatus existing = userStatusRepository.findByUserId(userStatusCreateRequestDto.getUserId());
         if(existing!=null){
             throw new RuntimeException("이미 UserStatus가 존재합니다.");

@@ -16,8 +16,8 @@ public class BinaryContentResponseDto {
 
     public static BinaryContentResponseDto from(BinaryContent binaryContent) {
         return BinaryContentResponseDto.builder()
-                .messageId(UUID.randomUUID())
-                .fileName(UUID.randomUUID().toString())
+                .messageId(binaryContent.getUuid())
+                .fileName(binaryContent.getFileName())
                 .size(binaryContent.getBytes().length)
                 .build();
     }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @AllArgsConstructor
@@ -11,5 +12,5 @@ public class UserUpdateRequestDto {
     private String userName;
     private String email;
     private String newPassword;
-    private String profileImagePath; //선택적으로 이미지 대체
+    private MultipartFile profileImage; //선택적으로 이미지 대체
 }

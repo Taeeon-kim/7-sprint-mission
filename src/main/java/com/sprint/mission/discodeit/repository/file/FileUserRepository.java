@@ -2,12 +2,18 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.util.*;
 
 @Repository
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "file"
+)
 public class FileUserRepository implements UserRepository {
 
     // 파일 저장 경로
@@ -62,15 +68,15 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public User findById(String userId) {
+    public Optional<User> findById(String userId) {
         return users.values().stream()
                 .filter(u -> u.getUserId().equals(userId))
-                .findFirst().orElse(null);
+                .findFirst();
     }
 
     @Override
-    public User findById(UUID uuid) {
-        return users.get(uuid);
+    public Optional<User> findById(UUID uuid) {
+        return Optional.ofNullable(users.get(uuid));
     }
 
     @Override
