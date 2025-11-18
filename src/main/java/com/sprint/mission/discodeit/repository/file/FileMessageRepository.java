@@ -92,6 +92,14 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
+    public List<Message> findByChannelId(UUID channelId) {
+        return messages.values().stream()
+                .filter(m -> m.getChannelId().equals(channelId))
+                .sorted(Comparator.comparing(Message::getCreateAt))
+                .toList();
+    }
+
+    @Override
     public Optional<Instant> findLastByChannel(UUID channelId) {
         return messages.values().stream()
                 .filter(m->m.getChannelId().equals(channelId))

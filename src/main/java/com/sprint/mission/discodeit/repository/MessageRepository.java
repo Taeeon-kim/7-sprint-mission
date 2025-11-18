@@ -18,7 +18,9 @@ public interface MessageRepository {
     List<Message> findAll(); //메시지 전체 조회
 
     List<Message> findAllByChannelId(Channel channel); // 채널관련 메시지 전체조회
-    
+
+    List<Message> findByChannelId(UUID channelId); // 채널에 속한 메시지의 파일 확인
+
     Optional<Instant> findLastByChannel(UUID channelId); // 가장 마지막에 온 메시지
 
     void deleteMessage(UUID uuid); // 메시지 삭제

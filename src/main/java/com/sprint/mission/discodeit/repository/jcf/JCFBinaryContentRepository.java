@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import com.sprint.mission.discodeit.dto.response.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,14 +35,17 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public List<BinaryContent> findByUserId(UUID userId) {
-        return List.of();
+    public List<BinaryContent> findAllById(UUID uuid) {
+        return binaryContentMap.values().stream()
+                .filter(content->content.equals((content.getUuid())))
+                .toList();
     }
 
-    @Override
-    public List<BinaryContent> findByChannelId(UUID channelId) {
-        return List.of();
-    }
+//    public List<BinaryContent> findByInputId(UUID inputId){
+//        return binaryContentMap.values().stream()
+//                .filter(bc->bc.equals(bc.getInputId()))
+//                .toList();
+//    }
 
     @Override
     public void delete(UUID uuid) {

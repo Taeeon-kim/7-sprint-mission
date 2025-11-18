@@ -68,8 +68,11 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public Optional<Channel> findByChannel(UUID uuid) {
-        return Optional.ofNullable(channels.get(uuid));
+    public Optional<Channel> findByChannel(UUID channelId) {
+//        return Optional.ofNullable(channels.get(uuid));
+        return channels.values().stream()
+                .filter(channel -> channel.getUuid().equals(channelId))
+                .findFirst();
     }
 
     @Override

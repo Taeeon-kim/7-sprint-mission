@@ -78,13 +78,10 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public List<BinaryContent> findByUserId(UUID userId) {
-        return List.of();
-    }
-
-    @Override
-    public List<BinaryContent> findByChannelId(UUID channelId) {
-        return List.of();
+    public List<BinaryContent> findAllById(UUID uuid) {
+        return binaryContentMap.values().stream()
+                .filter(content->uuid.equals((content.getUuid())))
+                .toList();
     }
 
     @Override
