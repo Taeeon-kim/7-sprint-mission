@@ -42,7 +42,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public UUID createChannel(ChannelCreateCommand command) {
+    public ChannelResponseDto createChannel(ChannelCreateCommand command) {
 
         Channel channel = channelFactory.create(command);
 
@@ -53,8 +53,8 @@ public class BasicChannelService implements ChannelService {
                 readStatusRepository.save(new ReadStatus(UserId, saved.getId(), Instant.now()));
             }
         }
-
-        return saved.getId();
+        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
+        return ChannelResponseDto.from(saved, messageCreatedAtOfChannel);
     }
 
     @Override

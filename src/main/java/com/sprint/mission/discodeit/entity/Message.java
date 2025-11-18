@@ -34,7 +34,7 @@ public class Message extends BasicEntity {
         this.senderId = senderId;
 //        this.receiverId = receiverId;
         this.channelId = channelId;
-        this.attachmentIds = (attachmentIds == null || attachmentIds.isEmpty()) ? new ArrayList<>() : attachmentIds;
+        this.attachmentIds = (attachmentIds == null) ? new ArrayList<>() : attachmentIds;
     }
 
 

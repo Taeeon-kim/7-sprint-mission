@@ -21,14 +21,13 @@ public class PrivateChannelCreator implements ChannelCreator {
 
     @Override
     public Channel create(ChannelCreateCommand command) {
-        userReader.findUserOrThrow(command.userId());
         if(command.memberIds() == null || command.memberIds().isEmpty()) {
             throw new IllegalArgumentException("memberIds required");
         }
         for (UUID userId : command.memberIds()){
             userReader.findUserOrThrow(userId);
         }
-        Channel privateChannel = Channel.createPrivateChannel(command.userId());
+        Channel privateChannel = Channel.createPrivateChannel();
         command.memberIds().forEach(privateChannel::addUserId);
         return privateChannel;
     }

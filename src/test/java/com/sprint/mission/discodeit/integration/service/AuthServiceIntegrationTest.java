@@ -46,7 +46,6 @@ public class AuthServiceIntegrationTest {
             User user = User.builder()
                     .nickname("name")
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .profileId(null)
                     .role(RoleType.USER)
                     .password("password")
@@ -69,7 +68,6 @@ public class AuthServiceIntegrationTest {
                     () -> assertEquals(saved.getNickname(), loginUser.nickname()),
                     () -> assertEquals(saved.getProfileId(), loginUser.profileId()),
                     () -> assertEquals(saved.getRole(), loginUser.role()),
-                    () -> assertEquals(saved.getPhoneNumber(), loginUser.phoneNumber()),
                     () -> assertEquals(saved.getEmail(), loginUser.email()),
                     () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
             );
@@ -84,7 +82,6 @@ public class AuthServiceIntegrationTest {
                     .role(RoleType.USER)
                     .profileId(null)
                     .email("email@example.com")
-                    .phoneNumber("010-1111-2222")
                     .nickname("name")
                     .password("password")
                     .build();
@@ -94,11 +91,11 @@ public class AuthServiceIntegrationTest {
 
             // when & then
             assertAll(
-                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
                             .username(saved.getNickname())
                             .password("wrongPassword")
                             .build())),
-                    () -> assertThrows(NoSuchElementException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
                                     .username("wrongName")
                                     .password(saved.getPassword())
                                     .build()

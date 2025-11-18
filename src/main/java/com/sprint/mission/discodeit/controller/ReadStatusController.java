@@ -1,9 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
+import com.sprint.mission.discodeit.api.ReadStatusApi;
+import com.sprint.mission.discodeit.dto.readStatus.*;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,37 +14,40 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class ReadStatusController {
+public class ReadStatusController implements ReadStatusApi {
 
     private final ReadStatusService readStatusService;
 
-    @RequestMapping(value = "/read-statuses/{readStatusId}", method = RequestMethod.GET)
+    @Override
+    @RequestMapping(value = "/readStatuses/{readStatusId}", method = RequestMethod.GET)
     public ResponseEntity<ReadStatusResponseDto> getReadStatus(@PathVariable UUID readStatusId) {
         ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
         return ResponseEntity.ok(readStatus);
     }
 
-    @RequestMapping(value = "/read-statuses", method = RequestMethod.POST)
-    public ResponseEntity<UUID> createReadStatus(
+    @Override
+    @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
+    public ResponseEntity<ReadStatusResponseDto> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request
     ) {
-        UUID readStatusId = readStatusService.createReadStatus(request);
-        return ResponseEntity.ok(readStatusId);
+        ReadStatusResponseDto responseDto = readStatusService.createReadStatus(request);
+        return ResponseEntity.ok(responseDto);
     }
 
-    @RequestMapping(value = "/read-statuses/{id}", method = RequestMethod.PATCH)
-    public ResponseEntity<Void> updateReadStatusByUserId(
+    @Override
+    @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
+    public ResponseEntity<ReadStatusUpdateResponseDto> updateReadStatus(
             @PathVariable UUID id,
             @RequestBody ReadStatusUpdateRequestDto requestDto
     ) {
         ReadStatusUpdateCommand command = ReadStatusUpdateCommand.from(id, requestDto);
-        readStatusService.updateReadStatus(command);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        ReadStatusUpdateResponseDto updateResponseDto = readStatusService.updateReadStatus(command);
+        return ResponseEntity.status(HttpStatus.OK).body(updateResponseDto);
     }
 
-
-    @RequestMapping(value = "/users/{userId}/read-statuses", method = RequestMethod.GET)
-    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@PathVariable UUID userId) {
+    @Override
+    @RequestMapping(value = "/readStatuses", method = RequestMethod.GET)
+    public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam UUID userId) {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);
         return ResponseEntity.ok(allReadStatusesByUserId);
     }

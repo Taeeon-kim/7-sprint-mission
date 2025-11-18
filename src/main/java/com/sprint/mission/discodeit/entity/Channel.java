@@ -19,11 +19,10 @@ public class Channel extends BasicEntity {
     private String description;
     private final Set<UUID> userIds;
     private final List<UUID> messageIds; // TODO: 추후 DB 및 레포지토리 계층 사용시 효율성을 위해 Message객체가아닌 messageId만 받는것 고려할 것, 채널이 모든 객체 정보를 가질 필요가있는지 먼저 생각
-    private final UUID createdByUserId; // NOTE: 작성자는 수정못하게 final, 해당 유저가 지워질걸 고려해서 User가아닌 userId로 받기
     private final ChannelType type;
 
 
-    private Channel(String title, String description, UUID createdByUserId, ChannelType type) {
+    private Channel(String title, String description, ChannelType type) {
 
         if (type == ChannelType.PUBLIC) {
             if (title == null || title.isBlank()) {
@@ -34,24 +33,21 @@ public class Channel extends BasicEntity {
             }
 
         }
-        if (createdByUserId == null) {
-            throw new IllegalArgumentException("createdByUserId is null");
-        }
+
 
         this.title = title;
         this.description = description;
-        this.createdByUserId = createdByUserId;
         this.type = type;
         this.userIds = new HashSet<>();
         this.messageIds = new ArrayList<>();
     }
 
-    public static Channel createPublicChannel(UUID createdByUserId, String title, String description) {
-        return new Channel(title, description, createdByUserId, ChannelType.PUBLIC);
+    public static Channel createPublicChannel(String title, String description) {
+        return new Channel(title, description, ChannelType.PUBLIC);
     }
 
-    public static Channel createPrivateChannel(UUID createdByUserId) {
-        return new Channel(null, null, createdByUserId, ChannelType.PRIVATE);
+    public static Channel createPrivateChannel() {
+        return new Channel(null, null, ChannelType.PRIVATE);
     }
 
 
@@ -97,10 +93,6 @@ public class Channel extends BasicEntity {
 
     public List<UUID> getMessageIds() {
         return messageIds.stream().toList();
-    }
-
-    public UUID getCreatedByUserId() {
-        return createdByUserId;
     }
 
 

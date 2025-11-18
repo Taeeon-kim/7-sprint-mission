@@ -1,9 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.*;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
@@ -31,7 +28,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ChannelRepository channelRepository;
 
     @Override
-    public UUID createReadStatus(ReadStatusCreateRequestDto requestDto) {
+    public ReadStatusResponseDto createReadStatus(ReadStatusCreateRequestDto requestDto) {
         if (requestDto.userId() == null || requestDto.channelId() == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
@@ -39,9 +36,9 @@ public class BasicReadStatusService implements ReadStatusService {
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
 
-        if (channel.getType() == ChannelType.PUBLIC) {
-            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
-        }
+//        if (channel.getType() == ChannelType.PUBLIC) {
+//            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
+//        }
 
         for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
             if (readStatus.getChannelId().equals(channel.getId())) {
@@ -59,7 +56,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
         channelRepository.save(channel);
         ReadStatus saved = readStatusRepository.save(readStatus);
-        return saved.getId();
+        return ReadStatusResponseDto.from(saved);
     }
 
     @Override
@@ -77,13 +74,15 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     @Override
-    public void updateReadStatus(ReadStatusUpdateCommand command) {
+    public ReadStatusUpdateResponseDto updateReadStatus(ReadStatusUpdateCommand command) {
         ReadStatus readStatusById = readStatusRepository.findById(command.id()).orElseThrow();
 
         boolean isUpdated = readStatusById.updateReadAt(command.readAt());
         if (isUpdated) {
-            readStatusRepository.save(readStatusById);
+            ReadStatus saved = readStatusRepository.save(readStatusById);
+            return ReadStatusUpdateResponseDto.from(saved);
         }
+        return null;
     }
 
     @Override

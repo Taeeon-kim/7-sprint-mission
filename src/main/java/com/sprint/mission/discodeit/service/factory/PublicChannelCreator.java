@@ -22,10 +22,9 @@ public class PublicChannelCreator implements ChannelCreator {
 
     @Override
     public Channel create(ChannelCreateCommand command) {
-        userReader.findUserOrThrow(command.userId());
         if (command.title() == null || command.title().isBlank() && command.description() == null) {
             throw new IllegalArgumentException("title/description required");
         }
-        return Channel.createPublicChannel(command.userId(), command.title(), command.description());
+        return Channel.createPublicChannel(command.title(), command.description());
     }
 }

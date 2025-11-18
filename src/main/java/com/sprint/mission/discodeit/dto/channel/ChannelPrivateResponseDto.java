@@ -31,7 +31,6 @@ public record ChannelPrivateResponseDto( // public은 userIds 생략
                 .description(channel.getDescription())
                 .userIds(channel.getUserIds())
                 .messageIds(channel.getMessageIds())
-                .createdByUserId(channel.getCreatedByUserId())
                 .type(channel.getType())
                 .currentMessagedAt(currentMessagedAt)
                 .build();

@@ -1,8 +1,6 @@
 package com.sprint.mission.discodeit.integration.service;
 
-import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
-import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.dto.user.UserUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
@@ -13,12 +11,15 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
+import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.Instant;
 import java.util.List;
@@ -37,6 +38,7 @@ public class UserServiceIntegrationTest {
     private UserStatusRepository userStatusRepository;
     private UserStatusService userStatusService;
     private BinaryContentRepository binaryContentRepository;
+    private BinaryContentService binaryContentService;
 
     // TODO: SpringBoot, Autowire 로 변경,
     @BeforeEach
@@ -46,9 +48,16 @@ public class UserServiceIntegrationTest {
         userStatusRepository = new JCFUserStatusRepository();
         binaryContentRepository = new JCFBinaryContentRepository();
         userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository);
+        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
+        userService = new BasicUserService(
+                userRepository,
+                userReader,
+                userStatusService,
+                userStatusRepository,
+                binaryContentRepository,
+                binaryContentService
+        );
     }
-
 
 
     @Nested
@@ -61,26 +70,27 @@ public class UserServiceIntegrationTest {
             int before = userRepository.findAll().size();
 
             //when
-            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
+            UserResponseDto userResponseDto = userService.signUp(command);
 
             //then
             int after = userRepository.findAll().size();
             assertEquals(before + 1, after);
-            User persistedUser = userRepository.findById(id)
+            User persistedUser = userRepository.findById(userResponseDto.id())
                     .orElseThrow(() -> new AssertionError("User not found"));
             assertEquals("name", persistedUser.getNickname());
 
             assertEquals("example@email.com", persistedUser.getEmail());
             assertEquals("password", persistedUser.getPassword());
-            assertEquals("010-1111-2222", persistedUser.getPhoneNumber());
 
         }
 
         @Test
         @DisplayName("[Integration][Negative] 회원가입 - 잘못된 입력은 예외 & DB 변화 없음")
         void signUp_invalid_blocked() {
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "pw"), null);
             assertThrows(IllegalArgumentException.class,
-                    () -> userService.signUp(new UserSignupRequestDto("", "a@b.com", "pw", "010", null)));
+                    () -> userService.signUp(command));
             assertEquals(0, userRepository.findAll().size());
         }
 
@@ -88,11 +98,13 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 중복된 이메일일 경우 예외")
         void signup_whenDuplicate_email_thenThrows() {
             // given
-            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
+            userService.signUp(command);
             int before = userRepository.findAll().size();
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("different", "example@email.com", "password", "010-1111-2222", null)));
+            UserSignupCommand duplicateCommand = UserSignupCommand.from(new UserSignupRequestDto("different", "example@email.com", "password"), null);
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(duplicateCommand));
 
             // then
             int after = userRepository.findAll().size();
@@ -103,11 +115,13 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 중복된 이름일 경우 예외")
         void signup_whenDuplicate_nickname_thenThrows() {
             // given
-            userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
+            userService.signUp(command);
             int before = userRepository.findAll().size();
 
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(new UserSignupRequestDto("name", "different@email.com", "password", "010-1111-2222", null)));
+            UserSignupCommand duplicateCommand = UserSignupCommand.from(new UserSignupRequestDto("name", "different@email.com", "password"), null);
+            assertThrows(IllegalArgumentException.class, () -> userService.signUp(duplicateCommand));
 
             // then
             int after = userRepository.findAll().size();
@@ -119,21 +133,18 @@ public class UserServiceIntegrationTest {
         void signup_then_userStatus_persists_as_well() {
 
             // given
-            UUID uuid = userService.signUp(
-                    new UserSignupRequestDto("name",
-                            "example@email.com",
-                            "password",
-                            "010-1111-2222",
-                            null)
-            );
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name",
+                    "example@email.com",
+                    "password"), null);
+            UserResponseDto responseDto = userService.signUp(command);
 
             // when
             UserStatus userStatusbByUserId = userStatusRepository
-                    .findByUserId(uuid).orElseThrow(() -> new NoSuchElementException("회원정보없음"));
+                    .findByUserId(responseDto.id()).orElseThrow(() -> new NoSuchElementException("회원정보없음"));
 
             // then
             assertNotNull(userStatusbByUserId);
-            assertEquals(uuid, userStatusbByUserId.getUserId());
+            assertEquals(responseDto.id(), userStatusbByUserId.getUserId());
 
         }
 
@@ -147,14 +158,15 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원조회 - 저장후 response DTO 반환 조회 성공")
         void getUserById_returns_saved_user() {
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("name", "example@email.com", "password", "010-1111-2222", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("name", "example@email.com", "password"), null);
+            UserResponseDto responseDto = userService.signUp(command);
 
             //when
-            UserResponseDto userById = userService.getUserById(id);
+            UserResponseDto userById = userService.getUserById(responseDto.id());
 
             //then
             assertEquals("name", userById.nickname());
-            assertEquals(id, userById.id());
+            assertEquals(responseDto.id(), userById.id());
         }
 
         @Test
@@ -180,15 +192,16 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원수정 - 이메일만 변경, 나머지 유지")
         void updateUser_updates_only_email() throws InterruptedException {
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
-            Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserResponseDto responseDto = userService.signUp(command);
+            Instant beforeTime = userRepository.findById(responseDto.id()).orElseThrow().getUpdatedAt();
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto(null, "b@c.com", null), null);
             //when
-            userService.updateUser(id, new UserUpdateRequestDto(null, "b@c.com", null, null, null));
+            userService.updateUser(updateCommand);
             //then
-            User after = userRepository.findById(id).orElseThrow();
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
             assertEquals("nick", after.getNickname());
-            assertEquals("010", after.getPhoneNumber());
 
             // 실제 update호출안된건지 update값 조회
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
@@ -199,19 +212,22 @@ public class UserServiceIntegrationTest {
         void updateUser_no_effect_when_same_values() {
 
             //given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
-            User before = userRepository.findById(id).orElseThrow();
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserResponseDto responseDto = userService.signUp(command);
+            User before = userRepository.findById(responseDto.id()).orElseThrow();
             Instant beforeTime = before.getUpdatedAt(); // 스냅샷
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
+            UserUpdateCommand updateCommand2 = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto(null, null, null), null);
+
 
             //when
-            userService.updateUser(id, new UserUpdateRequestDto("nick", "a@b.com", "pw", "010", null));
-            userService.updateUser(id,new UserUpdateRequestDto(null, null, null, null, null));
+            userService.updateUser(updateCommand);
+            userService.updateUser(updateCommand2);
 
             //then
-            User after = userRepository.findById(id).orElseThrow();
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals(before.getNickname(), after.getNickname());
             assertEquals(before.getEmail(), after.getEmail());
-            assertEquals(before.getPhoneNumber(), after.getPhoneNumber());
 
             assertEquals(beforeTime, after.getUpdatedAt());
         }
@@ -220,16 +236,18 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][State] 회원수정 - 여러 필드 동시 변경 반영")
         void updateUser_updates_multiple_fields() {
             // given
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
-            Instant beforeTime = userRepository.findById(id).orElseThrow().getUpdatedAt();
-            UUID profileId = UUID.randomUUID();
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserResponseDto responseDto = userService.signUp(command);
+            Instant beforeTime = userRepository.findById(responseDto.id()).orElseThrow().getUpdatedAt();
+            MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto("nick2", "b@c.com", "pw2"), mockMultipartFile);
+
             // when
-            userService.updateUser(id,new UserUpdateRequestDto("nick2", "b@c.com", "pw2", "011", profileId));
-            User after = userRepository.findById(id).orElseThrow();
+            userService.updateUser(updateCommand);
+            User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("nick2", after.getNickname());
             assertEquals("b@c.com", after.getEmail());
-            assertEquals("011", after.getPhoneNumber());
-            assertEquals(profileId, after.getProfileId());
+            assertNotNull(after.getProfileId());
 
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
         }
@@ -241,9 +259,10 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 회원삭제 - 삭제 후 조회 시 예외")
         void deleteUser_then_not_found() {
-            UUID id = userService.signUp(new UserSignupRequestDto("nick", "a@b.com", "pw", "010", null));
-            userService.deleteUser(id);
-            assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserResponseDto responseDto = userService.signUp(command);
+            userService.deleteUser(responseDto.id());
+            assertThrows(NoSuchElementException.class, () -> userService.getUserById(responseDto.id()));
         }
 
         @Test
@@ -254,7 +273,7 @@ public class UserServiceIntegrationTest {
             byte[] payload = "fake-bytes".getBytes(UTF_8);
             // 프로필이미지
             BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", payload));
-            User user = User.create("nick", "a@b.com", "pw", RoleType.USER, "010", savedBinarycontent.getId());
+            User user = User.create("nick", "a@b.com", "pw", RoleType.USER, savedBinarycontent.getId());
             UserStatus userStatus = new UserStatus(user.getId());
             //유저등록
             User savedUser = userRepository.save(user);
@@ -287,8 +306,10 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 회원전체조회 - 여러 명 저장 후 전체 조회")
         void getAllUsers_returns_all() {
-            userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p", "010", null));
-            userService.signUp(new UserSignupRequestDto("b", "b@b.com", "p", "010", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserSignupCommand command2 = UserSignupCommand.from(new UserSignupRequestDto("b", "b@b.com", "p"), null);
+            userService.signUp(command);
+            userService.signUp(command2);
             assertEquals(2, userService.getAllUsers().size());
         }
     }
@@ -299,11 +320,12 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow] 특정 회원리스트 조회 - 일부 id만 유효 → 유효한 것만 반환")
         void getUsersByIds_returns_only_existing() {
-            UUID id1 = userService.signUp(new UserSignupRequestDto("a", "a@a.com", "p", "010", null));
+            UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
+            UserResponseDto responseDto = userService.signUp(command);
             UUID id2 = UUID.randomUUID();
-            List<User> result = userService.getUsersByIds(List.of(id1, id2));
+            List<User> result = userService.getUsersByIds(List.of(responseDto.id(), id2));
             assertEquals(1, result.size());
-            assertEquals(id1, result.get(0).getId());
+            assertEquals(responseDto.id(), result.get(0).getId());
         }
 
         @Test
