@@ -26,17 +26,17 @@ public class BasicReadStatusService implements ReadStatusService {
 
     @Override
     public ReadStatusDto create(ReadStatusCreateRequestDto readStatusCreateRequestDto) {
-        User user = userRepository.findById(readStatusCreateRequestDto.getUserId())
-                .orElseThrow(()->new IllegalArgumentException("User not found"));
-
-        Channel channel = channelRepository.findByChannel(readStatusCreateRequestDto.getChannelId())
-                .orElseThrow(() -> new IllegalArgumentException("Channel not found"));
-
         ReadStatus existing = readStatusRepository.findByUserAndChannel(
                 readStatusCreateRequestDto.getUserId(),
                 readStatusCreateRequestDto.getChannelId()
         );
         if (existing != null) throw new IllegalArgumentException("ReadStatus already exists");
+
+        User user = userRepository.findById(readStatusCreateRequestDto.getUserId())
+                .orElseThrow(()->new IllegalArgumentException("User not found"));
+
+        Channel channel = channelRepository.findByChannel(readStatusCreateRequestDto.getChannelId())
+                .orElseThrow(() -> new IllegalArgumentException("Channel not found"));
 
         ReadStatus readStatus = new ReadStatus(
                 readStatusCreateRequestDto.getUserId(),
