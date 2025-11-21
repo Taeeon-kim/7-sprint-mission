@@ -1,27 +1,21 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public class User extends BasicEntity {
-    private static final long serialVersionUID = 1L;
+public class User extends BaseUpdatableEntity {
     private String nickname;
     private String email;
     private String password;
     private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
     private UUID profileId;
-//    private final List<User> friends;
-
-
-    private User() {
-    }
 
     @Builder
     private User(String nickname, String email, String password, RoleType role, UUID profileId) {
@@ -40,21 +34,6 @@ public class User extends BasicEntity {
         this.password = password;
         this.role = role;
         this.profileId = profileId;
-    }
-
-    private User(User other) { //  NOTE: 복사용, 복사 생성자
-
-        super(other);
-        this.nickname = other.nickname;
-        this.email = other.email;
-        this.password = other.password;
-        this.role = other.role;
-        this.profileId = other.profileId;
-//        this.friends = new ArrayList<>(other.friends);
-    }
-
-    public static User copyOf(User other) {
-        return new User(other);
     }
 
     public static User create(String nickname, String email, String password, RoleType role, UUID profileId) {

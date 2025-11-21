@@ -1,9 +1,8 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
-import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -13,8 +12,7 @@ import java.util.*;
 
 @Getter
 @ToString
-public class Channel extends BasicEntity {
-    private static final long serialVersionUID = 1L;
+public class Channel extends BaseUpdatableEntity {
     private String title;
     private String description;
     private final Set<UUID> userIds;

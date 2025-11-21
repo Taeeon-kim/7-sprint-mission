@@ -159,58 +159,6 @@ public class UserTest {
         }
     }
 
-//    @Nested
-//    @DisplayName("User 전화번호 변경 규칙")
-//    class PhoneRule {
-//        @Test
-//        @DisplayName("[Rule][Positive] 유효하고 기존과 다르면 변경된다")
-//        void updatePhone_shouldChange_whenValidAndDifferent() {
-//            User u = newUser();
-//            assertTrue(u.updatePhoneNumber("011"));
-//            assertEquals("011", u.getPhoneNumber());
-//        }
-//
-//        @Test
-//        @DisplayName("[Rule][Negative] 전화번호가 null/blank면 변경되지 않는다")
-//        void updatePhone_shouldNotChange_whenNullOrBlank() {
-//            User u = newUser();
-//            assertFalse(u.updatePhoneNumber(null));
-//            assertEquals("010-1111-1111", u.getPhoneNumber());
-//
-//            assertFalse(u.updatePhoneNumber(""));
-//            assertEquals("010-1111-1111", u.getPhoneNumber());
-//        }
-//
-//        @Test
-//        @DisplayName("[Rule][Negative] 전화번호가 동일하면 변경되지 않는다")
-//        void updatePhone_shouldNotChange_whenSame() {
-//            User u = newUser();
-//            assertFalse(u.updatePhoneNumber("010-1111-1111"));
-//            assertEquals("010-1111-1111", u.getPhoneNumber());
-//        }
-//    }
-
-    @Nested
-    @DisplayName("User 복사 생성자 상태")
-    class CopyConstructorState {
-
-        @Test
-        @DisplayName("[State][Positive] 원본과 동일한 상태로 복사된다 (ID/타임스탬프 포함)")
-        void copyConstructor_shouldCloneAllFields() {
-            User original = newUser();
-            User copy = User.copyOf(original);
-
-            assertEquals(original.getId(), copy.getId());
-            assertEquals(original.getCreatedAt(), copy.getCreatedAt());
-            assertEquals(original.getUpdatedAt(), copy.getUpdatedAt());
-            assertEquals(original.getNickname(), copy.getNickname());
-            assertEquals(original.getEmail(), copy.getEmail());
-            assertEquals(original.getPassword(), copy.getPassword());
-            assertEquals(original.getRole(), copy.getRole());
-            assertNotSame(original, copy);
-        }
-    }
-
     @Nested
     @DisplayName("BasicEntity updatedAt 제약")
     class UpdatedAtInvariant {
@@ -243,7 +191,6 @@ public class UserTest {
             assertEquals(now.plusMillis(5_000), u.getUpdatedAt());
         }
     }
-
 
 
 }

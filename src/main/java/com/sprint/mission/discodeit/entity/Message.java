@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,8 +10,7 @@ import java.util.UUID;
 
 @Getter
 
-public class Message extends BasicEntity {
-    private static final long serialVersionUID = 1L;
+public class Message extends BaseUpdatableEntity {
     private String content;
     private final UUID senderId;
     //    private final UUID receiverId; // 일단 dm 없으므로 제외
