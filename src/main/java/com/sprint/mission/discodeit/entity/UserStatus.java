@@ -14,7 +14,6 @@ public class UserStatus extends BaseUpdatableEntity {
 
     public void markAsActive() {
         this.lastActiveAt = Instant.now();
-        setUpdatedAt(Instant.now());
     }
 
     public UserStatus(UUID userId) {

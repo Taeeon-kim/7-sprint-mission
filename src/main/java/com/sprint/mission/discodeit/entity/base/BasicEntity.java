@@ -1,25 +1,29 @@
 package com.sprint.mission.discodeit.entity.base;
 
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public abstract class BasicEntity implements Serializable {
-    private final UUID id; // TODO: JPA로 바꾸고 Final 풀어주고, 리플렉션 되도록
-    private final Instant createdAt;
+@MappedSuperclass // JPA Entity 상속 받게 부모 클래스로 인정하도록
+@EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+public abstract class BasicEntity {
 
-    protected BasicEntity() { // NOTE: 직접 생성 불가 + 자식에서 호출하도록
-        this.id = UUID.randomUUID();
-        this.createdAt = Instant.now();
-    }
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
-    protected BasicEntity(BasicEntity user) {
-        this.id = user.id; // 클래스가 같으니 getId아닌 직접참조
-        this.createdAt = user.createdAt;
-    }
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
     @Override
     public String toString() {

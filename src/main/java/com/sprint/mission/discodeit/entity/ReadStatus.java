@@ -18,7 +18,6 @@ public class ReadStatus extends BaseUpdatableEntity {
 
     public void markAsRead() {
         this.readAt = Instant.now();
-        setUpdatedAt(Instant.now());
     }
 
     public boolean updateReadAt(Instant readAt) {

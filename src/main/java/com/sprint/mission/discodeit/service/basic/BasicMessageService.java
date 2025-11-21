@@ -132,7 +132,6 @@ public class BasicMessageService implements MessageService {
         }
 
         if (isUpdated) {
-            message.setUpdatedAt(Instant.now());
             Message saved = messageRepository.save(message);
             return MessageUpdateResponseDto.from(saved);
         }

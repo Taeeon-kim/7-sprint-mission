@@ -129,12 +129,9 @@ public class BasicUserService implements UserService {
         UUID profileBinaryId = updateCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null);
 
         UserUpdateParams params = UserUpdateParams.from(updateCommand, profileBinaryId); // 경계분리
-        boolean updated = userById.update(params);
-        if (updated) {
-            User saved = userRepository.save(userById);// user repository 사용 책임 분리
-            return UserResponseDto.from(saved, null);
-        }
-        return null;
+        userById.update(params);
+        userRepository.save(userById);// user repository 사용 책임 분리
+        return UserResponseDto.from(userById, null); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
     }
 
     @Override

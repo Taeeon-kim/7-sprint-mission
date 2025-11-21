@@ -5,11 +5,12 @@ import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class User extends BaseUpdatableEntity {
     private String nickname;
     private String email;
@@ -19,7 +20,6 @@ public class User extends BaseUpdatableEntity {
 
     @Builder
     private User(String nickname, String email, String password, RoleType role, UUID profileId) {
-        super();
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
@@ -40,16 +40,13 @@ public class User extends BaseUpdatableEntity {
         return new User(nickname, email, password, role, profileId);
     }
 
-    public boolean update(UserUpdateParams request) {
-        boolean changeFlag = false;
-        changeFlag |= this.updateNickname(request.nickname());
-        changeFlag |= this.updateEmail(request.email());
-        changeFlag |= this.updatePassword(request.password());
-        changeFlag |= this.updateProfileId(request.profileId());
-        if (changeFlag) {
-            this.setUpdatedAt(Instant.now());
-        }
-        return changeFlag;
+    public void update(UserUpdateParams request) {
+
+        this.updateNickname(request.nickname());
+        this.updateEmail(request.email());
+        this.updatePassword(request.password());
+        this.updateProfileId(request.profileId());
+
     }
 
     private boolean updateProfileId(UUID profileId) {

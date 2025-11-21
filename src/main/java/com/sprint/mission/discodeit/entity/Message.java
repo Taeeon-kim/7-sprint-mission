@@ -13,9 +13,8 @@ import java.util.UUID;
 public class Message extends BaseUpdatableEntity {
     private String content;
     private final UUID senderId;
-    //    private final UUID receiverId; // 일단 dm 없으므로 제외
     private final UUID channelId; // TODO: Channel과 연관관계 체크할것
-    private List<UUID> attachmentIds;
+    private List<UUID> attachmentIds; // TODO: JPA 연관관계 보고 삭제할것
 
     @Builder
     public Message(String content, UUID senderId, UUID channelId, List<UUID> attachmentIds) {

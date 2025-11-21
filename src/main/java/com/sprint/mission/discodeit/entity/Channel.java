@@ -123,9 +123,6 @@ public class Channel extends BaseUpdatableEntity {
         boolean changeFlag = false;
         changeFlag |= this.updateTitle(params.title());
         changeFlag |= this.updateDescription(params.description());
-        if (changeFlag) {
-            this.setUpdatedAt(Instant.now());
-        }
         return changeFlag;
     }
 }
