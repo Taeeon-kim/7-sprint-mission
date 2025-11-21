@@ -80,9 +80,6 @@ public class BasicBinaryContentService implements BinaryContentService {
                 .filter(Objects::nonNull)
                 .map(BinaryContentResponseDto::from)
                 .toList();
-//        return binaryContentRepository.findAllById(channelId)
-//                .stream().map(BinaryContentResponseDto::from)
-//                .toList();
     }
 
     @Override
