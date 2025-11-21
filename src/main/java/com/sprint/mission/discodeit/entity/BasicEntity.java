@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 public abstract class BasicEntity implements Serializable {
     private static final long serialVersionUID = 1L;
-    private final UUID id;
+    private final UUID id; // TODO: JPA로 바꾸고 Final 풀어주고, 리플렉션 되도록
     private final Instant createdAt;
     private Instant updatedAt;
 
