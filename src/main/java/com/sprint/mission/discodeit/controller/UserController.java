@@ -44,14 +44,16 @@ public class UserController {
     }
 
     //사용자 수정
-    @RequestMapping(method = RequestMethod.PUT, params = "userId", consumes = "multipart/form-data")
-    public void updateUser(@RequestParam String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+//    @RequestMapping(method = RequestMethod.PUT, params = "userId", consumes = "multipart/form-data")
+    @PatchMapping("/{userId}")
+    public void updateUser(@PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 
     //사용자 삭제
-    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
-    public void deleteUser(@RequestParam UUID uuid) {
+//    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable UUID uuid) {
         userService.deleteUser(uuid);
     }
 }

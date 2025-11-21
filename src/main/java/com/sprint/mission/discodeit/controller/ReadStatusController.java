@@ -11,13 +11,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/readStatus")
+@RequestMapping("/api/readStatuses")
 @RequiredArgsConstructor
 public class ReadStatusController {
 
     private final ReadStatusService readStatusService;
 
-    @RequestMapping(method = RequestMethod.POST)
+//    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ReadStatusDto createStatus(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
                                       @RequestParam UUID userId,
                                       @RequestParam UUID channelId) {
@@ -26,14 +27,16 @@ public class ReadStatusController {
         return readStatusService.create(readStatusCreateRequestDto);
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
-    public ReadStatusDto updateStatus(@RequestParam UUID readStatusId,
+//    @RequestMapping(method = RequestMethod.PUT)
+    @PatchMapping("/{readStatusId}")
+    public ReadStatusDto updateStatus(@PathVariable UUID readStatusId,
                                       @RequestBody ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
         readStatusUpdateRequestDto.setUuid(readStatusId);
         return readStatusService.update(readStatusUpdateRequestDto);
     }
 
-    @RequestMapping(method = RequestMethod.GET, params = "userId")
+//    @RequestMapping(method = RequestMethod.GET, params = "userId")
+    @GetMapping(params = "userId")
     public List<ReadStatusDto> getReadStatus(@RequestParam UUID userId) {
         return readStatusService.findAllByUserId(userId);
     }

@@ -31,16 +31,19 @@ public class MessageController {
     }
 
     // 메시지 수정
-    @RequestMapping(method = RequestMethod.PUT, consumes = "multipart/form-data")
-    public MessageResponseDto updateMessage(@ModelAttribute("data") MessageUpdateRequestDto messageUpdateRequestDto,
-                                            /*@RequestPart(value = "file", required = false)*/ List<MultipartFile> files) {
+//    @RequestMapping(method = RequestMethod.PUT, consumes = "multipart/form-data")
+    @PatchMapping(value = "/{messageId}", consumes = "multipart/form-data")
+    public MessageResponseDto updateMessage(
+            @ModelAttribute("data") MessageUpdateRequestDto messageUpdateRequestDto,
+            @RequestPart(value = "file", required = false) List<MultipartFile> files) {
         var updateMessage = messageService.updateMessage(messageUpdateRequestDto, files);
         return MessageResponseDto.from(updateMessage);
     }
 
     // 메시지 삭제
-    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
-    public void deleteMessage(@RequestParam UUID uuid) {
+//    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
+    @DeleteMapping("/{messageId}")
+    public void deleteMessage(@PathVariable UUID uuid) {
         messageService.deleteMessage(uuid);
     }
 

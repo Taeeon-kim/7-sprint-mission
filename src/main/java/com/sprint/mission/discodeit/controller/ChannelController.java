@@ -20,27 +20,31 @@ public class ChannelController {
     }
 
     // 공개 채널 생성
-    @RequestMapping(value = "/public", method = RequestMethod.POST)
+//    @RequestMapping(value = "/public", method = RequestMethod.POST
+    @PostMapping("/public")
     public void createPublicChannel(@RequestBody ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
         channelService.createPublicChannel(channelPublicCreateRequestDto);
     }
 
     // 비공개 채널 생성
-    @RequestMapping(value = "/private", method = RequestMethod.POST)
+//    @RequestMapping(value = "/private", method = RequestMethod.POST)
+    @PostMapping("/private")
     public void createPrivateChannel(@RequestBody ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
         channelService.createPrivateChannel(channelPrivateCreateRequestDto);
     }
 
     // 공개 채널 정보 수정
-    @RequestMapping(method = RequestMethod.PUT, params = "channelId")
-    public void updateChannel(@RequestParam UUID channelId,
+//    @RequestMapping(method = RequestMethod.PUT, params = "channelId")
+    @PatchMapping("/{channelId}")
+    public void updateChannel(@PathVariable UUID channelId,
                               @RequestBody ChannelUpdateRequestDto channelUpdateRequestDto) {
         channelService.updateChannel(channelId, channelUpdateRequestDto);
     }
 
     // 채널 삭제
-    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
-    public void deleteChannel(@RequestParam UUID uuid) {
+//    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
+    @DeleteMapping("/{channelId}")
+    public void deleteChannel(@PathVariable UUID uuid) {
         channelService.deleteChannel(uuid);
     }
 
