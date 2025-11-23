@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.RoleType;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,15 +12,26 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "users")
 public class User extends BaseUpdatableEntity {
+
+    @Column(name = "username", nullable = false, unique = true)
     private String nickname;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
-    private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
-    private UUID profileId;
+
+    @Column(name = "profile_id")
+    private UUID profileId; // 1:1양방향 (없을수도있음), TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
+    @OneToOne(mappedBy = "user")
+    private UserStatus userStatus; // 1:1 양방향
 
     @Builder
-    private User(String nickname, String email, String password, RoleType role, UUID profileId) {
+    private User(String nickname, String email, String password, UUID profileId) {
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
@@ -28,16 +40,14 @@ public class User extends BaseUpdatableEntity {
         if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("nickname invalid");
         if (email == null || !email.contains("@")) throw new IllegalArgumentException("email invalid");
         if (password == null || password.isBlank()) throw new IllegalArgumentException("password invalid");
-        if (role == null) throw new IllegalArgumentException("role invalid");
         this.nickname = nickname;
         this.email = email;
         this.password = password;
-        this.role = role;
         this.profileId = profileId;
     }
 
-    public static User create(String nickname, String email, String password, RoleType role, UUID profileId) {
-        return new User(nickname, email, password, role, profileId);
+    public static User create(String nickname, String email, String password, UUID profileId) {
+        return new User(nickname, email, password, profileId);
     }
 
     public void update(UserUpdateParams request) {

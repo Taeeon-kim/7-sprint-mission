@@ -3,28 +3,34 @@ package com.sprint.mission.discodeit.entity;
 import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-
-import java.time.Instant;
 import java.util.*;
 
 @Getter
 @ToString
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "channels")
 public class Channel extends BaseUpdatableEntity {
-    private String title;
+
+
+    private String name;
     private String description;
-    private final Set<UUID> userIds;
-    private final List<UUID> messageIds; // TODO: 추후 DB 및 레포지토리 계층 사용시 효율성을 위해 Message객체가아닌 messageId만 받는것 고려할 것, 채널이 모든 객체 정보를 가질 필요가있는지 먼저 생각
-    private final ChannelType type;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChannelType type;
 
 
-    private Channel(String title, String description, ChannelType type) {
+    private Channel(String name, String description, ChannelType type) {
 
         if (type == ChannelType.PUBLIC) {
-            if (title == null || title.isBlank()) {
-                throw new IllegalArgumentException("title is invalid");
+            if (name == null || name.isBlank()) {
+                throw new IllegalArgumentException("name is invalid");
             }
             if (description == null) {
                 throw new IllegalArgumentException("description is null");
@@ -32,82 +38,26 @@ public class Channel extends BaseUpdatableEntity {
 
         }
 
-
-        this.title = title;
+        this.name = name;
         this.description = description;
         this.type = type;
-        this.userIds = new HashSet<>();
-        this.messageIds = new ArrayList<>();
     }
 
-    public static Channel createPublicChannel(String title, String description) {
-        return new Channel(title, description, ChannelType.PUBLIC);
+    public static Channel createPublicChannel(String name, String description) {
+        return new Channel(name, description, ChannelType.PUBLIC);
     }
 
     public static Channel createPrivateChannel() {
         return new Channel(null, null, ChannelType.PRIVATE);
     }
 
-
-    public void addUserId(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("유저정보가 잘못 되었습니다.");
-        }
-        boolean isAdded = userIds.add(userId);
-        if (!isAdded) { // NOTE: 중복체크
-            throw new IllegalStateException("이미 참여한 유저입니다.");
-        }
-    }
-
-    public void removeUserId(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("유저정보가 잘못 되었습니다.");
-        }
-        boolean isRemoved = userIds.remove(userId);
-
-        if (!isRemoved) {
-            throw new IllegalStateException("채널에서 유저가 없습니다.");
-        }
-    }
-
-    public void removeMessageId(UUID messageId) {
-        if (messageId == null) {
-            throw new IllegalArgumentException("메세지정보가 잘못 되었습니다.");
-        }
-        messageIds.remove(messageId);
-    }
-
-    public void addMessageId(UUID messageId) {
-        if (messageId == null) {
-            throw new IllegalArgumentException("메세시 정보가 잘못되었습니다.");
-        }
-        messageIds.add(messageId);
-
-    }
-
-    public boolean isMember(UUID userId) {
-        return userIds.contains(userId);
-    }
-
-    public List<UUID> getMessageIds() {
-        return messageIds.stream().toList();
-    }
-
-
-    // TODO: Users 에대한 업데이트는 좀더 고려할것 일반적으로 값만 대입하는게 아닌 List로 User를 지우는지,추가하는지 에대한 내용
-    // 만약 User내용자체가 바뀌었다면 Channel에서 고려할사항은 아님 어차피 주소값이 있기때문에 알아서 바뀐 User로 될거니깐
-
-
-    // TODO: updatePrivaqte 변경
-
-    public boolean updateTitle(String title) {
-        if (title != null && !title.isBlank() && !title.equals(this.title)) {
-            this.title = title;
+    public boolean updateName(String name) {
+        if (name != null && !name.isBlank() && !name.equals(this.name)) {
+            this.name = name;
             return true;
         }
         return false;
     }
-
 
     public boolean updateDescription(String description) {
         if (description != null && !description.equals(this.description)) { // NOTE: 설명란은 blank 가능하도록하기위해 isBlank는 체크는 제거
@@ -118,11 +68,8 @@ public class Channel extends BaseUpdatableEntity {
         return false;
     }
 
-
-    public boolean update(ChannelUpdateParams params) {
-        boolean changeFlag = false;
-        changeFlag |= this.updateTitle(params.title());
-        changeFlag |= this.updateDescription(params.description());
-        return changeFlag;
+    public void update(ChannelUpdateParams params) {
+        this.updateName(params.name());
+        this.updateDescription(params.description());
     }
 }

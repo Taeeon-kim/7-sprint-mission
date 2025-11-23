@@ -64,16 +64,20 @@ CREATE TABLE messages
 CREATE TABLE read_statuses
 (
     id           UUID PRIMARY KEY,
-    user_id      UUID,
-    channel_id   UUID,
+    user_id      UUID                     NOT NULL,
+    channel_id   UUID                     NOT NULL,
     last_read_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE
+    created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at   TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT fk_read_status_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_read_status_channel FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE
+    CONSTRAINT uk_read_status_user_channel UNIQUE (user_id, channel_id)
 )
 
 CREATE TABLE message_attachments
 (
-    message_id UUID NOT NULL,
+    message_id    UUID NOT NULL,
     attachment_id UUID NOT NULL,
     PRIMARY KEY (message_id, attachment_id),
     CONSTRAINT fk_message_attachment_message FOREIGN KEY (message_id) REFERENCES messages (id) ON DELETE CASCADE,

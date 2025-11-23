@@ -12,29 +12,26 @@ public record ChannelResponseDto(
         UUID id,
         String name,
         String description,
-        Set<UUID> participantIds,
+        List<UUID> participantIds,
         List<UUID> messageIds,
         ChannelType type,
-        Instant lastMessagedAt,
-        Instant createdAt,
-        Instant updatedAt
-
-
+        Instant lastMessagedAt
 ) {
     public static ChannelResponseDto from(
             Channel channel,
+            List<UUID> participantIds,
+            List<UUID> messageIds,
             Instant lastMessagedAt
     ) {
         return new ChannelResponseDto(
                 channel.getId(),
-                channel.getTitle(),
+                channel.getName(),
                 channel.getDescription(),
-                channel.getUserIds(),
-                channel.getMessageIds(),
+                participantIds,
+                messageIds,
                 channel.getType(),
-                lastMessagedAt,
-                channel.getCreatedAt(),
-                channel.getUpdatedAt()
+                lastMessagedAt
+
         );
     }
 }

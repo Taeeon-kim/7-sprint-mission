@@ -24,6 +24,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         BinaryContent binaryContent = new BinaryContent(
                 command.fileName(),
                 command.contentType(),
+                command.size(),
                 command.bytes());
 
         BinaryContent saved = binaryContentRepository.save(binaryContent);
@@ -38,7 +39,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     @Override
     public List<BinaryContentResponseDto> getBinaryContentsByIds(List<UUID> ids) {
-        List<BinaryContent> allByIds = binaryContentRepository.findAllByIds(ids);
+        List<BinaryContent> allByIds = binaryContentRepository.findAllById(ids);
         return allByIds.stream()
                 .map(BinaryContentResponseDto::from)
                 .toList();

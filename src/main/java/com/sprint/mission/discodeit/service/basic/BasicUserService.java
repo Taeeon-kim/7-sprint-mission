@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -38,6 +39,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto signUp(UserSignupCommand userSignupCommand) {
         if (
                 userSignupCommand.username() == null ||
@@ -59,18 +61,14 @@ public class BasicUserService implements UserService {
         User newUser = User.create(userSignupCommand.username(),
                 userSignupCommand.email(),
                 userSignupCommand.password(),
-                USER,
                 profileBinaryId
         );
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
 
         // NOTE: 일단 요구사항대로 책임분리 없이 signup에서 userStatus 등록
-        UserStatus userStatus = new UserStatus(savedUser.getId());
+        UserStatus userStatus = new UserStatus(savedUser);
         userStatusRepository.save(userStatus);
-        // TODO: step2: 실패시 처리해야되나? 한다면 유저등록은 되어있기때문에 어떻게 처리할지
-        // TODO: 추후 @Trnsactional전 보상로직 try catch 할거 생각
-        // TODO: 여기서 이전에 알려준 dispatcher 사용? event 기반? 추후 리펙토링에 추가할것
 
         return UserResponseDto.from(savedUser, null);
     }
@@ -94,26 +92,7 @@ public class BasicUserService implements UserService {
         }
 
         User user = userReader.findUserOrThrow(userId);
-        UserStatus statusByUserId = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 유저상태정보가 없습니다."));
-
-        // 정합성, Fk 이유로 유저상태부터 제거
-        boolean isRemovedStatus = userStatusRepository.deleteById(statusByUserId.getId());
-        if (isRemovedStatus) {
-            try {
-                boolean deleted = userRepository.deleteById(user.getId());
-                if (!deleted) {
-                    throw new IllegalStateException("해당 유저를 삭제 하지 못했습니다.");
-                }
-                if (user.getProfileId() != null) {
-                    binaryContentRepository.deleteById(user.getProfileId());
-                }
-
-            } catch (Exception e) {
-                // 보상로직
-                userStatusRepository.save(statusByUserId);
-                throw e;
-            }
-        }
+        userRepository.deleteById(user.getId());
 
     }
 
@@ -153,6 +132,6 @@ public class BasicUserService implements UserService {
         if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        return userRepository.findAllByIds(userIds);
+        return userRepository.findAllById(userIds);
     }
 }

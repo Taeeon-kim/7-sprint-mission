@@ -2,22 +2,31 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "user_statuses")
 public class UserStatus extends BaseUpdatableEntity {
-    private final UUID userId;
+    @OneToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Column(name = "last_active_at", nullable = false)
     private Instant lastActiveAt;
 
     public void markAsActive() {
         this.lastActiveAt = Instant.now();
     }
 
-    public UserStatus(UUID userId) {
-        this.userId = userId;
+    public UserStatus(User user) {
+        this.user = user;
         this.lastActiveAt = Instant.now();
     }
 

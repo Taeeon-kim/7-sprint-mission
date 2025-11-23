@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BasicChannelService implements ChannelService {
@@ -49,12 +51,21 @@ public class BasicChannelService implements ChannelService {
         Channel saved = channelRepository.save(channel);
 
         if (saved.getType() == ChannelType.PRIVATE) {
-            for (UUID UserId : command.memberIds()) {
-                readStatusRepository.save(new ReadStatus(UserId, saved.getId(), Instant.now()));
-            }
+            List<User> users = userReader.findUsersByIds(command.memberIds());
+            List<ReadStatus> readStatuses = users.stream()
+                    .map(user -> new ReadStatus(user, saved, Instant.now())).toList();
+
+            readStatusRepository.saveAll(readStatuses);
         }
-        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-        return ChannelResponseDto.from(saved, messageCreatedAtOfChannel);
+
+        List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+                .map(readStatus -> readStatus.getUser().getId())
+                .collect(Collectors.toList());
+        List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                .map(Message::getCreatedAt)
+                .orElse(null);
+        return ChannelResponseDto.from(saved, participantIds, messageIds, lastMessageAt);
     }
 
     @Override
@@ -68,12 +79,11 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("해당 채널은 수정할수 없습니다.");
         }
         ChannelUpdateParams params = ChannelUpdateParams.from(request);
-        boolean changeFlag = channelById.update(params);
-        if (changeFlag) {
-            channelRepository.save(channelById);
-        }
-    }
+        channelById.update(params); // TODO: api ChannelDto 형식으로, 영속성 컨텍스트로 불필요 flag 제거 수정할 것
 
+        channelRepository.save(channelById);
+
+    }
 
     @Override
     public void deleteChannel(UUID channelId) {
@@ -81,36 +91,38 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        // 메세지 레포지토리에서 삭제 로직
-        List<UUID> channelMessageIds = channel.getMessageIds();
-        for (UUID messageId : channelMessageIds) {
-            messageRepository.deleteById(messageId);
-        }
-        // readStatus 삭제
-        List<ReadStatus> readStatuses = readStatusRepository.findByChannelId(channel.getId());
-        for (ReadStatus readStatus : readStatuses) {
-            readStatusRepository.deleteById(readStatus.getId());
-        }
         // 채널삭제
-        channelRepository.deleteById(channel.getId());
-        // NOTE: 보상로직 생략, DB 생기면 @Transactional
+        channelRepository.deleteById(channel.getId()); // NOTE message, read_status CASCADE 처리됨
+        // TODO: 보상로직 생략, DB 생기면 @Transactional 이부분도 곧 넣기
     }
 
     @Override
     public ChannelResponseDto getChannel(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-        return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+        List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+                .map(readStatus -> readStatus.getUser().getId())
+                .collect(Collectors.toList());
+        List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                .map(Message::getCreatedAt)
+                .orElse(null);
+        return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
     }
 
     @Override
     public List<ChannelResponseDto> getAllChannels() {
-        List<Channel> channelList = channelRepository.findAll();
+        List<Channel> channelList = channelRepository.findAll(); //
         return channelList
                 .stream()
-                .map(channel -> {
-                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                .map(channel -> { // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
+                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+                            .map(readStatus -> readStatus.getUser().getId())
+                            .collect(Collectors.toList());
+                    List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                            .map(Message::getCreatedAt)
+                            .orElse(null);
+                    return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
                 })
                 .toList();
     }
@@ -119,35 +131,25 @@ public class BasicChannelService implements ChannelService {
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
         return channelRepository.findAllByUserId(userId)
                 .stream()
-                .map(channel -> {
-                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+                .map(channel -> {  // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
+                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+                            .map(readStatus -> readStatus.getUser().getId())
+                            .collect(Collectors.toList());
+                    List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                            .map(Message::getCreatedAt)
+                            .orElse(null);
+                    return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
                 })
                 .toList();
     }
 
-    // 헬퍼 메서드
-    private Instant getLatestMessageCreatedAtOfChannel(Channel channel) {
-        Instant messageCreatedAtOfChannel = null;
-        // 최신 메세지 하나가져오고
-        List<UUID> messageIds = channel.getMessageIds();
-        // 해당 메세지의 createdAt 추출하고 response dto에 포함
-        if (!messageIds.isEmpty()) {
-            UUID currentMessageId = messageIds.get(messageIds.size() - 1);
 
-            messageCreatedAtOfChannel = messageRepository.findById(currentMessageId)
-                    .map(Message::getCreatedAt)
-                    .orElse(null);
-
-        }
-        return messageCreatedAtOfChannel;
-    }
-
-    private ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel, List<UUID> participantIds, List<UUID> messageIds, Instant lastMessageAt) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, messageCreatedAt);
+            return ChannelResponseDto.from(channel, participantIds, messageIds, lastMessageAt);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, messageCreatedAt);
+            return ChannelResponseDto.from(channel, participantIds, messageIds, lastMessageAt);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }
@@ -161,7 +163,13 @@ public class BasicChannelService implements ChannelService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         User user = userReader.findUserOrThrow(userId);
-        channel.addUserId(user.getId());
+        // 이미 참여했는지 체크 (메서드 없으면 아래 existsBy...를 리포지토리에 추가)
+        if (readStatusRepository.existsByUserAndChannel(user, channel)) {
+            throw new IllegalStateException("이미 참여한 유저입니다.");
+        }
+
+        // 참여 = ReadStatus 한 줄 생성
+        ReadStatus readStatus = new ReadStatus(user, channel, Instant.now());
         channelRepository.save(channel);
         // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
 
@@ -176,9 +184,11 @@ public class BasicChannelService implements ChannelService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         User user = userReader.findUserOrThrow(userId);
-        channel.removeUserId(user.getId());
-        channelRepository.save(channel);
-        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
+
+        ReadStatus readStatus = readStatusRepository.findByUserAndChannel(user, channel)
+                .orElseThrow(() -> new IllegalStateException("채널에 참여하지 않은 사용자입니다."));
+
+        readStatusRepository.delete(readStatus);
 
     }
 
@@ -189,16 +199,12 @@ public class BasicChannelService implements ChannelService {
         }
 
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        List<UUID> userIds = List.copyOf(channel.getUserIds());
+        List<UUID> userIds = readStatusRepository.findUserIdsByChannelId(channel.getId());
         return userReader.findUsersByIds(userIds);
     }
 
     @Override
     public List<Channel> getChannelsByUserId(UUID userId) {
-        User userById = userReader.findUserOrThrow(userId);
-        List<Channel> allChannels = channelRepository.findAll();
-        return allChannels.stream()
-                .filter(channel -> channel.isMember(userById.getId()))
-                .toList();
+        return readStatusRepository.findChannelsByUserId(userId);
     }
 }

@@ -11,8 +11,6 @@ import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFReadStatusRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;

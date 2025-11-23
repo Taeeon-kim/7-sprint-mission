@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.message.*;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
@@ -26,8 +28,9 @@ public class BasicMessageService implements MessageService {
     private final MessageReader messageReader;
     private final BinaryContentRepository binaryContentRepository;
     private final BinaryContentService binaryContentService;
+    private final ReadStatusRepository readStatusRepository;
 
-    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService) {
+    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService, ReadStatusRepository readStatusRepository) {
         this.messageRepository = messageRepository;
         this.channelRepository = channelRepository;
         this.userReader = userReader;
@@ -35,15 +38,15 @@ public class BasicMessageService implements MessageService {
         this.messageReader = messageReader;
         this.binaryContentRepository = binaryContentRepository;
         this.binaryContentService = binaryContentService;
+        this.readStatusRepository = readStatusRepository;
     }
 
 
     @Override
     public List<MessageResponseDto> getAllMessages() {
-        Map<UUID, Message> allMessages = messageRepository.findAllMap();
-        return allMessages.values()
+        List<Message> allMessages = messageRepository.findAll();
+        return allMessages
                 .stream()
-                .sorted(Comparator.comparing(Message::getCreatedAt))
                 .map(MessageResponseDto::from)
                 .toList();
     }
@@ -54,14 +57,8 @@ public class BasicMessageService implements MessageService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        Map<UUID, Message> allMessages = messageRepository.findAllMap();
-        return channel.getMessageIds()
-                .stream()
-                .map(allMessages::get)
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Message::getCreatedAt))
-                .map(MessageResponseDto::from)
-                .toList();
+        return messageRepository.findAllByChannelId(channel.getId()).stream()
+                .map(MessageResponseDto::from).toList();
     }
 
     @Override
@@ -79,7 +76,7 @@ public class BasicMessageService implements MessageService {
         User sender = userReader.findUserOrThrow(command.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
         Channel channel = channelReader.findChannelOrThrow(command.channelId());
-        boolean isMember = channel.isMember(sender.getId());
+        boolean isMember = readStatusRepository.existsByUserIdAndChannelId(sender.getId(), channel.getId());
         if (!isMember) {
             throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
         }
@@ -87,36 +84,17 @@ public class BasicMessageService implements MessageService {
         List<UUID> profileBinaryIds = command.profiles().stream()
                 .map(binaryContentService::uploadBinaryContent).toList();
 
+        // UUID → BinaryContent 조회
+        List<BinaryContent> attachments = binaryContentRepository.findAllById(profileBinaryIds);
         Message message = Message.builder()
                 .content(command.content())
-                .senderId(sender.getId())
-                .channelId(channel.getId())
-                .attachmentIds(profileBinaryIds)
+                .author(sender)
+                .channel(channel)
+                .attachments(attachments)
                 .build();
 
-        channel.addMessageId(message.getId());
-        boolean messageSaved = false;
-        try {
-            // NOTE: 3. 메세지를 전역 Message 저장소에 저장
-            Message savedMessage = messageRepository.save(message);
-            messageSaved = true;
-            // NOTE: 4. 해당 채널에 messageId 추가 및 업데이트
-            channelRepository.save(channel);
-            return MessageResponseDto.from(savedMessage);
-        } catch (Exception e) {
-            channel.removeMessageId(message.getId());
-            if (messageSaved) {
-                try {
-                    messageRepository.deleteById(message.getId());
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-            throw new RuntimeException(e);
-        }
-
-//        channel.setUpdatedAt(System.currentTimeMillis()); // NOTE: 보통 메타정보와 메세지 변경을 분리해야하지만 일단 모두 변경으로 인식
-
+        Message savedMessage = messageRepository.save(message);
+        return MessageResponseDto.from(savedMessage);
     }
 
     @Override
@@ -144,14 +122,6 @@ public class BasicMessageService implements MessageService {
             throw new IllegalArgumentException("전달값이 잘못되었습니다.");
         }
         Message message = messageReader.findMessageOrThrow(messageId);
-        boolean isDeleted = messageRepository.deleteById(message.getId());
-        if (isDeleted) {
-            Channel channel = channelReader.findChannelOrThrow(message.getChannelId());
-            channel.removeMessageId(message.getId());
-            channelRepository.save(channel);
-            for (UUID uuid : message.getAttachmentIds()) {
-                binaryContentRepository.deleteById(uuid);
-            }
-        }
+        messageRepository.deleteById(message.getId());
     }
 }

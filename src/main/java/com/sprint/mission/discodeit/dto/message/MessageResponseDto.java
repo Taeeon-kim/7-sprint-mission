@@ -21,10 +21,13 @@ public record MessageResponseDto(
     public static MessageResponseDto from(Message message) {
         return new MessageResponseDto(
                 message.getId(),
-                message.getChannelId(),
-                message.getSenderId(),
+                message.getChannel().getId(),
+                message.getAuthor().getId(),
                 message.getContent(),
-                message.getAttachmentIds() == null ? List.of() : message.getAttachmentIds(),
+                message.getAttachments() == null ? List.of() :
+                        message.getAttachments().stream()
+                                .map(attachment -> attachment.getId())
+                                .toList(),
                 message.getCreatedAt(),
                 message.getUpdatedAt()
         );

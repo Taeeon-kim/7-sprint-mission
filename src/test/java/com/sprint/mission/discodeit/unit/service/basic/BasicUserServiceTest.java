@@ -342,6 +342,7 @@ class BasicUserServiceTest {
                             new BinaryContent(
                                     binaryCommand.fileName(),
                                     binaryCommand.contentType(),
+                                    binaryCommand.size(),
                                     binaryCommand.bytes()
                             )).orElse(null);
             when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryContent.getId());

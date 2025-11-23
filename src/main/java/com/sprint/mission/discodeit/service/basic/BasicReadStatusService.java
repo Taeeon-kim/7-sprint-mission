@@ -36,25 +36,17 @@ public class BasicReadStatusService implements ReadStatusService {
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
 
-//        if (channel.getType() == ChannelType.PUBLIC) {
-//            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
-//        }
 
-        for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
-            if (readStatus.getChannelId().equals(channel.getId())) {
+            if (readStatusRepository.existsByUserIdAndChannelId(requestDto.userId(), requestDto.channelId())) {
                 throw new IllegalArgumentException("이미 존재합니다.");
             }
-        }
 
-        channel.addUserId(requestDto.userId());
 
         ReadStatus readStatus = ReadStatus.builder()
-                .userId(user.getId())
-                .channelId(channel.getId())
-                .readAt(Instant.now())
+                .user(user)
+                .channel(channel)
                 .build();
 
-        channelRepository.save(channel);
         ReadStatus saved = readStatusRepository.save(readStatus);
         return ReadStatusResponseDto.from(saved);
     }

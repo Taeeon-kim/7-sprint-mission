@@ -2,7 +2,10 @@ package com.sprint.mission.discodeit.service.factory;
 
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PrivateChannelCreator implements ChannelCreator {
     private final UserReader userReader;
+    private final ReadStatusRepository readStatusRepository;
 
     @Override
     public ChannelType supportedType() {
@@ -21,14 +25,9 @@ public class PrivateChannelCreator implements ChannelCreator {
 
     @Override
     public Channel create(ChannelCreateCommand command) {
-        if(command.memberIds() == null || command.memberIds().isEmpty()) {
+        if (command.memberIds() == null || command.memberIds().isEmpty()) {
             throw new IllegalArgumentException("memberIds required");
         }
-        for (UUID userId : command.memberIds()){
-            userReader.findUserOrThrow(userId);
-        }
-        Channel privateChannel = Channel.createPrivateChannel();
-        command.memberIds().forEach(privateChannel::addUserId);
-        return privateChannel;
+        return Channel.createPrivateChannel();
     }
 }

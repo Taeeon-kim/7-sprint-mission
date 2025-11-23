@@ -71,7 +71,7 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 조회 - 요청 id에 해당하는 binaryContent 반환")
         void getBinaryContent_returns_saved_content() {
             //given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length(), "test".getBytes());
             BinaryContent saved = binaryContentRepository.save(updateContent);
 
             // when
@@ -104,8 +104,8 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 다중 조회 - 요청 ids에 해당하는 binaryContent List 반환")
         void getBinaryContentsByIds_returns_saved_contents() {
             //given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
-            BinaryContent updateContent2 = new BinaryContent("test2.png", "image/png", "test222".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length(), "test".getBytes());
+            BinaryContent updateContent2 = new BinaryContent("test2.png", "image/png", (long) "test".length(), "test222".getBytes());
             BinaryContent saved = binaryContentRepository.save(updateContent);
             BinaryContent saved2 = binaryContentRepository.save(updateContent2);
 
@@ -149,7 +149,7 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 삭제 - 삭제 후 조회 불가 & 개수 감소")
         void deleteBinaryContent_then_not_found_and_size_decreased() {
             // given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length(), "test".getBytes());
             BinaryContent saved = binaryContentRepository.save(updateContent);
             long before = binaryContentRepository.findAll().size();
 
@@ -159,7 +159,7 @@ public class BinaryContentServiceIntegrationTest {
             // then
             long after = binaryContentRepository.findAll().size();
             assertEquals(before - 1, after);
-            assertThrows(NoSuchElementException.class, ()-> binaryContentService.getBinaryContent(saved.getId()));
+            assertThrows(NoSuchElementException.class, () -> binaryContentService.getBinaryContent(saved.getId()));
         }
 
     }
