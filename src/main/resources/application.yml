@@ -21,6 +21,7 @@ spring:
       hibernate:
 #        show_sql: true  # System.out 기반 출력
         format_sql: true
+    open-in-view: false # TODO: 디버깅모드 혹은 jconsole등 영속성컨텍스트/스레드 값 체크하여 실제 어느 스코프까지 가지고있는지 모니터링해볼것
 
 logging:
   level:

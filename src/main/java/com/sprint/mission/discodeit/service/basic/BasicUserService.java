@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,25 +19,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import static com.sprint.mission.discodeit.entity.type.RoleType.USER;
-
 @Service
+@RequiredArgsConstructor
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
     private final UserReader userReader;
-    private final UserStatusService userStatusService;
-    private final BinaryContentRepository binaryContentRepository;
+
     private final BinaryContentService binaryContentService;
 
-    public BasicUserService(UserRepository userRepository, UserReader userReader, UserStatusService userStatusService, UserStatusRepository userStatusRepository, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService) {
-        this.userRepository = userRepository;
-        this.userReader = userReader;
-        this.userStatusService = userStatusService;
-        this.userStatusRepository = userStatusRepository;
-        this.binaryContentRepository = binaryContentRepository;
-        this.binaryContentService = binaryContentService;
-    }
 
     @Override
     @Transactional
@@ -74,6 +65,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(UUID userId) {
 
         User user = userReader.findUserOrThrow(userId);
@@ -86,6 +78,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(UUID userId) {
         if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -97,6 +90,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUser(UserUpdateCommand updateCommand) {
         if (updateCommand.id() == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
@@ -114,6 +108,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
 
         List<User> all = userRepository.findAll();
@@ -128,6 +123,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> getUsersByIds(List<UUID> userIds) {
         if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");

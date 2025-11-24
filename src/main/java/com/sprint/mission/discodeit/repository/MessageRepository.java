@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.entity.Message;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,7 +17,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
              WHERE m.channel.id = :channelId
              ORDER BY m.createdAt DESC
             """)
-    Optional<Message> findLatestByChannelId(UUID channelId);
+    List<Message> findLatestByChannelId(UUID channelId, Pageable pageable);
 
     @Query("""
                 SELECT m.id FROM Message m where m.channel.id = :channelId

@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,6 +23,7 @@ public class BasicAuthService implements AuthService {
 
 
     @Override
+    @Transactional
     public UserResponseDto login(AuthLoginRequestDto request) {
         List<User> all = userRepository.findAll(); // TODO: 전용 레포지토리 만들어서 사용해도됨 findByUserNameAndPassword
         User findUser = all.stream()

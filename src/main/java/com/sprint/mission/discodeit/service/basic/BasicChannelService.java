@@ -9,14 +9,13 @@ import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.factory.ChannelFactory;
-import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
-import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -44,6 +43,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
+    @Transactional
     public ChannelResponseDto createChannel(ChannelCreateCommand command) {
 
         Channel channel = channelFactory.create(command);
@@ -62,13 +62,16 @@ public class BasicChannelService implements ChannelService {
                 .map(readStatus -> readStatus.getUser().getId())
                 .collect(Collectors.toList());
         List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
-        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
+                .stream()
                 .map(Message::getCreatedAt)
+                .findFirst()
                 .orElse(null);
         return ChannelResponseDto.from(saved, participantIds, messageIds, lastMessageAt);
     }
 
     @Override
+    @Transactional
     public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {
         if (channelId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -79,13 +82,13 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("해당 채널은 수정할수 없습니다.");
         }
         ChannelUpdateParams params = ChannelUpdateParams.from(request);
-        channelById.update(params); // TODO: api ChannelDto 형식으로, 영속성 컨텍스트로 불필요 flag 제거 수정할 것
+        channelById.update(params); // TODO: api ChannelDto 형식으로
 
         channelRepository.save(channelById);
-
     }
 
     @Override
+    @Transactional
     public void deleteChannel(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -97,30 +100,36 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ChannelResponseDto getChannel(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
         List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
                 .map(readStatus -> readStatus.getUser().getId())
                 .collect(Collectors.toList());
         List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
-        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
+                .stream()
                 .map(Message::getCreatedAt)
+                .findFirst()
                 .orElse(null);
         return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannels() {
         List<Channel> channelList = channelRepository.findAll(); //
         return channelList
                 .stream()
                 .map(channel -> { // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
-                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream() // TODO: 중복코드 private 메서드로 빼야하는지
                             .map(readStatus -> readStatus.getUser().getId())
                             .collect(Collectors.toList());
                     List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
-                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
+                            .stream()
                             .map(Message::getCreatedAt)
+                            .findFirst()
                             .orElse(null);
                     return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
                 })
@@ -128,16 +137,20 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
-        return channelRepository.findAllByUserId(userId)
+
+        return channelRepository.findAllVisibleByUserId(userId)
                 .stream()
                 .map(channel -> {  // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
                     List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
-                            .map(readStatus -> readStatus.getUser().getId())
+                            .map(readStatus -> readStatus.getUser().getId()) // LAZY 접근
                             .collect(Collectors.toList());
                     List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
-                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId())
+                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
+                            .stream()
                             .map(Message::getCreatedAt)
+                            .findFirst()
                             .orElse(null);
                     return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
                 })
@@ -156,6 +169,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
+    @Transactional
     public void joinChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -170,12 +184,12 @@ public class BasicChannelService implements ChannelService {
 
         // 참여 = ReadStatus 한 줄 생성
         ReadStatus readStatus = new ReadStatus(user, channel, Instant.now());
-        channelRepository.save(channel);
-        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
+        readStatusRepository.save(readStatus);
 
     }
 
     @Override
+    @Transactional
     public void leaveChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -189,10 +203,10 @@ public class BasicChannelService implements ChannelService {
                 .orElseThrow(() -> new IllegalStateException("채널에 참여하지 않은 사용자입니다."));
 
         readStatusRepository.delete(readStatus);
-
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> getAllMembers(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -203,8 +217,4 @@ public class BasicChannelService implements ChannelService {
         return userReader.findUsersByIds(userIds);
     }
 
-    @Override
-    public List<Channel> getChannelsByUserId(UUID userId) {
-        return readStatusRepository.findChannelsByUserId(userId);
-    }
 }

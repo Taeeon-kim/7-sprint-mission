@@ -14,15 +14,16 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
-    private final ChannelRepository channelRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final MessageReader messageReader;
@@ -30,19 +31,8 @@ public class BasicMessageService implements MessageService {
     private final BinaryContentService binaryContentService;
     private final ReadStatusRepository readStatusRepository;
 
-    public BasicMessageService(MessageRepository messageRepository, ChannelRepository channelRepository, UserReader userReader, ChannelReader channelReader, MessageReader messageReader, BinaryContentRepository binaryContentRepository, BinaryContentService binaryContentService, ReadStatusRepository readStatusRepository) {
-        this.messageRepository = messageRepository;
-        this.channelRepository = channelRepository;
-        this.userReader = userReader;
-        this.channelReader = channelReader;
-        this.messageReader = messageReader;
-        this.binaryContentRepository = binaryContentRepository;
-        this.binaryContentService = binaryContentService;
-        this.readStatusRepository = readStatusRepository;
-    }
-
-
     @Override
+    @Transactional(readOnly = true)
     public List<MessageResponseDto> getAllMessages() {
         List<Message> allMessages = messageRepository.findAll();
         return allMessages
@@ -52,16 +42,18 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
+    @Transactional
     public List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
         return messageRepository.findAllByChannelId(channel.getId()).stream()
-                .map(MessageResponseDto::from).toList();
+                .map(MessageResponseDto::from).toList(); // TODO: lazy라 MEssageResponse 내부에서 author, channel N+1 되므로 해결방안 및 심화요구사항 작성
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MessageResponseDto getMessageById(UUID messageId) {
         Message message = messageReader.findMessageOrThrow(messageId);
         return MessageResponseDto.from(message);
@@ -98,6 +90,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
+    @Transactional
     public MessageUpdateResponseDto updateMessage(MessageUpdateCommand command) {
         if (command.messageId() == null || command.content() == null || command.content().trim().isEmpty()) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
@@ -117,6 +110,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
+    @Transactional
     public void deleteMessage(UUID messageId) {
         if (messageId == null) {
             throw new IllegalArgumentException("전달값이 잘못되었습니다.");

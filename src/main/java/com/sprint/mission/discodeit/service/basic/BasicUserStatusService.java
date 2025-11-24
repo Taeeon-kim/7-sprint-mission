@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,6 +29,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
+    @Transactional
     public UUID createUserStatus(UserStatusRequestDto request) {
         if (request.getUserId() == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -44,12 +46,14 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserStatusResponseDto getUserStatus(UUID id) {
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
         return UserStatusResponseDto.from(userStatus);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserStatusResponseDto> getAllUserStatuses() {
         List<UserStatus> userStatusList = userStatusRepository.findAll();
         return userStatusList.stream()
@@ -58,6 +62,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
+    @Transactional
     public void updateUserStatus(UUID id, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (id == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -72,6 +77,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
+    @Transactional
     public void updateUserStatusByUserId(UUID userId, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (userId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -85,6 +91,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
+    @Transactional
     public void deleteUserStatus(UUID id) {
         if (id == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
