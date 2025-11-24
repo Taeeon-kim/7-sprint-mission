@@ -22,7 +22,7 @@ public class UserController implements UserApi {
 
     @Override
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
+    public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto, // TODO: @Valid
                                            @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
         UserSignupCommand command = UserSignupCommand.from(userSignupRequestDto, profile);

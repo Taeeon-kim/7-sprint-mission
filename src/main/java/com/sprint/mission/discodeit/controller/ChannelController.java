@@ -34,7 +34,7 @@ public class ChannelController implements ChannelApi {
 
     @Override
     @RequestMapping(value = "/channels/public", method = RequestMethod.POST)
-    public ResponseEntity<ChannelResponseDto> createChannelPublic(@RequestBody ChannelCreateRequestDto request) {
+    public ResponseEntity<ChannelResponseDto> createChannelPublic(@RequestBody ChannelCreateRequestDto request) { // TODO: @Valid
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PUBLIC);
         ChannelResponseDto responseDto = channelService.createChannel(cmd);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -42,7 +42,7 @@ public class ChannelController implements ChannelApi {
 
     @Override
     @RequestMapping(value = "/channels/private", method = RequestMethod.POST)
-    public ResponseEntity<ChannelResponseDto> createChannelPrivate(@RequestBody ChannelCreateRequestDto request) {
+    public ResponseEntity<ChannelResponseDto> createChannelPrivate(@RequestBody ChannelCreateRequestDto request) { // TODO: @Valid
         ChannelCreateCommand cmd = ChannelCreateCommand.from(request, ChannelType.PRIVATE);
         ChannelResponseDto responseDto = channelService.createChannel(cmd);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -59,7 +59,7 @@ public class ChannelController implements ChannelApi {
     @RequestMapping(value = "/channels/{channelId}", method = RequestMethod.PATCH)
     public ResponseEntity<Void> updateChannel(
             @PathVariable UUID channelId,
-            @RequestBody ChannelUpdateRequestDto request) {
+            @RequestBody ChannelUpdateRequestDto request) { // NOTE: patch는 Null 허용이니 valid체크 불필요
         channelService.updateChannel(channelId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

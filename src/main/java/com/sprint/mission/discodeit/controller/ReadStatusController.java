@@ -28,7 +28,7 @@ public class ReadStatusController implements ReadStatusApi {
     @Override
     @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
     public ResponseEntity<ReadStatusResponseDto> createReadStatus(
-            @RequestBody ReadStatusCreateRequestDto request
+            @RequestBody ReadStatusCreateRequestDto request // TODO: @Valid
     ) {
         ReadStatusResponseDto responseDto = readStatusService.createReadStatus(request);
         return ResponseEntity.ok(responseDto);

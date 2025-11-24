@@ -38,7 +38,7 @@ public class MessageController implements MessageApi {
     @Override
     @RequestMapping(value = "/messages", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponseDto> sendMessageByChannelId(
-            @RequestPart("messageCreateRequest") MessageSendRequestDto request,
+            @RequestPart("messageCreateRequest") MessageSendRequestDto request, // TODO: @Valid
             @RequestPart(value = "attachments", required = false) List<MultipartFile> files
     ) {
         MessageSendCommand messageSendCommand = MessageSendCommand.from(request, files);
