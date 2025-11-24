@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LoginRequestDto {
-    private final String userId;
+    private final String username;
     private final String password;
 }
