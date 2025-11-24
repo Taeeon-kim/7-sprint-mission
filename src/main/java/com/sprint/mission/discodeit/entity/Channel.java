@@ -35,7 +35,6 @@ public class Channel extends BaseUpdatableEntity {
             if (description == null) {
                 throw new IllegalArgumentException("description is null");
             }
-
         }
 
         this.name = name;

@@ -28,7 +28,7 @@ public class Message extends BaseUpdatableEntity {
 //    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<MessageAttachment> attachments; // TODO: 중간테이블을 직접 만든 MessageAttachment로할지 피드백후 결정
 
-    @OneToMany // N:1 테이블
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) // N:1 테이블
     @JoinTable(
             name = "message_attachments",
             joinColumns = @JoinColumn(name = "message_id"),         // 이 엔티티의 FK

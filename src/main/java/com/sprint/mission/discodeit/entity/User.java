@@ -27,7 +27,7 @@ public class User extends BaseUpdatableEntity {
 
     @Column(name = "profile_id")
     private UUID profileId; // 1:1양방향 (없을수도있음), TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserStatus userStatus; // 1:1 양방향
 
     @Builder
