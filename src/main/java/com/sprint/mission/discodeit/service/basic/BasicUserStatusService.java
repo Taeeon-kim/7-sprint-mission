@@ -73,7 +73,6 @@ public class BasicUserStatusService implements UserStatusService {
         if (isUpdated) {
             userStatusRepository.save(userStatus);
         }
-
     }
 
     @Override

@@ -21,7 +21,7 @@ public class BinaryContentController implements BinaryContentApi {
     private final BinaryContentService binaryContentService;
 
     @Override
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @GetMapping("/{id}")
     public ResponseEntity<BinaryContentResponseDto> getBinaryContent(
             @PathVariable UUID id
     ) {
@@ -30,7 +30,7 @@ public class BinaryContentController implements BinaryContentApi {
     }
 
     @Override
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public ResponseEntity<List<BinaryContentResponseDto>> getAllBinaryContentsByIds(
             @RequestParam(required = false) List<UUID> ids
     ) {
@@ -44,7 +44,7 @@ public class BinaryContentController implements BinaryContentApi {
     }
 
     @Override
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UUID> createBinaryContent(
             @RequestPart MultipartFile file
     ) {

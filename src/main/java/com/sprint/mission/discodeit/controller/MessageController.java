@@ -21,7 +21,7 @@ public class MessageController implements MessageApi {
     private final MessageService messageService;
 
     @Override
-    @RequestMapping(value = "/messages/{messageId}", method = RequestMethod.PATCH)
+    @PatchMapping("/messages/{messageId}")
     public ResponseEntity<MessageUpdateResponseDto> updateMessage(@PathVariable UUID messageId, @RequestBody MessageUpdateRequestDto request) {
         MessageUpdateCommand command = MessageUpdateCommand.from(request, messageId);
         messageService.updateMessage(command);
@@ -29,14 +29,14 @@ public class MessageController implements MessageApi {
     }
 
     @Override
-    @RequestMapping(value = "/messages/{messageId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Void> deleteMessage(@PathVariable UUID messageId) {
         messageService.deleteMessage(messageId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
-    @RequestMapping(value = "/messages", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/messages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponseDto> sendMessageByChannelId(
             @RequestPart("messageCreateRequest") MessageSendRequestDto request, // TODO: @Valid
             @RequestPart(value = "attachments", required = false) List<MultipartFile> files
@@ -47,7 +47,7 @@ public class MessageController implements MessageApi {
     }
 
     @Override
-    @RequestMapping(value = "/messages", method = RequestMethod.GET)
+    @GetMapping("/messages")
     public ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(
             @RequestParam UUID channelId
     ) {

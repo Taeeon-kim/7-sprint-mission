@@ -16,7 +16,7 @@ public class UserStatusController {
 
     private final UserStatusService userStatusService;
 
-    @RequestMapping(value = "/user-statuses/{statusId}", method = RequestMethod.PATCH)
+    @PatchMapping("/user-statuses/{statusId}")
     public ResponseEntity<Void> updateUserStatus(
             @PathVariable UUID statusId,
             @RequestBody UserStatusUpdateRequestDto requestDto
@@ -25,7 +25,7 @@ public class UserStatusController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @RequestMapping(value = "/users/{userId}/userStatus", method = RequestMethod.PATCH)
+    @PatchMapping("/users/{userId}/userStatus")
     public ResponseEntity<Void> updateUserStatusByUserId(
             @PathVariable UUID userId,
             @RequestBody UserStatusUpdateRequestDto requestDto

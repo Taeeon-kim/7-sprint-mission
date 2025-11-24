@@ -21,9 +21,9 @@ public class UserController implements UserApi {
     private final UserService userService;
 
     @Override
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto, // TODO: @Valid
-                                           @RequestPart(value = "profile", required = false) MultipartFile profile
+                                                      @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
         UserSignupCommand command = UserSignupCommand.from(userSignupRequestDto, profile);
         UserResponseDto responseDto = userService.signUp(command);
@@ -31,7 +31,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH,  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID userId,
             @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
@@ -43,14 +43,14 @@ public class UserController implements UserApi {
     }
 
     @Override
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {
         List<UserDto> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
     }
 
     @Override
-    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
         userService.deleteUser(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

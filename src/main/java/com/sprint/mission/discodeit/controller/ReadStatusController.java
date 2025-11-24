@@ -19,14 +19,14 @@ public class ReadStatusController implements ReadStatusApi {
     private final ReadStatusService readStatusService;
 
     @Override
-    @RequestMapping(value = "/readStatuses/{readStatusId}", method = RequestMethod.GET)
+    @GetMapping("/readStatuses/{readStatusId}")
     public ResponseEntity<ReadStatusResponseDto> getReadStatus(@PathVariable UUID readStatusId) {
         ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
         return ResponseEntity.ok(readStatus);
     }
 
     @Override
-    @RequestMapping(value = "/readStatuses", method = RequestMethod.POST)
+    @PostMapping("/readStatuses")
     public ResponseEntity<ReadStatusResponseDto> createReadStatus(
             @RequestBody ReadStatusCreateRequestDto request // TODO: @Valid
     ) {
@@ -35,7 +35,7 @@ public class ReadStatusController implements ReadStatusApi {
     }
 
     @Override
-    @RequestMapping(value = "/readStatuses/{id}", method = RequestMethod.PATCH)
+    @PatchMapping("/readStatuses/{id}")
     public ResponseEntity<ReadStatusUpdateResponseDto> updateReadStatus(
             @PathVariable UUID id,
             @RequestBody ReadStatusUpdateRequestDto requestDto
@@ -46,7 +46,7 @@ public class ReadStatusController implements ReadStatusApi {
     }
 
     @Override
-    @RequestMapping(value = "/readStatuses", method = RequestMethod.GET)
+    @GetMapping("/readStatuses")
     public ResponseEntity<List<ReadStatusResponseDto>> getAllReadStatusesByUserId(@RequestParam UUID userId) {
         List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(userId);
         return ResponseEntity.ok(allReadStatusesByUserId);
