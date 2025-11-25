@@ -31,7 +31,7 @@ public class ReadStatusController {
     @PatchMapping("/{readStatusId}")
     public ReadStatusDto updateStatus(@PathVariable UUID readStatusId,
                                       @RequestBody ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
-        readStatusUpdateRequestDto.setUuid(readStatusId);
+        readStatusUpdateRequestDto.setId(readStatusId);
         return readStatusService.update(readStatusUpdateRequestDto);
     }
 

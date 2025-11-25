@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReadStatusUpdateRequestDto {
-    private UUID uuid;
-    private Instant lastReadAt;
+    private UUID id; //uuid;
+    private Instant newLastReadAt; //lastReadAt;
+    private Instant updatedAt;
 }
