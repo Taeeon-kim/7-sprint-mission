@@ -32,12 +32,12 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public ChannelResponseDto createPublicChannel(ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
-        if (channelPublicCreateRequestDto.getChannelName() == null
-                || channelPublicCreateRequestDto.getChannelName().isBlank()) {
+        if (channelPublicCreateRequestDto.getName() == null
+                || channelPublicCreateRequestDto.getName().isBlank()) {
             throw new IllegalStateException("채널 이름이 필요합니다.");
         }
 
-        Channel channel = new Channel(channelPublicCreateRequestDto.getChannelName(), PUBLIC);
+        Channel channel = new Channel(channelPublicCreateRequestDto.getName(), PUBLIC);
         channelRepository.save(channel);
 
         return ChannelResponseDto.from(channel, null, null);
@@ -98,9 +98,9 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalStateException("PRIVATE 채널은 수정할 수 없습니다.");
         }
 
-        if(channelUpdateRequestDto.getNewChannelName() != null &&
-                !channelUpdateRequestDto.getNewChannelName().isBlank()){
-            channel.setUpdate(channelUpdateRequestDto.getNewChannelName());
+        if(channelUpdateRequestDto.getNewName() != null &&
+                !channelUpdateRequestDto.getNewName().isBlank()){
+            channel.setUpdate(channelUpdateRequestDto.getNewName());
         }
 
         channel.setUpdatedAt(Instant.now());

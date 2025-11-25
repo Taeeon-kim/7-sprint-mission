@@ -49,7 +49,8 @@ public class ChannelController {
     }
 
     // 특정 사용자의 채널 목록 조회
-    @RequestMapping(method = RequestMethod.GET)
+//    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public List<ChannelResponseDto> getChannel(@RequestParam UUID userId) {
         return channelService.findAllByUserId(userId);
     }

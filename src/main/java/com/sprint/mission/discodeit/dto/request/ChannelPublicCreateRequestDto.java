@@ -15,6 +15,6 @@ import java.util.UUID;
 public class ChannelPublicCreateRequestDto {
 
     private ChannelType channelType;
-    private String channelName; // PUBLIC 일때 사용
-
+//    private String channelName; // PUBLIC 일때 사용
+    private String name;
 }

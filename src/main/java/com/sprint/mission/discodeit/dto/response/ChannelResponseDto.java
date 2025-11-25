@@ -21,21 +21,24 @@ import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
 @Builder
 public class ChannelResponseDto {
 
-    private UUID channelId;
-    private String channelName;
-    private ChannelType channelType;
-    private Instant createAt;
-    private Instant updateAt;
+//    private UUID channelId;
+    private UUID id;
+//    private String channelName;
+    private String name;
+//    private ChannelType channelType;
+    private ChannelType type;
+//    private Instant createAt;
+//    private Instant updateAt;
     private Instant lastMessageAt;
     private List<UUID> participantIds;
 
     public static ChannelResponseDto from(Channel channel, Instant lastMessageAt, List<UUID> participantIds) {
         return ChannelResponseDto.builder()
-                .channelId(channel.getUuid())
-                .channelName(channel.getChannelName())
-                .channelType(channel.getChannelType())
-                .createAt(channel.getCreateAt())
-                .updateAt(channel.getUpdatedAt())
+                .id(channel.getUuid())
+                .name(channel.getChannelName())
+                .type(channel.getChannelType())
+//                .createAt(channel.getCreateAt())
+//                .updateAt(channel.getUpdatedAt())
                 .lastMessageAt(lastMessageAt)
                 .participantIds(participantIds)
                 .build();

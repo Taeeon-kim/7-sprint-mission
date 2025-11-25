@@ -16,6 +16,6 @@ import java.util.UUID;
 public class ChannelUpdateRequestDto {
 
     private UUID channelId;
-    private String newChannelName;
-
+//    private String newChannelName;
+    private String newName;
 }
