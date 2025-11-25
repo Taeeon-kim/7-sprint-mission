@@ -22,7 +22,8 @@ public class MessageController {
     private final ChannelRepository channelRepository;
 
     // 메시지 전송(저장)
-    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
     public MessageResponseDto createMessage(@ModelAttribute MessageCreateRequestDto messageCreateRequestDto,
                                             @RequestPart(value = "file", required = false) List<MultipartFile> files) {
         System.out.println("files: " + files);
@@ -48,7 +49,8 @@ public class MessageController {
     }
 
     // 특정 채널 메시지 목록 조회
-    @RequestMapping(method = RequestMethod.GET, params = "channelId")
+//    @RequestMapping(method = RequestMethod.GET, params = "channelId")
+    @GetMapping
     public List<MessageResponseDto> getMessageByChannel(@RequestParam UUID channelId) {
         var channel = channelRepository.findByChannel(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
