@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.dto.response.UserResponseDto;
 import com.sprint.mission.discodeit.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,28 +18,28 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     //사용자 생성
-    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void createUser( @ModelAttribute UserCreateRequestDto userCreateRequestDto) {
         userService.createUser(userCreateRequestDto);
     }
 
     //단건 조회
-    @RequestMapping(method = RequestMethod.GET, params = "userId")
+//    @RequestMapping(method = RequestMethod.GET, params = "userId")
+    @GetMapping(params = "userId")
     public UserResponseDto getUser(@RequestParam String userId) {
         return userService.findById(userId);
     }
 
     //전체 조회
-    @RequestMapping(method = RequestMethod.GET, params = "!userId")
+//    @RequestMapping(method = RequestMethod.GET, params = "!userId")
+    @GetMapping(params = "!userId")
     public List<UserResponseDto> getUsers() {
         return userService.findAllUser();
     }
