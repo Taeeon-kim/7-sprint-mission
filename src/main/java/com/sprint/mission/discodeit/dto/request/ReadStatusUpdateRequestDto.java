@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "수정할 읽음 상태 정보")
 public class ReadStatusUpdateRequestDto {
     private UUID id; //uuid;
     private Instant newLastReadAt; //lastReadAt;
