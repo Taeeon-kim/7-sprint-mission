@@ -251,8 +251,8 @@ public class ChannelServicentegrationTest {
                     () -> assertEquals("전체 공지", result.description()),
                     () -> assertEquals(ChannelType.PUBLIC, result.type()),
                     // 최신 메시지 시간 검증
-                    () -> assertNotNull(result.lastMessagedAt()),
-                    () -> assertEquals(m2.getCreatedAt(), result.lastMessagedAt())
+                    () -> assertNotNull(result.lastMessageAt()),
+                    () -> assertEquals(m2.getCreatedAt(), result.lastMessageAt())
             );
         }
 
@@ -264,7 +264,7 @@ public class ChannelServicentegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Negative] 채널 조회 - 채널에 메세지가 없으면 lastMessagedAt은 null 이다")
+        @DisplayName("[Integration][Negative] 채널 조회 - 채널에 메세지가 없으면 lastMessageAt은 null 이다")
         void getChannel_null_when_message_not_found() {
             // given
             User creator = UserFixture.createUser(userRepository, userStatusRepository);
@@ -280,7 +280,7 @@ public class ChannelServicentegrationTest {
                     () -> assertEquals("공지", responsedChannel.name()),
                     () -> assertEquals("전체 공지", responsedChannel.description()),
                     () -> assertEquals(ChannelType.PUBLIC, responsedChannel.type()),
-                    () -> assertNull(responsedChannel.lastMessagedAt()) // 핵심 검증
+                    () -> assertNull(responsedChannel.lastMessageAt()) // 핵심 검증
             );
         }
 
@@ -296,7 +296,7 @@ public class ChannelServicentegrationTest {
             ChannelResponseDto dto = channelService.getChannel(channel.getId());
 
             // then
-            assertNull(dto.lastMessagedAt());
+            assertNull(dto.lastMessageAt());
         }
 
     }
@@ -346,12 +346,12 @@ public class ChannelServicentegrationTest {
                     // Channel A
                     () -> assertEquals("공지", dtoA.name()),
                     () -> assertEquals("전체 공지", dtoA.description()),
-                    () -> assertEquals(messageA2.getCreatedAt(), dtoA.lastMessagedAt()),
+                    () -> assertEquals(messageA2.getCreatedAt(), dtoA.lastMessageAt()),
 
                     // Channel B
                     () -> assertEquals("잡담", dtoB.name()),
                     () -> assertEquals("자유 채팅방", dtoB.description()),
-                    () -> assertEquals(messageB1.getCreatedAt(), dtoB.lastMessagedAt())
+                    () -> assertEquals(messageB1.getCreatedAt(), dtoB.lastMessageAt())
             );
         }
     }
