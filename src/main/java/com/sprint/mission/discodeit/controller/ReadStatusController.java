@@ -29,7 +29,7 @@ public class ReadStatusController {
             @ApiResponse(responseCode = "400", description = "이미 읽음 상태가 존재함"),
             @ApiResponse(responseCode = "404", description = "Channel 또는 User를 찾을 수 없음")
     })
-    public ReadStatusDto createStatus(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
+    public ReadStatusDto create_1 /*createStatus*/(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
                                       @RequestParam UUID userId,
                                       @RequestParam UUID channelId) {
         readStatusCreateRequestDto.setUserId(userId);
@@ -38,7 +38,7 @@ public class ReadStatusController {
     }
 
     @PatchMapping("/{readStatusId}")
-    @Operation(summary = "Message 읽음 상태 수정")
+    @Operation(summary = "Message 읽음 상태 수정", operationId = "update_1")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message 읽음 상태가 성공적으로 수정됨"),
             @ApiResponse(responseCode = "404", description = "Message 읽음 상태를 찾을 수 없음")
@@ -52,11 +52,9 @@ public class ReadStatusController {
     @GetMapping(params = "userId")
     @Operation(summary = "User의 Message 읽음 상태 목록 조회")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Message 읽음 상태 목록 조회 성공"),
-            @ApiResponse(responseCode = "400", description = ","),
-            @ApiResponse(responseCode = "404", description = ","),
+            @ApiResponse(responseCode = "200", description = "Message 읽음 상태 목록 조회 성공")
     })
-    public List<ReadStatusDto> getReadStatus(@RequestParam UUID userId) {
+    public List<ReadStatusDto> findAllByUserId /*getReadStatus*/ (@RequestParam UUID userId) {
         return readStatusService.findAllByUserId(userId);
     }
 }

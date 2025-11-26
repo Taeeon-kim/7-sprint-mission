@@ -60,6 +60,7 @@ public class ChannelController {
     @DeleteMapping("/{channelId}")
     @Operation(summary = "Channel 삭제")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Channel삭제"),
             @ApiResponse(responseCode = "404", description = "Channel을 찾을 수 없음")
     })
     public void deleteChannel(@PathVariable UUID uuid) {
