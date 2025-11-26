@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ReadStatusDto;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,8 +31,8 @@ public class ReadStatusController {
             @ApiResponse(responseCode = "404", description = "Channel 또는 User를 찾을 수 없음")
     })
     public ReadStatusDto create_1 /*createStatus*/(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
-                                      @RequestParam UUID userId,
-                                      @RequestParam UUID channelId) {
+                                                   @RequestParam UUID userId,
+                                                   @RequestParam UUID channelId) {
         readStatusCreateRequestDto.setUserId(userId);
         readStatusCreateRequestDto.setChannelId(channelId);
         return readStatusService.create(readStatusCreateRequestDto);
@@ -43,9 +44,10 @@ public class ReadStatusController {
             @ApiResponse(responseCode = "200", description = "Message 읽음 상태가 성공적으로 수정됨"),
             @ApiResponse(responseCode = "404", description = "Message 읽음 상태를 찾을 수 없음")
     })
-    public ReadStatusDto updateStatus(@PathVariable UUID readStatusId,
+    public ReadStatusDto updateStatus(@Parameter(description = "수정할 읽음 상태 ID")
+                                      @PathVariable UUID readStatusId,
                                       @RequestBody ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
-        readStatusUpdateRequestDto.setId(readStatusId);
+//        readStatusUpdateRequestDto.setId(readStatusId);
         return readStatusService.update(readStatusUpdateRequestDto);
     }
 
@@ -54,7 +56,8 @@ public class ReadStatusController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message 읽음 상태 목록 조회 성공")
     })
-    public List<ReadStatusDto> findAllByUserId /*getReadStatus*/ (@RequestParam UUID userId) {
+    public List<ReadStatusDto> findAllByUserId /*getReadStatus*/(@Parameter(description = "조회할 User ID")
+                                                                 @RequestParam UUID userId) {
         return readStatusService.findAllByUserId(userId);
     }
 }
