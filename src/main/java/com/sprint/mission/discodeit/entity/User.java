@@ -94,10 +94,9 @@ public class User extends BaseUpdatableEntity {
     }
 
     // 편의 메서드 추가
-    public void assignStatus(UserStatus status) {
-        this.userStatus = status;
-        if (status != null) {
-            status.setUser(this);
+    public void initUserStatus() {
+        if (this.userStatus == null) {
+            this.userStatus = new UserStatus(this);
         }
     }
 

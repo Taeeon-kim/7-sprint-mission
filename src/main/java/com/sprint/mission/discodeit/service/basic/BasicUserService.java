@@ -57,12 +57,10 @@ public class BasicUserService implements UserService {
                 userSignupCommand.password(),
                 binaryContent
         );
-        User savedUser = userRepository.save(newUser);
-        // NOTE: user save 이후 userStatus 생성 추가
 
-        // NOTE: 일단 요구사항대로 책임분리 없이 signup에서 userStatus 등록
-        UserStatus userStatus = new UserStatus(savedUser);
-        userStatusRepository.save(userStatus);
+        // NOTE: user객체 생성후 userStatus도 넣어서 cascade 영향으로 같이 insert되도록
+        newUser.initUserStatus();
+        User savedUser = userRepository.save(newUser);
 
         return UserResponseDto.from(savedUser);
     }

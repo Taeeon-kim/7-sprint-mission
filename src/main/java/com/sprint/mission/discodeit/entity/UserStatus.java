@@ -47,8 +47,4 @@ public class UserStatus extends BaseUpdatableEntity {
         }
         return false;
     }
-
-    void setUser(User user) {
-        this.user = user;
-    }
 }

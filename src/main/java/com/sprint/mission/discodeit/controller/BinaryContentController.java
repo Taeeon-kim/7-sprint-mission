@@ -5,6 +5,9 @@ import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +44,22 @@ public class BinaryContentController implements BinaryContentApi {
             binaryContents = binaryContentService.getBinaryContentsByIds(ids);
         }
         return ResponseEntity.ok(binaryContents);
+    }
+
+    @Override
+    @GetMapping("/{binaryContentId}/download")
+    public ResponseEntity<Resource> downloadBinaryContent(@PathVariable("binaryContentId")  UUID id) {
+        BinaryContentResponseDto content = binaryContentService.getBinaryContent(id);
+        ByteArrayResource resource = new ByteArrayResource(content.bytes());
+        return ResponseEntity.ok()
+                .contentType(
+                        content.contentType() != null
+                                ? MediaType.parseMediaType(content.contentType())
+                                : MediaType.APPLICATION_OCTET_STREAM
+                )
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + content.fileName() + "\"")
+                .body(resource);
     }
 
     @Override
