@@ -272,10 +272,11 @@ public class UserServiceIntegrationTest {
             // 결정적 픽스쳐 준비
             byte[] payload = "fake-bytes".getBytes(UTF_8);
             // 프로필이미지
-            BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", (long) payload.length, payload));
+            BinaryContent savedBinarycontent = binaryContentRepository.save(
+                    new BinaryContent("profile.png", "image/png", (long) payload.length)
+            );
             User user = User.create("nick", "a@b.com", "pw", savedBinarycontent);
-            UserStatus userStatus = new UserStatus(user);
-            user.assignStatus(userStatus);
+            user.initUserStatus();
             //유저등록
             User savedUser = userRepository.save(user);
             // 유저상태
@@ -310,7 +311,7 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command2 = UserSignupCommand.from(new UserSignupRequestDto("b", "b@b.com", "p"), null);
             userService.signUp(command);
             userService.signUp(command2);
-            assertTrue(userService.getAllUsers().size()>=2);
+            assertTrue(userService.getAllUsers().size() >= 2);
         }
     }
 

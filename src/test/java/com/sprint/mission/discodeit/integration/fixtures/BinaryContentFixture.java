@@ -28,7 +28,6 @@ public class BinaryContentFixture {
     public static BinaryContent createBinaryContent(BinaryContentRepository binaryContentRepository) throws IOException {
         MockMultipartFile file = defaultMockFile();
         return binaryContentRepository.save(BinaryContent.builder()
-                .bytes(file.getBytes())
                 .contentType(file.getContentType())
                 .fileName(file.getOriginalFilename())
                 .size(file.getSize())
@@ -40,7 +39,6 @@ public class BinaryContentFixture {
      */
     public static BinaryContent createBinaryContent(BinaryContentRepository binaryContentRepository, MockMultipartFile file) throws IOException {
         return binaryContentRepository.save(BinaryContent.builder()
-                .bytes(file.getBytes())
                 .contentType(file.getContentType())
                 .fileName(file.getOriginalFilename())
                 .size(file.getSize())

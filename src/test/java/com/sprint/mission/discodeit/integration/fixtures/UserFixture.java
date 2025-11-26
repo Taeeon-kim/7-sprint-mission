@@ -24,25 +24,22 @@ public final class UserFixture {
 
     public static User createUserWithStatus(UserRepository userRepository,
                                             UserStatusRepository userStatusRepository) {
-        User user = userRepository.save(defaultUser());
-        UserStatus status = new UserStatus(user);
-        user.assignStatus(status);      // 양방향 세팅
-        userStatusRepository.save(status);
+        User user = defaultUser();
+        user.initUserStatus();      // 양방향 세팅
+        userRepository.save(user);
         return user;
     }
 
-    public static User createUserWithStatus(User user,UserRepository userRepository,
+    public static User createUserWithStatus(User user, UserRepository userRepository,
                                             UserStatusRepository userStatusRepository) {
-        User saved = userRepository.save(user);
-        UserStatus status = new UserStatus(saved);
-        saved.assignStatus(status);      // 양방향 세팅
-        userStatusRepository.save(status);
+        user.initUserStatus();// 양방향 세팅
+        userRepository.save(user);
         return user;
     }
 
     public static User defaultUser() {
         byte[] payload = "fake-bytes".getBytes(StandardCharsets.UTF_8);
-        BinaryContent binaryContent = new BinaryContent("profile.png", "image/png", (long) payload.length, payload);
+        BinaryContent binaryContent = new BinaryContent("profile.png", "image/png", (long) payload.length);
         return User.builder()
                 .nickname("name")
                 .email("ee@exam.com")

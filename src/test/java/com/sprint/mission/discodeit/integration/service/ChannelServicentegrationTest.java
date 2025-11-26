@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -56,9 +57,13 @@ public class ChannelServicentegrationTest {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    
     @BeforeEach
     void setUp() {
-
+        jdbcTemplate.execute("TRUNCATE TABLE read_statuses, messages, channels, users, user_statuses RESTART IDENTITY CASCADE");
     }
 
     @Nested

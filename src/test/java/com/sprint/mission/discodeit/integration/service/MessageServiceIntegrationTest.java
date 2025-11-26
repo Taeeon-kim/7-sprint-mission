@@ -90,8 +90,7 @@ public class MessageServiceIntegrationTest {
                     () -> assertEquals(publicChannel.getId(), message.getChannel().getId()),
                     () -> assertEquals("message", message.getContent()),
                     () -> assertEquals(binaryContentUploadCommand.contentType(), attachments.get(0).getContentType()),
-                    () -> assertEquals(binaryContentUploadCommand.fileName(), attachments.get(0).getFileName()),
-                    () -> assertEquals(binaryContentUploadCommand.bytes(), attachments.get(0).getBytes())
+                    () -> assertEquals(binaryContentUploadCommand.fileName(), attachments.get(0).getFileName())
             );
 
         }
@@ -136,8 +135,8 @@ public class MessageServiceIntegrationTest {
                     () -> assertEquals(message2.getContent(), foundMessage2.content()),
                     () -> assertEquals(message1.getChannel().getId(), foundMessage1.channelId()),
                     () -> assertEquals(message2.getChannel().getId(), foundMessage2.channelId()),
-                    () -> assertEquals(message1.getAuthor().getId(), foundMessage1.authorId()),
-                    () -> assertEquals(message2.getAuthor().getId(), foundMessage2.authorId())
+                    () -> assertEquals(message1.getAuthor().getId(), foundMessage1.author().id()),
+                    () -> assertEquals(message2.getAuthor().getId(), foundMessage2.author().id())
             );
 
 

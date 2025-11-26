@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -26,10 +27,10 @@ class BasicUserServiceTest {
     private UserRepository userRepository;
     private UserReader userReader;
     private UserStatusRepository userStatusRepository;
-    private UserStatusService userStatusService;
     private BasicUserService userService;
     private BinaryContentRepository binaryContentRepository;
     private BinaryContentService binaryContentService;
+    private UserMapper userMapper;
 
     @BeforeEach
     void setUp() {
@@ -37,10 +38,10 @@ class BasicUserServiceTest {
         userRepository = mock(UserRepository.class);
         userReader = mock(UserReader.class);
         userStatusRepository = mock(UserStatusRepository.class);
-        userStatusService = mock(UserStatusService.class);
+        userMapper = mock(UserMapper.class);
         binaryContentRepository = mock(BinaryContentRepository.class);
         binaryContentService = mock(BinaryContentService.class);
-        userService = new BasicUserService(userRepository, userStatusRepository, userReader, binaryContentService, binaryContentRepository);
+        userService = new BasicUserService(userRepository, userReader, binaryContentService, binaryContentRepository, userMapper);
     }
 
     // --- grouped by use-case with @Nested ---
@@ -141,7 +142,16 @@ class BasicUserServiceTest {
             when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
             when(userStatusRepository.findByUserId(id))
                     .thenReturn(Optional.of(new UserStatus(user)));
-
+            when(userMapper.toDto(user)).thenReturn(
+                    new UserResponseDto(
+                            id,
+                            user.getUsername(),
+                            user.getEmail(),
+                            null,
+                            false,
+                            user.getCreatedAt(),
+                            user.getUpdatedAt())
+            );
             // when
             UserResponseDto result = userService.getUserById(id); // 흐름 검증
 
@@ -340,8 +350,7 @@ class BasicUserServiceTest {
                             new BinaryContent(
                                     binaryCommand.fileName(),
                                     binaryCommand.contentType(),
-                                    binaryCommand.size(),
-                                    binaryCommand.bytes()
+                                    binaryCommand.size()
                             )).orElse(null);
 
             when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryId);
