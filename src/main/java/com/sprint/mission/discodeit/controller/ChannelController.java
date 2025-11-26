@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,13 +61,12 @@ public class ChannelController {
     @DeleteMapping("/{channelId}")
     @Operation(summary = "Channel 삭제")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Channel삭제"),
+            @ApiResponse(responseCode = "204", description = "Channel이 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "Channel을 찾을 수 없음")
     })
     public void deleteChannel(@PathVariable UUID uuid) {
         channelService.deleteChannel(uuid);
     }
-
     // 특정 사용자의 채널 목록 조회
     @GetMapping
     @Operation(summary = "User가 참여 중인 Channel 목록 조회")
