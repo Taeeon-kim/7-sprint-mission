@@ -43,8 +43,8 @@ public class BasicMessageService implements MessageService {
             throw new IllegalStateException("작성자가 없습니다.");
 
         // attachmentIds + 새로 업로드한 파일UUID
-        List<UUID> attachmentIds = messageCreateRequestDto.getAttachmentIds() != null
-                ? new ArrayList<>(messageCreateRequestDto.getAttachmentIds())
+        List<UUID> attachmentIds = messageCreateRequestDto.getAttachments() != null
+                ? new ArrayList<>(messageCreateRequestDto.getAttachments())
                 : new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
