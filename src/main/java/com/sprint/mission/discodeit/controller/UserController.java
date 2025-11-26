@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import jakarta.websocket.server.PathParam;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -42,14 +43,14 @@ public class UserController {
     }
 
     //단건 조회
-    @GetMapping(params = "userId")
-    public UserResponseDto getUser(@RequestParam String userId) {
-        return userService.findById(userId);
-    }
+//    @GetMapping(params = "userId")
+//    public UserResponseDto getUser(@RequestParam String userId) {
+//        return userService.findById(userId);
+//    }
 
     //전체 조회
     @GetMapping(params = "!userId")
-    @Operation(summary = "전체 User 목록 조회")
+    @Operation(summary = "전체 User 목록 조회", operationId = "findAll")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User 목록 조회 성공")
     })
@@ -59,7 +60,7 @@ public class UserController {
 
     //사용자 수정
     @PatchMapping(path = "{userId}", consumes = "multipart/form-data")
-    @Operation(summary = "User 정보 수정") //, description = "수정할 User ID")
+    @Operation(summary = "User 정보 수정")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User 정보가 성공적으로 수정됨"),
             @ApiResponse(responseCode = "400", description = "같은 email 또는 username를 사용하는 User가 이미 존재함"),
@@ -76,7 +77,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void delete /*deleteUser*/(@PathVariable UUID uuid) {
-        userService.deleteUser(uuid);
+    public void delete /*deleteUser*/(@PathParam("userId") UUID userId) {
+        userService.deleteUser(userId);
     }
 }

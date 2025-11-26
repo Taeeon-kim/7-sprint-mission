@@ -46,7 +46,6 @@ public class MessageController {
     @Operation(summary = "Message 내용 수정")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message가 성공적으로 수정됨"),
-            @ApiResponse(responseCode = "400", description = "Message"),
             @ApiResponse(responseCode = "404", description = "Message를 찾을 수 없음")
     })
     public MessageResponseDto updateMessage(

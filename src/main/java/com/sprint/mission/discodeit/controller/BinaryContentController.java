@@ -3,9 +3,11 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.response.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,13 @@ public class BinaryContentController {
     private final BinaryContentService binaryContentService;
 
     @GetMapping("/{binaryContentId}")
-    public BinaryContentResponseDto findById(@PathVariable("binaryContentId") UUID uuid) {
+    @Operation(summary = "첨부 파일 조회", operationId = "findById")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "첨부 파일 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "첨부 파일 조회 실패")
+    })
+    public BinaryContentResponseDto findById(@Parameter(description = "조회할 첨부 파일 ID")
+                                             @PathParam("binaryContentId") UUID uuid) {
         return binaryContentService.find(uuid);
     }
 
