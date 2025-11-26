@@ -18,7 +18,7 @@ CREATE TABLE binary_contents
     file_name    VARCHAR(255)             NOT NULL,
     size         BIGINT                   NOT NULL,
     content_type VARCHAR(100)             NOT NULL,
-    bytes        BYTEA                    NOT NULL, -- 고도화 단계에서 이부분 지울것, 성능 및 공간 차지 비효율
+--     bytes        BYTEA                    NOT NULL, -- 고도화 단계에서 이부분 지울것, 성능 및 공간 차지 비효율
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL
 
 );

@@ -30,6 +30,10 @@ logging:
 
 ## 추후 아래 안쓰면 지울 것
 discodeit:
+  storage:
+    type: local          # <= 여기 값이 'local'일 때만 LocalBinaryContentStorage를 빈으로 등록
+    local:
+      root-path: ./storage    # 프로젝트 폴더 아래 storage 디렉토리
   repository:
     type: jcf
     file-directory: ./data

@@ -47,3 +47,6 @@ bin/
 ### Generated ###
 META-INF/
 org/
+
+### Local storage ###
+storage/

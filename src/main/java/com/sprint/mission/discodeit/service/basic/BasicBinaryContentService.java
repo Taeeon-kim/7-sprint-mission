@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     private final BinaryContentRepository binaryContentRepository;
     private final BinaryContentMapper binaryContentMapper;
+    private final BinaryContentStorage binaryContentStorage;
 
     @Override
     @Transactional
@@ -28,10 +30,16 @@ public class BasicBinaryContentService implements BinaryContentService {
         BinaryContent binaryContent = new BinaryContent(
                 command.fileName(),
                 command.contentType(),
-                command.size(),
-                command.bytes());
+                command.size());
 
-        BinaryContent saved = binaryContentRepository.save(binaryContent);
+        BinaryContent saved = null;
+        saved = binaryContentRepository.save(binaryContent);
+        try {
+            binaryContentStorage.put(saved.getId(), command.bytes());
+        } catch (Exception e) {
+            throw new RuntimeException("파일 저장 파일 실패", e);
+        }
+        // 키id로 값 bytes 저장
         return saved.getId();
     }
 

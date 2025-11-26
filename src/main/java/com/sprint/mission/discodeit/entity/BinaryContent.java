@@ -20,17 +20,17 @@ public class BinaryContent extends BasicEntity {
     @Column(name = "content_type", nullable = false)
     private String contentType;
 
-    @Column(nullable = false)
-    private byte[] bytes;
+//    @Column(nullable = false)
+//    private byte[] bytes;
 
     @Column(nullable = false)
     private Long size;
 
     @Builder
-    public BinaryContent(String fileName, String contentType, Long size, byte[] bytes) {
+    public BinaryContent(String fileName, String contentType, Long size) {
         this.fileName = fileName;
         this.contentType = contentType;
-        this.bytes = bytes;
+//        this.bytes = bytes;
         this.size = size;
     }
 }

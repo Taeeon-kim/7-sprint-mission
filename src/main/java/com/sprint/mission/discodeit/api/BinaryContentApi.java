@@ -48,7 +48,7 @@ public interface BinaryContentApi {
                     content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
-    ResponseEntity<Resource> downloadBinaryContent(UUID id);
+    ResponseEntity<?> downloadBinaryContent(UUID id);
 
     @Operation(summary = "바이너리컨텐츠 생성")
     @ApiResponses({
