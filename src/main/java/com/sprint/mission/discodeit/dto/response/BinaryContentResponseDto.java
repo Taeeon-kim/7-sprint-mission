@@ -13,9 +13,9 @@ public class BinaryContentResponseDto {
 
 //    private UUID messageId;
     private UUID id;
-//    private String fileName;
+    private String fileName;
     private String contentType;
-//    private long size;
+    private long size;
     private long bytes;
     private Instant createdAt;
 
@@ -24,8 +24,8 @@ public class BinaryContentResponseDto {
 //                .messageId(binaryContent.getUuid())
                 .id(binaryContent.getUuid())
                 .contentType(binaryContent.getContentType())
-//                .fileName(binaryContent.getFileName())
-//                .size(binaryContent.getBytes().length)
+                .fileName(binaryContent.getFileName())
+                .size(binaryContent.getBytes().length)
                 .bytes(binaryContent.getBytes().length)
                 .createdAt(binaryContent.getCreateAt())
                 .build();

@@ -64,6 +64,13 @@ public class BasicBinaryContentService implements BinaryContentService {
     }
 
     @Override
+    public List<BinaryContentResponseDto> findAll() {
+        return binaryContentRepository.findAll().stream()
+                .map(BinaryContentResponseDto::from)
+                .toList();
+    }
+
+    @Override
     public List<BinaryContentResponseDto> findByChannelId(UUID channelId) {
         List<Message> messages = messageRepository.findByChannelId(channelId);
 
