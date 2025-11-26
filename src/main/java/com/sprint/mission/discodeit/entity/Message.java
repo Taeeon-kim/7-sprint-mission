@@ -25,9 +25,6 @@ public class Message extends BaseUpdatableEntity {
     @JoinColumn(name = "channel_id")
     private Channel channel; // TODO: Channel과 연관관계 체크할것
 
-//    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<MessageAttachment> attachments; // TODO: 중간테이블을 직접 만든 MessageAttachment로할지 피드백후 결정
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) // N:1 테이블
     @JoinTable(
             name = "message_attachments",

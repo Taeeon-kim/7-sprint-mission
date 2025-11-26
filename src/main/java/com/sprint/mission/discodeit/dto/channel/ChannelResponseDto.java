@@ -23,14 +23,14 @@ public record ChannelResponseDto(
             List<User> participants,
             Instant lastMessagedAt
     ) {
-        List<UserResponseDto> userResponseDtos = participants.stream()
-                .map(user -> UserResponseDto.from(user))
+        List<UserResponseDto> userResponseDtoList = participants.stream()
+                .map(UserResponseDto::from)
                 .toList();
         return new ChannelResponseDto(
                 channel.getId(),
                 channel.getName(),
                 channel.getDescription(),
-                userResponseDtos,
+                userResponseDtoList,
                 channel.getType(),
                 lastMessagedAt
 

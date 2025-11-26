@@ -72,7 +72,6 @@ public class BasicChannelService implements ChannelService {
                 .map(readStatus -> readStatus.getUser())
                 .collect(Collectors.toList());
 
-        List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
         Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
                 .stream()
                 .map(Message::getCreatedAt)
