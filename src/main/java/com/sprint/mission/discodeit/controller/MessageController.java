@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.response.MessageResponseDto;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,8 +28,8 @@ public class MessageController {
     private final ChannelRepository channelRepository;
 
     // 메시지 전송(저장)
-    @PostMapping(consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Message 생성")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Message 생성", operationId = "create_2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Message가 성공적으로 생성됨"),
             @ApiResponse(responseCode = "404", description = "Channel 또는 User를 찾을 수 없음")
@@ -68,11 +69,11 @@ public class MessageController {
 
     // 특정 채널 메시지 목록 조회
     @GetMapping
-    @Operation(summary = "Channel의 Message 목록 조회")
+    @Operation(summary = "Channel의 Message 목록 조회", operationId = "findAllByChannelId")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message 목록 조회 성공")
     })
-    public List<MessageResponseDto> getMessageByChannel(@RequestParam UUID channelId) {
+    public List<MessageResponseDto> getMessageByChannel(@Parameter(description = "조회할 Channel ID") UUID channelId) {
         var channel = channelRepository.findByChannel(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
         return messageService.findChannelAllMessage(channel)

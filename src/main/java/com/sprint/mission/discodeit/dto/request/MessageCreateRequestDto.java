@@ -19,5 +19,5 @@ public class MessageCreateRequestDto {
     private UUID channelId;
     private String channelName;
     private String content;
-    private List<UUID> attachmentIds =  new ArrayList<>();
+    private List<UUID> attachments =  new ArrayList<>();
 }
