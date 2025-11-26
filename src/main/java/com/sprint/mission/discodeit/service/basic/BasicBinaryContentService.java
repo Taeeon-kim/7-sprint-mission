@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class BasicBinaryContentService implements BinaryContentService {
 
     private final BinaryContentRepository binaryContentRepository;
+    private final BinaryContentMapper binaryContentMapper;
 
     @Override
     @Transactional
@@ -37,7 +39,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     @Transactional(readOnly = true)
     public BinaryContentResponseDto getBinaryContent(UUID id) {
         BinaryContent binaryContent = binaryContentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을수 없습니다."));
-        return BinaryContentResponseDto.from(binaryContent);
+        return binaryContentMapper.toDto(binaryContent);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     public List<BinaryContentResponseDto> getBinaryContentsByIds(List<UUID> ids) {
         List<BinaryContent> allByIds = binaryContentRepository.findAllById(ids);
         return allByIds.stream()
-                .map(BinaryContentResponseDto::from)
+                .map(binaryContentMapper::toDto)
                 .toList();
     }
 
@@ -63,7 +65,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     public List<BinaryContentResponseDto> getAllBinaryContents() {
         List<BinaryContent> all = binaryContentRepository.findAll();
         return all.stream()
-                .map(BinaryContentResponseDto::from)
+                .map(binaryContentMapper::toDto)
                 .toList();
     }
 }

@@ -6,14 +6,15 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.factory.ChannelFactory;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
     private static final int MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL = 2;
 
@@ -35,15 +37,7 @@ public class BasicChannelService implements ChannelService {
     private final ChannelReader channelReader;
     private final ReadStatusRepository readStatusRepository;
     private final ChannelFactory channelFactory;
-
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, ReadStatusRepository readStatusRepository, ChannelFactory channelFactory) {
-        this.channelRepository = channelRepository;
-        this.messageRepository = messageRepository;
-        this.userReader = userReader;
-        this.channelReader = channelReader;
-        this.readStatusRepository = readStatusRepository;
-        this.channelFactory = channelFactory;
-    }
+    private final ChannelMapper channelMapper;
 
     @Override
     @Transactional
@@ -68,16 +62,7 @@ public class BasicChannelService implements ChannelService {
             readStatusRepository.saveAll(readStatuses);
         }
 
-        List<User> participants = readStatusRepository.findByChannelId(saved.getId()).stream()
-                .map(readStatus -> readStatus.getUser())
-                .collect(Collectors.toList());
-
-        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
-                .stream()
-                .map(Message::getCreatedAt)
-                .findFirst()
-                .orElse(null);
-        return ChannelResponseDto.from(saved, participants, lastMessageAt);
+        return channelMapper.toDto(saved);
     }
 
     @Override
@@ -117,36 +102,17 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public ChannelResponseDto getChannel(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream()
-                .map(readStatus -> readStatus.getUser())
-                .collect(Collectors.toList());
-
-        Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
-                .stream()
-                .map(Message::getCreatedAt)
-                .findFirst()
-                .orElse(null);
-        return getChannelResponseDto(channel, participants, lastMessageAt);
+        return getChannelResponseDto(channel);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannels() {
         List<Channel> channelList = channelRepository.findAll(); //
+        // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
         return channelList
                 .stream()
-                .map(channel -> { // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
-                    List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream() // TODO: 중복코드 private 메서드로 빼야하는지
-                            .map(readStatus -> readStatus.getUser())
-                            .collect(Collectors.toList());
-
-                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
-                            .stream()
-                            .map(Message::getCreatedAt)
-                            .findFirst()
-                            .orElse(null);
-                    return getChannelResponseDto(channel, participants, lastMessageAt);
-                })
+                .map(this::getChannelResponseDto)
                 .toList();
     }
 
@@ -154,29 +120,18 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
 
+        // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
         return channelRepository.findAllVisibleByUserId(userId)
                 .stream()
-                .map(channel -> {  // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
-                    List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream()
-                            .map(readStatus -> readStatus.getUser()) // LAZY 접근
-                            .collect(Collectors.toList());
-                    List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
-                    Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
-                            .stream()
-                            .map(Message::getCreatedAt)
-                            .findFirst()
-                            .orElse(null);
-                    return getChannelResponseDto(channel, participants, lastMessageAt);
-                })
+                .map(this::getChannelResponseDto)
                 .toList();
     }
 
-
-    private ChannelResponseDto getChannelResponseDto(Channel channel, List<User> participants, Instant lastMessageAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, participants, lastMessageAt);
+            return channelMapper.toDto(channel);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, participants, lastMessageAt);
+            return channelMapper.toDto(channel);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }

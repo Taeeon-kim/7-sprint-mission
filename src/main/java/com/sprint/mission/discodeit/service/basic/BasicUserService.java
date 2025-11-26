@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -23,10 +24,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
-    private final UserStatusRepository userStatusRepository;
     private final UserReader userReader;
     private final BinaryContentService binaryContentService;
     private final BinaryContentRepository binaryContentRepository;
+    private final UserMapper userMapper;
 
 
     @Override
@@ -62,7 +63,7 @@ public class BasicUserService implements UserService {
         newUser.initUserStatus();
         User savedUser = userRepository.save(newUser);
 
-        return UserResponseDto.from(savedUser);
+        return userMapper.toDto(savedUser);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class BasicUserService implements UserService {
 
         User user = userReader.findUserOrThrow(userId);
 
-        return UserResponseDto.from(user);
+        return userMapper.toDto(user);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class BasicUserService implements UserService {
         UserUpdateParams params = UserUpdateParams.from(updateCommand, binaryContent); // 경계분리
         userById.update(params);
         userRepository.save(userById);// user repository 사용 책임 분리
-        return UserResponseDto.from(userById); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
+        return userMapper.toDto(userById); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
     }
 
     @Override
@@ -114,9 +115,9 @@ public class BasicUserService implements UserService {
 
         List<User> all = userRepository.findAll();
 
-        return all.stream().map(
-                user -> UserResponseDto.from(user)
-        ).toList();
+        return all.stream()
+                .map(userMapper::toDto)
+                .toList();
 
     }
 

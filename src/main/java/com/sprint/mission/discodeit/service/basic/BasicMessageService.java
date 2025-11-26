@@ -6,8 +6,8 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -31,6 +31,7 @@ public class BasicMessageService implements MessageService {
     private final BinaryContentRepository binaryContentRepository;
     private final BinaryContentService binaryContentService;
     private final ReadStatusRepository readStatusRepository;
+    private final MessageMapper mesageMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -38,7 +39,7 @@ public class BasicMessageService implements MessageService {
         List<Message> allMessages = messageRepository.findAll();
         return allMessages
                 .stream()
-                .map(MessageResponseDto::from)
+                .map(mesageMapper::toDto)
                 .toList();
     }
 
@@ -50,17 +51,19 @@ public class BasicMessageService implements MessageService {
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
         return messageRepository.findAllByChannelId(channel.getId()).stream()
-                .map(MessageResponseDto::from).toList(); // TODO: lazy라 MEssageResponse 내부에서 author, channel N+1 되므로 해결방안 및 심화요구사항 작성
+                .map(mesageMapper::toDto).toList(); // TODO: lazy라 MEssageResponse 내부에서 author, channel N+1 되므로 해결방안 및 심화요구사항 작성
     }
 
     @Override
     @Transactional(readOnly = true)
     public MessageResponseDto getMessageById(UUID messageId) {
         Message message = messageReader.findMessageOrThrow(messageId);
-        return MessageResponseDto.from(message);
+        return mesageMapper.toDto(message);
     }
 
 
+    @Override
+    @Transactional
     public MessageResponseDto sendMessageToChannel(MessageSendCommand command) {
         if (command.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -91,7 +94,7 @@ public class BasicMessageService implements MessageService {
                 .build();
 
         Message savedMessage = messageRepository.save(message);
-        return MessageResponseDto.from(savedMessage);
+        return mesageMapper.toDto(savedMessage);
     }
 
     @Override
@@ -109,7 +112,7 @@ public class BasicMessageService implements MessageService {
 
         if (isUpdated) {
             Message saved = messageRepository.save(message);
-            return MessageUpdateResponseDto.from(saved);
+            return mesageMapper.toUpdateDto(saved);
         }
         return null;
     }
