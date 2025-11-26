@@ -77,7 +77,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void delete /*deleteUser*/(@PathParam("userId") UUID userId) {
+    public void delete /*deleteUser*/(@PathVariable("userId") UUID userId) {
         userService.deleteUser(userId);
     }
 }
