@@ -73,7 +73,8 @@ public class MessageController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message 목록 조회 성공")
     })
-    public List<MessageResponseDto> getMessageByChannel(@Parameter(description = "조회할 Channel ID") UUID channelId) {
+    public List<MessageResponseDto> getMessageByChannel(@Parameter(description = "조회할 Channel ID")
+                                                        @RequestParam UUID channelId) {
         var channel = channelRepository.findByChannel(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
         return messageService.findChannelAllMessage(channel)
