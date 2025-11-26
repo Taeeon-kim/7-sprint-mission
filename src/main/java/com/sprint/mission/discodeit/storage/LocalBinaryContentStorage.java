@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,7 @@ public class LocalBinaryContentStorage implements BinaryContentStorage{
     }
 
     @Override
-    public ResponseEntity<?> download(BinaryContentResponseDto binaryContentResponseDto) {
+    public ResponseEntity<Resource> download(BinaryContentResponseDto binaryContentResponseDto) {
         try {
             InputStream in = get(binaryContentResponseDto.id());
             ByteArrayResource resource = new ByteArrayResource(in.readAllBytes());
