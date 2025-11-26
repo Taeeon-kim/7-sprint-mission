@@ -118,7 +118,7 @@ public class ReadStatusServiceIntegrationTest {
             // then
             assertEquals(creator.getId(), readStatus.userId());
             assertEquals(channel.getId(), readStatus.channelId());
-            assertNotNull(readStatus.readAt());
+            assertNotNull(readStatus.lastReadAt());
 
         }
 

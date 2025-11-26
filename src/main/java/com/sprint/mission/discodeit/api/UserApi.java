@@ -49,7 +49,7 @@ public interface UserApi {
 
     @Operation(summary = "모든 유저 조회")
     @ApiResponse(responseCode = "200", description = "성공")
-    ResponseEntity<List<UserDto>> getAllUsers();
+    ResponseEntity<List<UserResponseDto>> getAllUsers();
 
     @Operation(summary = "유저 삭제")
     @ApiResponses({

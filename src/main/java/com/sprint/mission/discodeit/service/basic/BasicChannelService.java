@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.factory.ChannelFactory;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
@@ -67,16 +68,17 @@ public class BasicChannelService implements ChannelService {
             readStatusRepository.saveAll(readStatuses);
         }
 
-        List<UUID> participantIds = readStatusRepository.findByChannelId(saved.getId()).stream()
-                .map(readStatus -> readStatus.getUser().getId())
+        List<User> participants = readStatusRepository.findByChannelId(saved.getId()).stream()
+                .map(readStatus -> readStatus.getUser())
                 .collect(Collectors.toList());
+
         List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
         Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
                 .stream()
                 .map(Message::getCreatedAt)
                 .findFirst()
                 .orElse(null);
-        return ChannelResponseDto.from(saved, participantIds, messageIds, lastMessageAt);
+        return ChannelResponseDto.from(saved, participants, lastMessageAt);
     }
 
     @Override
@@ -116,16 +118,16 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public ChannelResponseDto getChannel(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
-                .map(readStatus -> readStatus.getUser().getId())
+        List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream()
+                .map(readStatus -> readStatus.getUser())
                 .collect(Collectors.toList());
-        List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+
         Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
                 .stream()
                 .map(Message::getCreatedAt)
                 .findFirst()
                 .orElse(null);
-        return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
+        return getChannelResponseDto(channel, participants, lastMessageAt);
     }
 
     @Override
@@ -135,16 +137,16 @@ public class BasicChannelService implements ChannelService {
         return channelList
                 .stream()
                 .map(channel -> { // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
-                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream() // TODO: 중복코드 private 메서드로 빼야하는지
-                            .map(readStatus -> readStatus.getUser().getId())
+                    List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream() // TODO: 중복코드 private 메서드로 빼야하는지
+                            .map(readStatus -> readStatus.getUser())
                             .collect(Collectors.toList());
-                    List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
+
                     Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
                             .stream()
                             .map(Message::getCreatedAt)
                             .findFirst()
                             .orElse(null);
-                    return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
+                    return getChannelResponseDto(channel, participants, lastMessageAt);
                 })
                 .toList();
     }
@@ -156,8 +158,8 @@ public class BasicChannelService implements ChannelService {
         return channelRepository.findAllVisibleByUserId(userId)
                 .stream()
                 .map(channel -> {  // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
-                    List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
-                            .map(readStatus -> readStatus.getUser().getId()) // LAZY 접근
+                    List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream()
+                            .map(readStatus -> readStatus.getUser()) // LAZY 접근
                             .collect(Collectors.toList());
                     List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
                     Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
@@ -165,17 +167,17 @@ public class BasicChannelService implements ChannelService {
                             .map(Message::getCreatedAt)
                             .findFirst()
                             .orElse(null);
-                    return getChannelResponseDto(channel, participantIds, messageIds, lastMessageAt);
+                    return getChannelResponseDto(channel, participants, lastMessageAt);
                 })
                 .toList();
     }
 
 
-    private ChannelResponseDto getChannelResponseDto(Channel channel, List<UUID> participantIds, List<UUID> messageIds, Instant lastMessageAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel, List<User> participants, Instant lastMessageAt) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, participantIds, messageIds, lastMessageAt);
+            return ChannelResponseDto.from(channel, participants, lastMessageAt);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, participantIds, messageIds, lastMessageAt);
+            return ChannelResponseDto.from(channel, participants, lastMessageAt);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }

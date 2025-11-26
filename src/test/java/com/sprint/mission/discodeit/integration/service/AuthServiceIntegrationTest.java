@@ -49,17 +49,17 @@ public class AuthServiceIntegrationTest {
             User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             // when
             UserResponseDto loginUser = authService.login(AuthLoginRequestDto.builder()
-                    .username(user.getNickname())
+                    .username(user.getUsername())
                     .password(user.getPassword())
                     .build());
 
             // then
             assertAll(
                     () -> assertEquals(user.getId(), loginUser.id()),
-                    () -> assertEquals(user.getNickname(), loginUser.nickname()),
-                    () -> assertEquals(user.getProfile().getId(), loginUser.profileId()),
+                    () -> assertEquals(user.getUsername(), loginUser.username()),
+                    () -> assertEquals(user.getProfile().getId(), loginUser.profile().id()),
                     () -> assertEquals(user.getEmail(), loginUser.email()),
-                    () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
+                    () -> assertEquals(true, loginUser.online())
             );
         }
 
@@ -69,12 +69,11 @@ public class AuthServiceIntegrationTest {
         void login_throws_when_not_found() {
             // given
             User user = UserFixture.createUser(userRepository, userStatusRepository);
-
-
+            
             // when & then
             assertAll(
                     () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
-                            .username(user.getNickname())
+                            .username(user.getUsername())
                             .password("wrongPassword")
                             .build())),
                     () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()

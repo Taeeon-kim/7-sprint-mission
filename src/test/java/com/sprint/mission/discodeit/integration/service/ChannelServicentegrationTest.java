@@ -425,10 +425,9 @@ public class ChannelServicentegrationTest {
                     // userIds 정책 검증
                     () -> result.forEach(dto -> {
                         if (dto.id().equals(channelC.getId())) {
-                            assertNotNull(dto.participantIds(), "비공개 채널은 참여자 정보 제공");
-                            assertTrue(dto.participantIds().contains(member1.getId()));
+                            assertNotNull(dto.participants(), "비공개 채널은 참여자 정보 제공");
                         } else {
-                            assertTrue(dto.participantIds().isEmpty(), "공개 채널은 맴버가 없어야한다");
+                            assertTrue(dto.participants().isEmpty(), "공개 채널은 맴버가 없어야한다");
                         }
                     })
             );

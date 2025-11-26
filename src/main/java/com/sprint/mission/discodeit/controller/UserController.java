@@ -44,8 +44,8 @@ public class UserController implements UserApi {
 
     @Override
     @GetMapping
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> allUsers = userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        List<UserResponseDto> allUsers = userService.getAllUsers();
         return ResponseEntity.ok(allUsers);
     }
 

@@ -49,7 +49,7 @@ public class UserControllerIntegrationTest {
 
             // dto
             UserSignupRequestDto request = UserSignupRequestDto.builder()
-                    .username(user.getNickname())
+                    .username(user.getUsername())
                     .email(user.getEmail())
                     .password(user.getPassword())
                     .build();

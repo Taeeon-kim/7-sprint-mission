@@ -17,7 +17,7 @@ import java.util.UUID;
 public class User extends BaseUpdatableEntity {
 
     @Column(name = "username", nullable = false, unique = true)
-    private String nickname;
+    private String username;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -27,7 +27,7 @@ public class User extends BaseUpdatableEntity {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "profile_id")
-    private BinaryContent profile; // 1:1양방향 (없을수도있음), TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
+    private BinaryContent profile; // TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserStatus userStatus; // 1:1 양방향
 
@@ -41,7 +41,7 @@ public class User extends BaseUpdatableEntity {
         if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("nickname invalid");
         if (email == null || !email.contains("@")) throw new IllegalArgumentException("email invalid");
         if (password == null || password.isBlank()) throw new IllegalArgumentException("password invalid");
-        this.nickname = nickname;
+        this.username = nickname;
         this.email = email;
         this.password = password;
         this.profile = profile;
@@ -69,8 +69,8 @@ public class User extends BaseUpdatableEntity {
     }
 
     public boolean updateNickname(String nickname) {
-        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.nickname)) {
-            this.nickname = nickname;
+        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.username)) {
+            this.username = nickname;
             return true;
         }
         return false;

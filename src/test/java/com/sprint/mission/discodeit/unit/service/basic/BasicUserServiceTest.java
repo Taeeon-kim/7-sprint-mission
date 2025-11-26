@@ -145,7 +145,7 @@ class BasicUserServiceTest {
             // when
             UserResponseDto result = userService.getUserById(id); // 흐름 검증
 
-            assertEquals(user.getNickname(), result.nickname()); // 분기 검증
+            assertEquals(user.getUsername(), result.username()); // 분기 검증
             assertEquals(user.getEmail(), result.email());
 
             // then

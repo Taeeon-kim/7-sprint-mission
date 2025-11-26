@@ -43,7 +43,7 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
-        if (userRepository.existsByEmail(userSignupCommand.email()) || userRepository.existsByNickname(userSignupCommand.username())) {
+        if (userRepository.existsByEmail(userSignupCommand.email()) || userRepository.existsByUsername(userSignupCommand.username())) {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
 
@@ -64,7 +64,7 @@ public class BasicUserService implements UserService {
         UserStatus userStatus = new UserStatus(savedUser);
         userStatusRepository.save(userStatus);
 
-        return UserResponseDto.from(savedUser, null);
+        return UserResponseDto.from(savedUser);
     }
 
     @Override
@@ -73,11 +73,7 @@ public class BasicUserService implements UserService {
 
         User user = userReader.findUserOrThrow(userId);
 
-        UserStatus statusByUserId = userStatusRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-
-        return UserResponseDto.from(user, statusByUserId.getUserStatus());
+        return UserResponseDto.from(user);
     }
 
     @Override
@@ -111,20 +107,17 @@ public class BasicUserService implements UserService {
         UserUpdateParams params = UserUpdateParams.from(updateCommand, binaryContent); // 경계분리
         userById.update(params);
         userRepository.save(userById);// user repository 사용 책임 분리
-        return UserResponseDto.from(userById, null); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
+        return UserResponseDto.from(userById); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDto> getAllUsers() {
+    public List<UserResponseDto> getAllUsers() {
 
         List<User> all = userRepository.findAll();
 
         return all.stream().map(
-                user -> UserDto.from(
-                        user,
-                        userStatusRepository.findByUserId(user.getId()).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다.")) // TODO:  N+1 문제 발생, DB 없을때도 이런방식으로 해야되나? 별도 보조인덱스 Map 없는이상 일단 유지, 추후 N+1 개선 신경쓸것
-                                .getUserStatus())
+                user -> UserResponseDto.from(user)
         ).toList();
 
     }

@@ -46,7 +46,7 @@ public class UserTest {
         void constructor_shouldCreate_whenValid() {
             User u = newUser();
 
-            assertEquals("name", u.getNickname());
+            assertEquals("name", u.getUsername());
             assertEquals("example@email.com", u.getEmail());
             assertEquals("password123", u.getPassword());
             assertNull(u.getId()); // 실제 persist 전이면 @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID) 이기떄문에 단위테스트에서는 Null
@@ -66,7 +66,7 @@ public class UserTest {
             boolean changed = u.updateNickname("nick2");
 
             assertTrue(changed);
-            assertEquals("nick2", u.getNickname());
+            assertEquals("nick2", u.getUsername());
         }
 
         @Test
@@ -74,7 +74,7 @@ public class UserTest {
         void updateNickname_shouldNotChange_whenBlank() {
             User u = newUser();
             assertFalse(u.updateNickname(""));
-            assertEquals("name", u.getNickname());
+            assertEquals("name", u.getUsername());
         }
 
         @Test
@@ -82,7 +82,7 @@ public class UserTest {
         void updateNickname_shouldNotChange_whenNull() {
             User u = newUser();
             assertFalse(u.updateNickname(null));
-            assertEquals("name", u.getNickname());
+            assertEquals("name", u.getUsername());
         }
 
         @Test
@@ -90,7 +90,7 @@ public class UserTest {
         void updateNickname_shouldNotChange_whenSame() {
             User u = newUser();
             assertFalse(u.updateNickname("name"));
-            assertEquals("name", u.getNickname());
+            assertEquals("name", u.getUsername());
         }
     }
 

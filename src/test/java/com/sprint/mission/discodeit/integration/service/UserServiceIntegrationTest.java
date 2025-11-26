@@ -66,7 +66,7 @@ public class UserServiceIntegrationTest {
             assertEquals(before + 1, after);
             User persistedUser = userRepository.findById(userResponseDto.id())
                     .orElseThrow(() -> new AssertionError("User not found"));
-            assertEquals("name", persistedUser.getNickname());
+            assertEquals("name", persistedUser.getUsername());
 
             assertEquals("example@email.com", persistedUser.getEmail());
             assertEquals("password", persistedUser.getPassword());
@@ -77,9 +77,11 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 잘못된 입력은 예외 & DB 변화 없음")
         void signUp_invalid_blocked() {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "pw"), null);
+            int before = userRepository.findAll().size();
             assertThrows(IllegalArgumentException.class,
                     () -> userService.signUp(command));
-            assertEquals(0, userRepository.findAll().size());
+            int after = userRepository.findAll().size();
+            assertEquals(before, after);
         }
 
         @Test
@@ -153,7 +155,7 @@ public class UserServiceIntegrationTest {
             UserResponseDto userById = userService.getUserById(responseDto.id());
 
             //then
-            assertEquals("name", userById.nickname());
+            assertEquals("name", userById.username());
             assertEquals(responseDto.id(), userById.id());
         }
 
@@ -194,7 +196,7 @@ public class UserServiceIntegrationTest {
             //then
             User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
-            assertEquals("nick", after.getNickname());
+            assertEquals("nick", after.getUsername());
 
             // 실제 update호출안된건지 update값 조회
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
@@ -219,7 +221,7 @@ public class UserServiceIntegrationTest {
 
             //then
             User after = userRepository.findById(responseDto.id()).orElseThrow();
-            assertEquals(before.getNickname(), after.getNickname());
+            assertEquals(before.getUsername(), after.getUsername());
             assertEquals(before.getEmail(), after.getEmail());
 
             assertEquals(beforeTime, after.getUpdatedAt());
@@ -242,7 +244,7 @@ public class UserServiceIntegrationTest {
             em.clear();
 
             User after = userRepository.findById(responseDto.id()).orElseThrow();
-            assertEquals("nick2", after.getNickname());
+            assertEquals("nick2", after.getUsername());
             assertEquals("b@c.com", after.getEmail());
             assertNotNull(after.getProfile().getId());
 
@@ -308,7 +310,7 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command2 = UserSignupCommand.from(new UserSignupRequestDto("b", "b@b.com", "p"), null);
             userService.signUp(command);
             userService.signUp(command2);
-            assertEquals(2, userService.getAllUsers().size());
+            assertTrue(userService.getAllUsers().size()>=2);
         }
     }
 

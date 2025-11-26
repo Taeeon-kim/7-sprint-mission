@@ -10,7 +10,7 @@ public record ReadStatusResponseDto(
         UUID id,
         UUID userId,
         UUID channelId,
-        Instant readAt
+        Instant lastReadAt
 ) {
     public static ReadStatusResponseDto from(ReadStatus readStatus) {
         return new ReadStatusResponseDto(

@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.dto.channel;
 
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 
 import java.time.Instant;
@@ -12,23 +14,23 @@ public record ChannelResponseDto(
         UUID id,
         String name,
         String description,
-        List<UUID> participantIds,
-        List<UUID> messageIds,
+        List<UserResponseDto> participants,
         ChannelType type,
         Instant lastMessagedAt
 ) {
     public static ChannelResponseDto from(
             Channel channel,
-            List<UUID> participantIds,
-            List<UUID> messageIds,
+            List<User> participants,
             Instant lastMessagedAt
     ) {
+        List<UserResponseDto> userResponseDtos = participants.stream()
+                .map(user -> UserResponseDto.from(user))
+                .toList();
         return new ChannelResponseDto(
                 channel.getId(),
                 channel.getName(),
                 channel.getDescription(),
-                participantIds,
-                messageIds,
+                userResponseDtos,
                 channel.getType(),
                 lastMessagedAt
 
