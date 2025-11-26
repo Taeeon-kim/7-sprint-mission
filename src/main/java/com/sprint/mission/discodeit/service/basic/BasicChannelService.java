@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class BasicChannelService implements ChannelService {
+    private static final int MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL = 2;
+
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
     private final UserReader userReader;
@@ -52,13 +54,20 @@ public class BasicChannelService implements ChannelService {
 
         if (saved.getType() == ChannelType.PRIVATE) {
             List<User> users = userReader.findUsersByIds(command.memberIds());
+            if (users.size() < MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL) {
+                throw new IllegalArgumentException("PRIVATE 채널 최소 2명 이상이어야 합니다.");
+            }
+            if (users.size() < command.memberIds().size()) {
+                throw new IllegalArgumentException("참여 유저가 잘못되었습니다.");
+            }
+
             List<ReadStatus> readStatuses = users.stream()
-                    .map(user -> new ReadStatus(user, saved, Instant.now())).toList();
+                    .map(user -> new ReadStatus(user, saved)).toList();
 
             readStatusRepository.saveAll(readStatuses);
         }
 
-        List<UUID> participantIds = readStatusRepository.findByChannelId(channel.getId()).stream()
+        List<UUID> participantIds = readStatusRepository.findByChannelId(saved.getId()).stream()
                 .map(readStatus -> readStatus.getUser().getId())
                 .collect(Collectors.toList());
         List<UUID> messageIds = messageRepository.findIdsByChannelId(channel.getId());
@@ -94,9 +103,13 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
+
+        messageRepository.deleteByChannelId(channel.getId());
+
+        readStatusRepository.deleteByChannelId(channel.getId());
+
         // 채널삭제
-        channelRepository.deleteById(channel.getId()); // NOTE message, read_status CASCADE 처리됨
-        // TODO: 보상로직 생략, DB 생기면 @Transactional 이부분도 곧 넣기
+        channelRepository.deleteById(channel.getId()); // NOTE : Channel쪽에 연관관계가없어서 CASCADE 발생이안됨 따라서 위에 명시적으로 삭제
     }
 
     @Override
@@ -183,7 +196,7 @@ public class BasicChannelService implements ChannelService {
         }
 
         // 참여 = ReadStatus 한 줄 생성
-        ReadStatus readStatus = new ReadStatus(user, channel, Instant.now());
+        ReadStatus readStatus = new ReadStatus(user, channel);
         readStatusRepository.save(readStatus);
 
     }

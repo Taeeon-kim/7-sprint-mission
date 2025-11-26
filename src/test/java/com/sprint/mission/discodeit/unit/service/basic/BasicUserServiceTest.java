@@ -12,10 +12,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InOrder;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -36,13 +33,14 @@ class BasicUserServiceTest {
 
     @BeforeEach
     void setUp() {
+        // TODO: 중복 생성이 너무많으니 픽스처 도입 할것
         userRepository = mock(UserRepository.class);
         userReader = mock(UserReader.class);
         userStatusRepository = mock(UserStatusRepository.class);
         userStatusService = mock(UserStatusService.class);
         binaryContentRepository = mock(BinaryContentRepository.class);
         binaryContentService = mock(BinaryContentService.class);
-        userService = new BasicUserService(userRepository, userReader, userStatusService, userStatusRepository, binaryContentRepository, binaryContentService);
+        userService = new BasicUserService(userRepository, userStatusRepository, userReader, binaryContentService, binaryContentRepository);
     }
 
     // --- grouped by use-case with @Nested ---
@@ -59,7 +57,7 @@ class BasicUserServiceTest {
             String password = "1234";
 
             when(userRepository.save(any(User.class)))
-                    .thenReturn(User.create(nickname, email, password, RoleType.USER, null));
+                    .thenReturn(User.create(nickname, email, password, null));
 
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto(nickname, email, password), null);
 
@@ -121,16 +119,16 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior] 회원조회 - userReader.findUserOrThrow(id) 호출 (조회 위임 검증)")
         void getUserById_shouldDelegateToUserReader_whenCalled() {
             // given
-            UUID id = UUID.randomUUID();
+            User user = User.create("name", "email@emc.com", "password", null);
             when(userStatusRepository
-                    .findByUserId(id))
-                    .thenReturn(Optional.of(new UserStatus(id)));
-            when(userReader.findUserOrThrow(id)).thenReturn(User.create("nickname", "email@exa.com", "pwd", RoleType.USER, null));
+                    .findByUserId(user.getId()))
+                    .thenReturn(Optional.of(new UserStatus(user)));
+            when(userReader.findUserOrThrow(user.getId())).thenReturn(User.create("nickname", "email@exa.com", "pwd", null));
 
             // when
-            userService.getUserById(id);
+            userService.getUserById(user.getId());
 
-            verify(userReader).findUserOrThrow(id);
+            verify(userReader).findUserOrThrow(user.getId());
         }
 
         @Test
@@ -138,21 +136,20 @@ class BasicUserServiceTest {
         void getUserById_shouldReturnUser_whenFound() {
 
             // given
-            User user = User.create("taeeon", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(user.getId())).thenReturn(user); // Stub
-            when(userStatusRepository.findByUserId(user.getId()))
-                    .thenReturn(Optional.of(new UserStatus(user.getId())));
+            UUID id = UUID.randomUUID();
+            User user = User.create("taeeon", "a@b.com", "pw", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
+            when(userStatusRepository.findByUserId(id))
+                    .thenReturn(Optional.of(new UserStatus(user)));
 
             // when
-            UserResponseDto result = userService.getUserById(user.getId()); // 흐름 검증
+            UserResponseDto result = userService.getUserById(id); // 흐름 검증
 
             assertEquals(user.getNickname(), result.nickname()); // 분기 검증
             assertEquals(user.getEmail(), result.email());
-            assertEquals(user.getRole(), result.role());
-            assertEquals(user.getProfileId(), result.profileId());
 
             // then
-            verify(userReader).findUserOrThrow(user.getId()); // 행위검증
+            verify(userReader).findUserOrThrow(id); // 행위검증
         }
 
         @Test
@@ -181,27 +178,25 @@ class BasicUserServiceTest {
         void deleteUser_shouldCallRepositoryDelete_whenValidId() {
 
             // given
+            UUID id = UUID.randomUUID();
             User user = User.builder()
                     .nickname("taeeon")
-                    .role(RoleType.USER)
                     .password("pwd")
                     .email("dfds@exmap.com")
-                    .profileId(UUID.randomUUID())
                     .build();
-            UserStatus userStatus = new UserStatus(user.getId());
+            UserStatus userStatus = new UserStatus(user);
             when(userReader.findUserOrThrow(any())).thenReturn(user);
 
             when(userStatusRepository.findByUserId(any(UUID.class))).thenReturn(Optional.of(userStatus));
-            when(userStatusRepository.deleteById(any())).thenReturn(true);
-            when(userRepository.deleteById(user.getId())).thenReturn(true);
+
 //            when(binaryContentRepository);
 
             // when
-            userService.deleteUser(user.getId());
+            userService.deleteUser(id);
 
             // then
             verify(userRepository, times(1)).deleteById(user.getId());
-            verify(binaryContentRepository).deleteById(any()); // 부수효과, 흐름상 원자적으로 binarycontent도 삭제
+
         }
 
         @Test
@@ -234,15 +229,16 @@ class BasicUserServiceTest {
             verify(userRepository, never()).save(any());
         }
 
+        @Disabled("jpa dirty checking으로 더이상 도메인에서 update flag없이 먹등성 그대로 save요청됨 추후 이부분 검토")
         @Test
         @DisplayName("[Behavior + Branch] 회원수정 - 닉네임 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenNicknameChanged() {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
-
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto("new", null, null), null);
+            UUID id = UUID.randomUUID();
+            User real = User.create("nick", "a@b.com", "pw", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("new", null, null), null);
             when(userRepository.save(real)).thenReturn(real);
             // when (행위 실행 : 실제 서비스 호출)
             userService.updateUser(updateCommand);
@@ -253,13 +249,14 @@ class BasicUserServiceTest {
             inOrder.verify(userRepository).save(real);
         }
 
+        @Disabled("jpa dirty checking으로 더이상 도메인에서 update flag없이 먹등성 그대로 save요청됨 추후 이부분 검토")
         @Test
         @DisplayName("[Behavior + Branch][Negative] 회원수정 - 닉네임 미변경시 userRepository.save() 미호출")
         void updateUser_shouldNotCallRepositorySave_whenNicknameNotChanged() {
 
             // given (Stub 설정, 외부 협력자와 반환값 고정)
             UUID id = UUID.randomUUID();
-            User real = User.create("same", "a@b.com", "pw", RoleType.USER, null);
+            User real = User.create("same", "a@b.com", "pw", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
             UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("same", null, null), null);
 
@@ -276,17 +273,17 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch] 회원수정 - 이메일 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenEmailChanged() {
             // given
-//            UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, "change@email.com", null), null);
+            UUID id = UUID.randomUUID();
+            User real = User.create("nick", "a@b.com", "pw", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, "change@email.com", null), null);
             when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then (순서 + 위임 검증)
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(real.getId());
+            inOrder.verify(userReader).findUserOrThrow(id);
             inOrder.verify(userRepository).save(any(User.class));
         }
 
@@ -295,17 +292,17 @@ class BasicUserServiceTest {
         void updateUser_shouldCallRepositorySave_whenPasswordChanged() {
             // given
 
-
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-            when(userReader.findUserOrThrow(real.getId())).thenReturn(real);
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, null, "vjhsngr"), null);
+            UUID id = UUID.randomUUID();
+            User real = User.create("nick", "a@b.com", "pw", null);
+            when(userReader.findUserOrThrow(id)).thenReturn(real);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, "vjhsngr"), null);
             when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(real.getId());
+            inOrder.verify(userReader).findUserOrThrow(id);
             inOrder.verify(userRepository).save(real);
         }
 
@@ -331,12 +328,13 @@ class BasicUserServiceTest {
         @DisplayName("[Behavior + Branch] 회원수정 - 프로필이미지 id 변경 시 userRepository.save() 호출")
         void updateUser_shouldCallRepositorySave_whenProfileIdChanged() {
             // given
-
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
+            UUID id = UUID.randomUUID();
+            User real = User.create("nick", "a@b.com", "pw", null);
             when(userReader.findUserOrThrow(any())).thenReturn(real);
 
             MockMultipartFile mockMultipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
-            UserUpdateCommand updateCommand = UserUpdateCommand.from(real.getId(), new UserUpdateRequestDto(null, null, null), mockMultipartFile);
+            UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), mockMultipartFile);
+            UUID binaryId = UUID.randomUUID();
             BinaryContent binaryContent = updateCommand.profile()
                     .map((binaryCommand) ->
                             new BinaryContent(
@@ -345,23 +343,26 @@ class BasicUserServiceTest {
                                     binaryCommand.size(),
                                     binaryCommand.bytes()
                             )).orElse(null);
-            when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryContent.getId());
+
+            when(binaryContentService.uploadBinaryContent(updateCommand.profile().orElse(null))).thenReturn(binaryId);
             when(userRepository.save(real)).thenReturn(real);
             // when
             userService.updateUser(updateCommand);
 
             // then
             InOrder inOrder = inOrder(userReader, userRepository);
-            inOrder.verify(userReader).findUserOrThrow(real.getId());
+            inOrder.verify(userReader).findUserOrThrow(id);
             inOrder.verify(userRepository).save(real);
+            // TODO: binary verify는 안넣어도 되는지 추후 검토
         }
 
+        @Disabled("jpa dirty checking으로 더이상 도메인에서 update flag없이 먹등성 그대로 save요청됨 추후 이부분 검토")
         @Test
         @DisplayName("[Behavior + Branch][Negative] 회원수정 - 모든필드 null일때 미변경 userRepository.save() 미호출")
         void updateUser_shouldNotCallRepositorySave_whenAllFieldNull() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
+            User real = User.create("nick", "a@b.com", "pw", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
             UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto(null, null, null), null);
             // when
@@ -373,12 +374,13 @@ class BasicUserServiceTest {
             inOrder.verify(userRepository, never()).save(any());
         }
 
+        @Disabled("jpa dirty checking으로 더이상 도메인에서 update flag없이 먹등성 그대로 save요청됨 추후 이부분 검토")
         @Test
         @DisplayName("[Behavior + Branch][Negative] 회원수정 - 기존과 동일값 일때 userRepository.save() 미호출")
         void updateUser_shouldNotCallRepositorySave_whenNoFieldChanged() {
             // given
             UUID id = UUID.randomUUID();
-            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
+            User real = User.create("nick", "a@b.com", "pw", null);
             when(userReader.findUserOrThrow(id)).thenReturn(real);
             UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("nick", "a@b.com", "pw"), null);
 
@@ -421,20 +423,24 @@ class BasicUserServiceTest {
         @DisplayName("[Branch][Negative] 특정 회원리스트 조회- 입력이 null이면 IllegalArgumentException 예외 발생")
         void getUsersByIds_shouldThrowException_whenInputNull() {
             assertThrows(IllegalArgumentException.class, () -> userService.getUsersByIds(null));
-            verify(userRepository, never()).findAllByIds(any());
+            verify(userRepository, never()).findAllById(any()); // TODO: 단위테스트에서도 해당 jpa 메서드 호출하는지 한번 검토 문제없을시 다른부분도 안봐도됨
         }
 
         @Test
         @DisplayName("[Behavior + Flow] 특정 회원리스트 조회 - 주어진 id 리스트에 해당하는 유저 목록 반환")
         void getUsersByIds_shouldReturnUsers_whenIdsValid() {
-            List<UUID> ids = List.of(UUID.randomUUID());
-            List<User> users = List.of(User.create("a", "a@b.com", "p", RoleType.USER, null));
-            when(userRepository.findAllByIds(ids)).thenReturn(users);
 
+            //give
+            List<UUID> ids = List.of(UUID.randomUUID());
+            List<User> users = List.of(User.create("a", "a@b.com", "p", null));
+            when(userRepository.findAllById(ids)).thenReturn(users);
+
+            //when
             List<User> result = userService.getUsersByIds(ids);
 
+            //then
             assertEquals(users, result);
-            verify(userRepository).findAllByIds(ids);
+            verify(userRepository).findAllById(ids);
         }
 
         @Test
@@ -443,14 +449,14 @@ class BasicUserServiceTest {
             //given
             List<UUID> ids = List.of();
             List<User> users = List.of();
-            when(userRepository.findAllByIds(ids)).thenReturn(users);
+            when(userRepository.findAllById(ids)).thenReturn(users);
 
             //when
             List<User> result = userService.getUsersByIds(ids);
 
             //then
             assertEquals(users, result);
-            verify(userRepository).findAllByIds(ids);
+            verify(userRepository).findAllById(ids);
         }
     }
 }

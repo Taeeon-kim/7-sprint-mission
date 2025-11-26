@@ -25,6 +25,7 @@ public class BasicAuthService implements AuthService {
     @Override
     @Transactional
     public UserResponseDto login(AuthLoginRequestDto request) {
+        System.out.println("login!");
         List<User> all = userRepository.findAll(); // TODO: 전용 레포지토리 만들어서 사용해도됨 findByUserNameAndPassword
         User findUser = all.stream()
                 .filter((user) -> (user.getNickname().equals(request.username())) && (user.getPassword().equals(request.password())))

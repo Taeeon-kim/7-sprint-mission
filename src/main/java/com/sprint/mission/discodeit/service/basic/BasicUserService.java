@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.*;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -9,7 +10,6 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,8 +25,8 @@ public class BasicUserService implements UserService {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
     private final UserReader userReader;
-
     private final BinaryContentService binaryContentService;
+    private final BinaryContentRepository binaryContentRepository;
 
 
     @Override
@@ -48,11 +48,14 @@ public class BasicUserService implements UserService {
         }
 
         UUID profileBinaryId = userSignupCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null); // NOTE: 서비스 의존은 지양해야하지만, 순환참조 없고 해당 서비스가 다른 서비스에 의존하는게 아니면 공통된건 사용해도 좋고, 오히려 Service라는 이름보단 -Uploader @Component로 구성하는게 나을수도있다.
+        BinaryContent binaryContent = (profileBinaryId != null)
+                ? binaryContentRepository.getReferenceById(profileBinaryId) // TODO: getReference로 유지할지 findBy로 갈지 검토
+                : null;
 
         User newUser = User.create(userSignupCommand.username(),
                 userSignupCommand.email(),
                 userSignupCommand.password(),
-                profileBinaryId
+                binaryContent
         );
         User savedUser = userRepository.save(newUser);
         // NOTE: user save 이후 userStatus 생성 추가
@@ -101,7 +104,11 @@ public class BasicUserService implements UserService {
 
         UUID profileBinaryId = updateCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null);
 
-        UserUpdateParams params = UserUpdateParams.from(updateCommand, profileBinaryId); // 경계분리
+        BinaryContent binaryContent = (profileBinaryId != null)
+                ? binaryContentRepository.getReferenceById(profileBinaryId) // TODO: getReference로 유지할지 findBy로 갈지 검토
+                : null;
+
+        UserUpdateParams params = UserUpdateParams.from(updateCommand, binaryContent); // 경계분리
         userById.update(params);
         userRepository.save(userById);// user repository 사용 책임 분리
         return UserResponseDto.from(userById, null); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환

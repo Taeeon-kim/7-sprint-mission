@@ -18,11 +18,12 @@ public record UserResponseDto(
 ) {
 
     public static UserResponseDto from(User user, UserActiveStatus userStatus) {
+        UUID profileId = user.getProfile() != null ?user.getProfile().getId() : null;
         return new UserResponseDto(
                 user.getId(),
                 user.getNickname(),
                 user.getEmail(),
-                user.getProfileId(),
+                profileId,
                 userStatus,
                 user.getCreatedAt(),
                 user.getUpdatedAt()

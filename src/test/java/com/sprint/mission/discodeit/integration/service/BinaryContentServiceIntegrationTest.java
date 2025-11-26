@@ -5,11 +5,13 @@ import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,15 +19,18 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class BinaryContentServiceIntegrationTest {
+
+    @Autowired
     private BinaryContentRepository binaryContentRepository;
+
+    @Autowired
     private BinaryContentService binaryContentService;
 
     @BeforeEach
     void setUp() {
-
-        binaryContentRepository = new JCFBinaryContentRepository();
-        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
     }
 
     @AfterEach

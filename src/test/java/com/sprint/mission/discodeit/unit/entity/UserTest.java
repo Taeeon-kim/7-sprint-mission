@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserTest {
 
     private User newUser() {
-        return User.create("name", "example@email.com", "password123", RoleType.USER, null);
+        return User.create("name", "example@email.com", "password123", null);
     }
 
     @Nested
@@ -24,15 +24,13 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 필수입력값 유효하지않으면 예외")
         void constructor_shouldThrowException_whenRequiredFieldsInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create(null, null, null, null, null));
+                    () -> User.create(null, null, null, null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create(null, "a@b.com", "pw", RoleType.USER, null));
+                    () -> User.create(null, "a@b.com", "pw", null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "invalid", "pw", RoleType.USER, null));
+                    () -> User.create("nick", "invalid", "pw", null));
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "a@b.com", "", RoleType.USER, null));
-            assertThrows(IllegalArgumentException.class,
-                    () -> User.create("nick", "a@b.com", "pw", null, null));
+                    () -> User.create("nick", "a@b.com", "", null));
         }
 
 
@@ -40,7 +38,7 @@ public class UserTest {
         @DisplayName("[Invariant][Negative] 이메일 형식이 잘못되면 예외")
         void constructor_shouldThrow_whenEmailInvalid() {
             assertThrows(IllegalArgumentException.class,
-                    () -> User.create("name", "invalid", "pw", RoleType.USER, null));
+                    () -> User.create("name", "invalid", "pw", null));
         }
 
         @Test
@@ -51,10 +49,9 @@ public class UserTest {
             assertEquals("name", u.getNickname());
             assertEquals("example@email.com", u.getEmail());
             assertEquals("password123", u.getPassword());
-            assertEquals(RoleType.USER, u.getRole());
-            assertNotNull(u.getId());
-            assertNotNull(u.getCreatedAt());
-            assertNotNull(u.getUpdatedAt());
+            assertNull(u.getId()); // 실제 persist 전이면 @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID) 이기떄문에 단위테스트에서는 Null
+            assertNull(u.getCreatedAt()); // 실제 persist 전이면  @CreatedDate 이기떄문에 단위테스트에서는 Null
+            assertNull(u.getUpdatedAt()); // 실제 persist 전이면  @LastModifiedDate 이기떄문에 단위테스트에서는 Null
         }
     }
 
@@ -158,39 +155,4 @@ public class UserTest {
             assertEquals("password123", u.getPassword());
         }
     }
-
-    @Nested
-    @DisplayName("BasicEntity updatedAt 제약")
-    class UpdatedAtInvariant {
-
-        @Test
-        @DisplayName("[Invariant][Negative] updatedAt이 null이면 예외")
-        void setUpdatedAt_shouldThrow_whenNull() {
-            User u = newUser();
-            assertThrows(IllegalArgumentException.class, () -> u.setUpdatedAt(null));
-        }
-
-        @Test
-        @DisplayName("[Invariant][Negative] 과거 시각으로 설정 시 예외")
-        void setUpdatedAt_shouldThrow_whenDecreasing() {
-            User u = newUser();
-            Instant now = u.getUpdatedAt();
-            assertThrows(IllegalStateException.class, () -> u.setUpdatedAt(now.minusMillis(1)));
-        }
-
-        @Test
-        @DisplayName("[Invariant][Positive] 동일/미래 시각은 허용 (현재 구현 기준)")
-        void setUpdatedAt_shouldAllow_sameOrFuture() {
-            User u = newUser();
-            Instant now = u.getUpdatedAt();
-
-            u.setUpdatedAt(now);
-            assertEquals(now, u.getUpdatedAt());
-
-            u.setUpdatedAt(now.plusMillis(5_000));
-            assertEquals(now.plusMillis(5_000), u.getUpdatedAt());
-        }
-    }
-
-
 }

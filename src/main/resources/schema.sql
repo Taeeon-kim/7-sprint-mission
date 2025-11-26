@@ -8,7 +8,7 @@ CREATE TABLE users
     profile_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
-    CONSTRAINT fk_user_profile FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE SET NULL
+    CONSTRAINT fk_user_profile FOREIGN KEY (profile_id) REFERENCES binary_contents (id) ON DELETE SET NULL
 );
 
 --- 바이너리컨텐츠 테이블 DDL
@@ -29,8 +29,8 @@ CREATE TABLE user_statuses
     id             UUID PRIMARY KEY,
     user_id        UUID                     NOT NULL UNIQUE,
     last_active_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_at     TIMESTAMP                NOT NULL,
-    updated_at     TIMESTAMP,
+    created_at     TIMESTAMP WITH TIME ZONE               NOT NULL,
+    updated_at     TIMESTAMP WITH TIME ZONE,
 
     CONSTRAINT fk_user_status_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
@@ -71,7 +71,7 @@ CREATE TABLE read_statuses
     updated_at   TIMESTAMP WITH TIME ZONE,
 
     CONSTRAINT fk_read_status_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT fk_read_status_channel FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE
+    CONSTRAINT fk_read_status_channel FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE,
     CONSTRAINT uk_read_status_user_channel UNIQUE (user_id, channel_id)
 )
 

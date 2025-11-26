@@ -14,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_statuses")
 public class UserStatus extends BaseUpdatableEntity {
-    @OneToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
@@ -27,7 +27,7 @@ public class UserStatus extends BaseUpdatableEntity {
 
     public UserStatus(User user) {
         this.user = user;
-        this.lastActiveAt = Instant.now();
+        this.lastActiveAt = Instant.now(); // 이건 JPA/DB 자동 삽입 없는지 체크
     }
 
     public UserActiveStatus getUserStatus() {
@@ -48,4 +48,7 @@ public class UserStatus extends BaseUpdatableEntity {
         return false;
     }
 
+    void setUser(User user) {
+        this.user = user;
+    }
 }

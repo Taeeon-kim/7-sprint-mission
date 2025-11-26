@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -68,9 +69,13 @@ public class BasicMessageService implements MessageService {
         User sender = userReader.findUserOrThrow(command.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
         Channel channel = channelReader.findChannelOrThrow(command.channelId());
-        boolean isMember = readStatusRepository.existsByUserIdAndChannelId(sender.getId(), channel.getId());
-        if (!isMember) {
-            throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
+
+        // 3. PRIVATE 채널일 때만 멤버 체크
+        if (channel.getType() == ChannelType.PRIVATE) {
+            boolean isMember = readStatusRepository.existsByUserIdAndChannelId(sender.getId(), channel.getId());
+            if (!isMember) {
+                throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
+            }
         }
 
         List<UUID> profileBinaryIds = command.profiles().stream()

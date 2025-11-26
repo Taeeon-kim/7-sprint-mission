@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +12,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Builder
 @Entity
 @Table(
         name = "read_statuses",
@@ -33,6 +31,15 @@ public class ReadStatus extends BaseUpdatableEntity {
     private Channel channel;
     @CreatedDate
     private Instant lastReadAt;
+
+    @Builder
+    public ReadStatus(User user, Channel channel) {
+        if (channel.getType() != ChannelType.PRIVATE) {
+            throw new IllegalArgumentException("public channel은 readStatus 생성 허용 되지 않습니다.");
+        }
+        this.user = user;
+        this.channel = channel;
+    }
 
     public boolean updateReadAt(Instant readAt) {
 

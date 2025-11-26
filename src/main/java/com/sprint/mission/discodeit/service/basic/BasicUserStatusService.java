@@ -29,7 +29,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    @Transactional
+//    @Transactional
     public UUID createUserStatus(UserStatusRequestDto request) {
         if (request.getUserId() == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -70,7 +70,9 @@ public class BasicUserStatusService implements UserStatusService {
 
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
         boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
+        System.out.println("before in = " + isUpdated);
         if (isUpdated) {
+            System.out.println("isUpdated = " + isUpdated);
             userStatusRepository.save(userStatus);
         }
     }
@@ -98,3 +100,4 @@ public class BasicUserStatusService implements UserStatusService {
         userStatusRepository.deleteById(id);
     }
 }
+

@@ -6,29 +6,32 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
 import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.integration.fixtures.UserFixture;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
 import com.sprint.mission.discodeit.service.AuthService;
-import com.sprint.mission.discodeit.service.basic.BasicAuthService;
 import org.junit.jupiter.api.*;
-
-import java.util.NoSuchElementException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class AuthServiceIntegrationTest {
 
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private AuthService authService;
+
+    @Autowired
     private UserStatusRepository userStatusRepository;
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository();
-        userStatusRepository = new JCFUserStatusRepository();
-        authService = new BasicAuthService(userRepository, userStatusRepository);
     }
 
     @AfterEach
@@ -43,32 +46,19 @@ public class AuthServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow][Positive] 로그인 - 아이디, 비밀번호 일치 시 회원 정보 반환")
         void login_then_returns_user() {
-            User user = User.builder()
-                    .nickname("name")
-                    .email("email@example.com")
-                    .profileId(null)
-                    .role(RoleType.USER)
-                    .password("password")
-                    .build();
-
-            User saved = userRepository.save(user);
-
-            UserStatus userStatus = new UserStatus(saved.getId());
-            userStatusRepository.save(userStatus);
-
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             // when
             UserResponseDto loginUser = authService.login(AuthLoginRequestDto.builder()
-                    .username(saved.getNickname())
-                    .password(saved.getPassword())
+                    .username(user.getNickname())
+                    .password(user.getPassword())
                     .build());
 
             // then
             assertAll(
-                    () -> assertEquals(saved.getId(), loginUser.id()),
-                    () -> assertEquals(saved.getNickname(), loginUser.nickname()),
-                    () -> assertEquals(saved.getProfileId(), loginUser.profileId()),
-                    () -> assertEquals(saved.getRole(), loginUser.role()),
-                    () -> assertEquals(saved.getEmail(), loginUser.email()),
+                    () -> assertEquals(user.getId(), loginUser.id()),
+                    () -> assertEquals(user.getNickname(), loginUser.nickname()),
+                    () -> assertEquals(user.getProfile().getId(), loginUser.profileId()),
+                    () -> assertEquals(user.getEmail(), loginUser.email()),
                     () -> assertEquals(UserActiveStatus.ONLINE, loginUser.isOnline())
             );
         }
@@ -78,26 +68,18 @@ public class AuthServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 로그인 - 아이디, 비밀번호 불일치 시 NoSuchElement 예외")
         void login_throws_when_not_found() {
             // given
-            User user = User.builder()
-                    .role(RoleType.USER)
-                    .profileId(null)
-                    .email("email@example.com")
-                    .nickname("name")
-                    .password("password")
-                    .build();
-
-            User saved = userRepository.save(user);
+            User user = UserFixture.createUser(userRepository, userStatusRepository);
 
 
             // when & then
             assertAll(
                     () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
-                            .username(saved.getNickname())
+                            .username(user.getNickname())
                             .password("wrongPassword")
                             .build())),
                     () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
                                     .username("wrongName")
-                                    .password(saved.getPassword())
+                                    .password(user.getPassword())
                                     .build()
                             )
                     )

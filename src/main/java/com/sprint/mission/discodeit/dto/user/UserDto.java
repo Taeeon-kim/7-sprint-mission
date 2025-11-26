@@ -16,12 +16,13 @@ public record UserDto(
         Boolean online
 ) {
     public static UserDto from(User user, UserActiveStatus userStatus) {
+        UUID profileId = user.getProfile() != null ?user.getProfile().getId() : null;
         return new UserDto(user.getId(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.getNickname(),
                 user.getEmail(),
-                user.getProfileId(),
+                profileId,
                 userStatus == UserActiveStatus.ONLINE
         );
 

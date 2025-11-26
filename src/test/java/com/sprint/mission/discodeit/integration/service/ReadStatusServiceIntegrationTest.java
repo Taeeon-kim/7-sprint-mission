@@ -8,15 +8,16 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.RoleType;
+import com.sprint.mission.discodeit.integration.fixtures.ChannelFixture;
+import com.sprint.mission.discodeit.integration.fixtures.ReadStatusFixture;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
-import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
-import com.sprint.mission.discodeit.service.reader.ChannelReader;
-import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,23 +28,25 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class ReadStatusServiceIntegrationTest {
 
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private ChannelRepository channelRepository;
+
+    @Autowired
     private ReadStatusRepository readStatusRepository;
+
+    @Autowired
     private ReadStatusService readStatusService;
-    private UserReader userReader;
-    private ChannelReader channelReader;
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository();
-        channelRepository = new JCFChannelRepository();
-        readStatusRepository = new JCFReadStatusRepository();
-        userReader = new UserReader(userRepository);
-        channelReader = new ChannelReader(channelRepository);
-        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader, channelRepository);
+
     }
 
     @AfterEach
@@ -61,7 +64,7 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -79,9 +82,9 @@ public class ReadStatusServiceIntegrationTest {
             int after = readStatusRepository.findAll().size();
             assertEquals(before + 1, after);
             ReadStatus readStatus = readStatusRepository.findById(responseDto.id()).orElseThrow();
-            assertEquals(creator.getId(), readStatus.getUserId());
-            assertEquals(channel.getId(), readStatus.getChannelId());
-            assertNotNull(readStatus.getReadAt());
+            assertEquals(creator.getId(), readStatus.getUser().getId());
+            assertEquals(channel.getId(), readStatus.getChannel().getId());
+            assertNotNull(readStatus.getLastReadAt());
 
         }
     }
@@ -96,7 +99,7 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -143,20 +146,17 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                    User.builder().nickname("creator2").email("c2@ex.com")
+                            .password("pw").build()
             );
 
-            Channel channel = Channel.createPrivateChannel();
-            Channel savedChannel = channelRepository.save(channel);
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
-            Channel channel2 = Channel.createPrivateChannel();
-            Channel savedChannel2 = channelRepository.save(channel2);
-
+            Channel channel2 = ChannelFixture.createPrivateChannel(channelRepository);
 
             ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
@@ -164,13 +164,11 @@ public class ReadStatusServiceIntegrationTest {
                             .channelId(channel.getId()).build()
             );
 
-
             ReadStatusResponseDto responseDto2 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel2.getId()).build()
             );
-
 
             ReadStatusResponseDto responseDto3 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
@@ -216,17 +214,10 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
-            User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
-            );
-
-            Channel channel = Channel.createPrivateChannel();
-
-            Channel savedChannel = channelRepository.save(channel);
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
             ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
@@ -244,7 +235,7 @@ public class ReadStatusServiceIntegrationTest {
             );
 
             // then
-            Instant readAt = readStatusRepository.findById(responseDto.id()).orElseThrow().getReadAt();
+            Instant readAt = readStatusRepository.findById(responseDto.id()).orElseThrow().getLastReadAt();
             assertEquals(expectedReadAt, readAt);
 
         }
@@ -262,17 +253,11 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
-            User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
-            );
 
-            Channel channel = Channel.createPrivateChannel();
-
-            Channel savedChannel = channelRepository.save(channel);
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
             ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()

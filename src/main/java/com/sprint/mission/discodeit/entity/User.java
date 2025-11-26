@@ -25,13 +25,14 @@ public class User extends BaseUpdatableEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "profile_id")
-    private UUID profileId; // 1:1양방향 (없을수도있음), TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_id")
+    private BinaryContent profile; // 1:1양방향 (없을수도있음), TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserStatus userStatus; // 1:1 양방향
 
     @Builder
-    private User(String nickname, String email, String password, UUID profileId) {
+    private User(String nickname, String email, String password, BinaryContent profile) {
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
@@ -43,11 +44,11 @@ public class User extends BaseUpdatableEntity {
         this.nickname = nickname;
         this.email = email;
         this.password = password;
-        this.profileId = profileId;
+        this.profile = profile;
     }
 
-    public static User create(String nickname, String email, String password, UUID profileId) {
-        return new User(nickname, email, password, profileId);
+    public static User create(String nickname, String email, String password, BinaryContent profile) {
+        return new User(nickname, email, password, profile);
     }
 
     public void update(UserUpdateParams request) {
@@ -55,13 +56,13 @@ public class User extends BaseUpdatableEntity {
         this.updateNickname(request.nickname());
         this.updateEmail(request.email());
         this.updatePassword(request.password());
-        this.updateProfileId(request.profileId());
+        this.updateProfile(request.profile());
 
     }
 
-    private boolean updateProfileId(UUID profileId) {
-        if (profileId != null && !profileId.equals(this.profileId)) {
-            this.profileId = profileId;
+    private boolean updateProfile(BinaryContent profile) {
+        if (profile != null) {
+            this.profile = profile;
             return true;
         }
         return false;
@@ -90,6 +91,14 @@ public class User extends BaseUpdatableEntity {
             return true;
         }
         return false;
+    }
+
+    // 편의 메서드 추가
+    public void assignStatus(UserStatus status) {
+        this.userStatus = status;
+        if (status != null) {
+            status.setUser(this);
+        }
     }
 
 }
