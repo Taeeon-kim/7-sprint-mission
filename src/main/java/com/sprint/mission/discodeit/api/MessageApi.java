@@ -1,12 +1,15 @@
 package com.sprint.mission.discodeit.api;
 
 import com.sprint.mission.discodeit.dto.message.*;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
+import com.sprint.mission.discodeit.entity.Message;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,5 +62,5 @@ public interface MessageApi {
                     content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
-    ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(UUID channelId);
+    ResponseEntity<PageResponse<MessageResponseDto>> getAllMessagesByChannelId(UUID channelId, Pageable pageable);
 }

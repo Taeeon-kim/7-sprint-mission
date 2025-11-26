@@ -2,8 +2,11 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.api.MessageApi;
 import com.sprint.mission.discodeit.dto.message.*;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.MessageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,10 +51,11 @@ public class MessageController implements MessageApi {
 
     @Override
     @GetMapping("/messages")
-    public ResponseEntity<List<MessageResponseDto>> getAllMessagesByChannelId(
-            @RequestParam UUID channelId
-    ) {
-        List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId);
+    public ResponseEntity<PageResponse<MessageResponseDto>> getAllMessagesByChannelId(
+            @RequestParam UUID channelId,
+            Pageable pageable // Pageable 명시에 놓으면 PageableHandlerMethodArgumentResolver 를통해 프론트에서 파라미터 형식 이름만 맞추면 바인딩해줌
+            ) {
+        PageResponse<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId, pageable);
         return ResponseEntity.ok(allMessagesByChannelId);
     }
 }

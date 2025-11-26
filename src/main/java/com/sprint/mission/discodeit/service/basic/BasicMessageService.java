@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.message.*;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
+import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -16,6 +18,9 @@ import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +36,7 @@ public class BasicMessageService implements MessageService {
     private final BinaryContentRepository binaryContentRepository;
     private final BinaryContentService binaryContentService;
     private final ReadStatusRepository readStatusRepository;
-    private final MessageMapper mesageMapper;
+    private final MessageMapper messageMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,26 +44,36 @@ public class BasicMessageService implements MessageService {
         List<Message> allMessages = messageRepository.findAll();
         return allMessages
                 .stream()
-                .map(mesageMapper::toDto)
+                .map(messageMapper::toDto)
                 .toList();
     }
 
     @Override
     @Transactional
-    public List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId) {
+    public PageResponse<MessageResponseDto> getAllMessagesByChannelId(UUID channelId, Pageable pageable) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        return messageRepository.findAllByChannelId(channel.getId()).stream()
-                .map(mesageMapper::toDto).toList(); // TODO: lazy라 MEssageResponse 내부에서 author, channel N+1 되므로 해결방안 및 심화요구사항 작성
+
+        /**
+         NOTE: DTO 변환이유중하나가 엔티티를 그대로 컨트롤러까지 넘기면, @Transactional 범위 밖에서 직렬화(Jackson)가 author 같은 LAZY 필드에 접근하면서
+         세션이 이미 닫혀 있어 LazyInitializationException 이 발생한다.
+         그래서 트랜잭션 안에서 미리 DTO로 변환해서 필요한 값만 꺼내두는 것.
+         */
+        Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable)
+                .map(messageMapper::toDto);
+        // TODO: lazy라 MessageResponse 내부에서 author, channel N+1 인지보고 해결방안 및 심화요구사항 작성
+
+        return PageResponseMapper.fromSlice(sliceMessageList);
+
     }
 
     @Override
     @Transactional(readOnly = true)
     public MessageResponseDto getMessageById(UUID messageId) {
         Message message = messageReader.findMessageOrThrow(messageId);
-        return mesageMapper.toDto(message);
+        return messageMapper.toDto(message);
     }
 
 
@@ -94,7 +109,7 @@ public class BasicMessageService implements MessageService {
                 .build();
 
         Message savedMessage = messageRepository.save(message);
-        return mesageMapper.toDto(savedMessage);
+        return messageMapper.toDto(savedMessage);
     }
 
     @Override
@@ -112,7 +127,7 @@ public class BasicMessageService implements MessageService {
 
         if (isUpdated) {
             Message saved = messageRepository.save(message);
-            return mesageMapper.toUpdateDto(saved);
+            return messageMapper.toUpdateDto(saved);
         }
         return null;
     }
