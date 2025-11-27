@@ -57,8 +57,8 @@ public class BasicMessageService implements MessageService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         /**
-         NOTE: DTO 변환이유중하나가 엔티티를 그대로 컨트롤러까지 넘기면, @Transactional 범위 밖에서 직렬화(Jackson)가 author 같은 LAZY 필드에 접근하면서
-         세션이 이미 닫혀 있어 LazyInitializationException 이 발생한다.
+         NOTE: DTO 변환이유중하나가 엔티티를 그대로 컨트롤러까지 넘기면, @Transactional 범위 밖에서 직렬화(Jackson)가 author 같은 lazy 연관필드에 접근하면서
+         영속성 컨텍스트/세션이 이미 닫혀 있는데 lazy 필드는 db에서 안 가져온 상태(프록시)라서 프록시를 초기화 하려고할때 LazyInitializationException 이 발생한다.
          그래서 트랜잭션 안에서 미리 DTO로 변환해서 필요한 값만 꺼내두는 것.
          */
         Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable)
