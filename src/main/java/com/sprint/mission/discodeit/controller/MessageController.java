@@ -49,9 +49,13 @@ public class MessageController {
             @ApiResponse(responseCode = "404", description = "Message를 찾을 수 없음")
     })
     public MessageResponseDto updateMessage(
-            @ModelAttribute("data") MessageUpdateRequestDto messageUpdateRequestDto,
+            @PathVariable UUID messageId,
+            @RequestParam(value = "content") String content,
             @RequestPart(value = "file", required = false) List<MultipartFile> files) {
-        var updateMessage = messageService.updateMessage(messageUpdateRequestDto, files);
+        MessageUpdateRequestDto dto = new MessageUpdateRequestDto();
+        dto.setMessageId(messageId);
+        dto.setContent(content);
+        var updateMessage = messageService.updateMessage(dto, files);
         return MessageResponseDto.from(updateMessage);
     }
 
@@ -62,8 +66,8 @@ public class MessageController {
             @ApiResponse(responseCode = "204", description = "Message가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "Message를 찾을 수 없음")
     })
-    public void deleteMessage(@PathVariable UUID uuid) {
-        messageService.deleteMessage(uuid);
+    public void deleteMessage(@PathVariable UUID messageId) {
+        messageService.deleteMessage(messageId);
     }
 
     // 특정 채널 메시지 목록 조회

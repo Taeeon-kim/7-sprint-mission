@@ -48,7 +48,7 @@ public class BasicMessageService implements MessageService {
                 : new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
-                if(file == null || file.isEmpty()) continue;
+                if (file == null || file.isEmpty()) continue;
                 BinaryContent saved;
                 try {
                     saved = binaryContentRepository.save(
@@ -108,15 +108,18 @@ public class BasicMessageService implements MessageService {
         List<UUID> attachments = message.getAttachmentIds() != null
                 ? new ArrayList<>(message.getAttachmentIds())
                 : new ArrayList<>();
-        if (files != null) {
+        if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
-                try {
-                    BinaryContent saved = binaryContentRepository.save(
-                            new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes())
-                    );
-                    attachments.add(saved.getUuid());
-                } catch (Exception e) {
-                    throw new RuntimeException("파일 저장 실패", e);
+                if (file != null && !file.isEmpty()) {
+                    try {
+                        BinaryContent saved = binaryContentRepository.save(
+                                new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes())
+                        );
+                        attachments.add(saved.getUuid());
+                        System.out.println("[파일 저장 완료] : " + file.getOriginalFilename());
+                    } catch (Exception e) {
+                        throw new RuntimeException("파일 저장 실패", e);
+                    }
                 }
             }
         }
