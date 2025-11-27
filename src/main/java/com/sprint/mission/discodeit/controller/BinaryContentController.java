@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,9 +28,10 @@ public class BinaryContentController {
             @ApiResponse(responseCode = "200", description = "첨부 파일 조회 성공"),
             @ApiResponse(responseCode = "404", description = "첨부 파일 조회 실패")
     })
-    public BinaryContentResponseDto findById(@Parameter(description = "조회할 첨부 파일 ID")
-                                             @PathParam("binaryContentId") UUID uuid) {
-        return binaryContentService.find(uuid);
+    public ResponseEntity<BinaryContentResponseDto> findById(@Parameter(description = "조회할 첨부 파일 ID")
+                                             @PathVariable("binaryContentId") UUID uuid) {
+//        binaryContentService.find(uuid);
+        return ResponseEntity.ok().body(binaryContentService.find(uuid));
     }
 
     @GetMapping
@@ -40,13 +42,4 @@ public class BinaryContentController {
     public List<BinaryContentResponseDto> findAllByIdIn() {
         return binaryContentService.findAll();
     }
-//    @RequestMapping(method = RequestMethod.GET, params = "userId")
-//    public List<BinaryContentResponseDto> getUserBinaryContent(@RequestParam UUID userId){
-//        return binaryContentService.findByUserId(userId);
-//    }
-//
-//    @RequestMapping(method = RequestMethod.GET, params = "channelId")
-//    public List<BinaryContentResponseDto> getChannelBinaryContent(@RequestParam UUID channelId){
-//        return binaryContentService.findByChannelId(channelId);
-//    }
 }

@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,8 +32,9 @@ public class ChannelController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Public Channel이 성공적으로 생성됨")
     })
-    public void createPublicChannel(@RequestBody ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
+    public ResponseEntity<Void> createPublicChannel(@RequestBody ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
         channelService.createPublicChannel(channelPublicCreateRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 비공개 채널 생성
@@ -40,8 +43,9 @@ public class ChannelController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Private Channel이 성공적으로 생성됨")
     })
-    public void createPrivateChannel(@RequestBody ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
+    public ResponseEntity<Void> createPrivateChannel(@RequestBody ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
         channelService.createPrivateChannel(channelPrivateCreateRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 공개 채널 정보 수정
@@ -64,8 +68,9 @@ public class ChannelController {
             @ApiResponse(responseCode = "204", description = "Channel이 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "Channel을 찾을 수 없음")
     })
-    public void deleteChannel(@PathVariable UUID uuid) {
+    public ResponseEntity<Void> deleteChannel(@PathVariable("channelId") UUID uuid) {
         channelService.deleteChannel(uuid);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
     // 특정 사용자의 채널 목록 조회
     @GetMapping
