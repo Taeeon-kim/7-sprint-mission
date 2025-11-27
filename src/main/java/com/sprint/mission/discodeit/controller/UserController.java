@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.UserResponseDto;
 import com.sprint.mission.discodeit.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -66,7 +67,9 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "같은 email 또는 username를 사용하는 User가 이미 존재함"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void update (@PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+    public void update (
+            @Parameter(description = "수정할 User ID")
+            @PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 
@@ -77,7 +80,9 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void delete (@PathVariable("userId") UUID userId) {
+    public void delete (
+            @Parameter(description = "삭제할 User ID")
+            @PathVariable("userId") UUID userId) {
         userService.deleteUser(userId);
     }
 }

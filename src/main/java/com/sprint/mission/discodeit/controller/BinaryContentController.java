@@ -23,10 +23,10 @@ public class BinaryContentController {
     private final BinaryContentService binaryContentService;
 
     @GetMapping("/{binaryContentId}")
-    @Operation(summary = "첨부 파일 조회", operationId = "findById")
+    @Operation(summary = "첨부 파일 조회", operationId = "find")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "첨부 파일 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "첨부 파일 조회 실패")
+            @ApiResponse(responseCode = "404", description = "첨부 파일을 찾을 수 없음")
     })
     public ResponseEntity<BinaryContentResponseDto> findById(@Parameter(description = "조회할 첨부 파일 ID")
                                              @PathVariable("binaryContentId") UUID uuid) {

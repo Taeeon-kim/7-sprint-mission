@@ -35,7 +35,7 @@ public class MessageController {
             @ApiResponse(responseCode = "404", description = "Channel 또는 User를 찾을 수 없음")
     })
     public MessageResponseDto createMessage(@ModelAttribute MessageCreateRequestDto messageCreateRequestDto,
-                                            @RequestPart(value = "file", required = false) List<MultipartFile> files) {
+                                            @RequestPart(value = "attachments", required = false) List<MultipartFile> files) {
         System.out.println("files: " + files);
         var message = messageService.createMessage(messageCreateRequestDto, files);
         return MessageResponseDto.from(message);
@@ -43,12 +43,13 @@ public class MessageController {
 
     // 메시지 수정
     @PatchMapping(value = "/{messageId}", consumes = "multipart/form-data")
-    @Operation(summary = "Message 내용 수정")
+    @Operation(summary = "Message 내용 수정", operationId = "update_2")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Message가 성공적으로 수정됨"),
             @ApiResponse(responseCode = "404", description = "Message를 찾을 수 없음")
     })
     public MessageResponseDto updateMessage(
+            @Parameter(description = "수정할 Message ID")
             @PathVariable UUID messageId,
             @RequestParam(value = "content") String content,
             @RequestPart(value = "file", required = false) List<MultipartFile> files) {
@@ -61,12 +62,14 @@ public class MessageController {
 
     // 메시지 삭제
     @DeleteMapping("/{messageId}")
-    @Operation(summary = "Message 삭제")
+    @Operation(summary = "Message 삭제", operationId = "delete_1")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Message가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "Message를 찾을 수 없음")
     })
-    public void deleteMessage(@PathVariable UUID messageId) {
+    public void deleteMessage(
+            @Parameter(description = "삭제할 Message ID")
+            @PathVariable UUID messageId) {
         messageService.deleteMessage(messageId);
     }
 

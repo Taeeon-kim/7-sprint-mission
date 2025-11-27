@@ -19,5 +19,5 @@ public class UserCreateRequestDto {
     private String password;
     private String userName;
     private MultipartFile profileImagePath; // 선택적 이미지 등록
-    private String status; //유저 접속 상태
+//    private String status; //유저 접속 상태
 }
