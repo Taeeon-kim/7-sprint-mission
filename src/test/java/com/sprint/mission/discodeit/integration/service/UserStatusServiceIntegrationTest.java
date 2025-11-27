@@ -67,7 +67,7 @@ public class UserStatusServiceIntegrationTest {
         void create_persists_and_returns_same_data() {
             // given
 
-            User savedUser = UserFixture.createUser(userRepository, userStatusRepository);
+            User savedUser = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             int before = userStatusRepository.findAll().size();
 
             // when
@@ -113,7 +113,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][positive] 유저상태 조회 - id 조회시 UserStatusResponseDto로 유저상태정보 반환 성공")
         void getUserStatusById_returns_userStatus() {
             // given
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
 
             User savedUser = userRepository.save(user);
 

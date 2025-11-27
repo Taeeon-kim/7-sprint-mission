@@ -18,7 +18,6 @@ public class UserMapper {
 
     public UserResponseDto toDto(User user) {
         if (user == null) return null;
-        System.out.println("user.getProfile() = " + user.getProfile());
         BinaryContentResponseDto binaryContentResponseDto = Optional.ofNullable(user.getProfile()) // TODO: lazy가 나을지 eager가 나을지 혹은 feth join?
                 .map(binaryContentMapper::toDto)
                 .orElse(null);

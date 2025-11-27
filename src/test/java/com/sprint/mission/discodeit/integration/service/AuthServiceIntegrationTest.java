@@ -68,8 +68,8 @@ public class AuthServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 로그인 - 아이디, 비밀번호 불일치 시 NoSuchElement 예외")
         void login_throws_when_not_found() {
             // given
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
-            
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+
             // when & then
             assertAll(
                     () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()

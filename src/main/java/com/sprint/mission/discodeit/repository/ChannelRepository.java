@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface ChannelRepository extends JpaRepository<Channel, UUID> {
 
 
-    // TODO: DISTINCT 관련해서 더 공부할것 내부적으로 어느시점에 필요한지 JOIN, WHERE
+    // userId + channelId 복합 Unique 제약으로 인해 DISTINCT 불필요
     @Query("""
-                SELECT DISTINCT c
+                SELECT c
                 FROM Channel c
                 LEFT JOIN ReadStatus rs ON rs.channel = c
                 WHERE c.type = 'PUBLIC'

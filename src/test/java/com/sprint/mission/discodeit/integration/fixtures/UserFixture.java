@@ -14,11 +14,11 @@ public final class UserFixture {
     private UserFixture() {
     } // 인스턴스 생성 방지
 
-    public static User createUser(UserRepository userRepository, UserStatusRepository userStatusRepository) {
+    public static User createUser(UserRepository userRepository) {
         return userRepository.save(defaultUser());
     }
 
-    public static User createUser(User user, UserRepository userRepository, UserStatusRepository userStatusRepository) {
+    public static User createUser(User user, UserRepository userRepository) {
         return userRepository.save(user);
     }
 

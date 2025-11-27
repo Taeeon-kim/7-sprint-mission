@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class Message extends BaseUpdatableEntity {
             joinColumns = @JoinColumn(name = "message_id"),         // 이 엔티티의 FK
             inverseJoinColumns = @JoinColumn(name = "attachment_id") // BinaryContent FK
     )
+    @BatchSize(size = 50)
     private List<BinaryContent> attachments = new ArrayList<>();
 
     @Builder

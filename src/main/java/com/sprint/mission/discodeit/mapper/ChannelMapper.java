@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,15 @@ public class ChannelMapper {
     private final MessageRepository messageRepository;
     private final UserMapper userMapper;
 
-    public ChannelResponseDto toDto(Channel channel){
-        List<User> participants = readStatusRepository.findByChannelId(channel.getId()).stream()
-                .map(ReadStatus::getUser)
-                .collect(Collectors.toList());
+    public ChannelResponseDto toDto(Channel channel) {
+        if (channel == null) return null;
+        List<User> participants = List.of();
+        if (channel.getType() == ChannelType.PRIVATE) {
+            participants = readStatusRepository.findByChannelId(channel.getId()).stream()
+                    .map(ReadStatus::getUser)
+                    .collect(Collectors.toList());
+
+        }
 
         Instant lastMessageAt = messageRepository.findLatestByChannelId(channel.getId(), PageRequest.of(0, 1))
                 .stream()

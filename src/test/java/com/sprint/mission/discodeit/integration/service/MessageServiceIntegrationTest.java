@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand
 import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.integration.fixtures.*;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.repository.*;
 
 import com.sprint.mission.discodeit.service.MessageService;
@@ -11,13 +12,16 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,8 +46,12 @@ public class MessageServiceIntegrationTest {
 
     @Autowired
     private BinaryContentRepository binaryContentRepository;
+
     @Autowired
-    private ReadStatusRepository readStatusRepository;
+    private MessageMapper messageMapper;
+
+    @Autowired
+    private EntityManager em;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +69,7 @@ public class MessageServiceIntegrationTest {
 
             // Given
 
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             MockMultipartFile file = new MockMultipartFile(
@@ -104,31 +112,41 @@ public class MessageServiceIntegrationTest {
 
         @Test
         @DisplayName("[Integration][Positive] 다중 메세지 조회 - 해당 채널의 메세지들 반환")
-        void getAllMessagesByChannelId_returns_message_list() {
+        void getAllMessagesByChannelId_returns_message_list() { // 여기부터 다시 테스트 batch
 
             // given
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+
+            byte[] payload = "fake-bytes".getBytes(StandardCharsets.UTF_8);
+            BinaryContent binaryContent = new BinaryContent("profile.png", "image/png", (long) payload.length);
+
+            User member = User.create("another", "ee@ee.com", "password", binaryContent);
+            User user2 = UserFixture.createUserWithStatus(member, userRepository, userStatusRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             Message message1 = MessageFixture.sendMessage("message1", user, publicChannel, null, messageRepository);
-            Message message2 = MessageFixture.sendMessage("message2", user, publicChannel, null, messageRepository);
+            Message message2 = MessageFixture.sendMessage("message2", user2, publicChannel, null, messageRepository);
+            Pageable pageable = PageRequest.of(0, 50);
 
+            em.flush();
+            em.clear();
             // when
-            List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
+            Slice<MessageResponseDto> allMessagesByChannelId = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+                    .map(messageMapper::toDto);
 
             // then
             MessageResponseDto foundMessage1 = allMessagesByChannelId.stream()
-                    .filter(message -> message.id() == message1.getId())
+                    .filter(message -> message.id().equals(message1.getId()))
                     .findFirst()
                     .orElseThrow();
 
             MessageResponseDto foundMessage2 = allMessagesByChannelId.stream()
-                    .filter(message -> message.id() == message2.getId())
+                    .filter(message -> message.id().equals(message2.getId()))
                     .findFirst()
                     .orElseThrow();
 
             assertAll(
-                    () -> assertEquals(2, allMessagesByChannelId.size()),
+                    () -> assertEquals(2, allMessagesByChannelId.getContent().size()),
                     () -> assertEquals(message1.getId(), foundMessage1.id()),
                     () -> assertEquals(message2.getId(), foundMessage2.id()),
                     () -> assertEquals(message1.getContent(), foundMessage1.content()),
@@ -141,6 +159,8 @@ public class MessageServiceIntegrationTest {
 
 
         }
+
+        //TODO: Slice, Pageable 정보가 맞는지 테스트 케이스 추가 ex) slice.getSize, slice.getNuber, slice.hasNext 등
     }
 
     @Nested
@@ -154,7 +174,7 @@ public class MessageServiceIntegrationTest {
         @DisplayName("[Integration][Positive] 메세지 수정 - 작성자가 수정하면 내용과 updatedAt이 반영된다")
         void updateMessage_updates_content_when_edits() throws InterruptedException {
             // given
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             Message message = MessageFixture.sendMessage(user, publicChannel, null, messageRepository);
@@ -195,20 +215,30 @@ public class MessageServiceIntegrationTest {
         void deleteMessage_then_not_found() throws IOException {
 
             // given
-            User user = UserFixture.createUser(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             BinaryContent binaryContent = BinaryContentFixture.createBinaryContent(binaryContentRepository);
 
             Message message = MessageFixture.sendMessage(user, publicChannel, List.of(binaryContent), messageRepository);
 
-            List<Message> beforeMessages = messageRepository.findAllByChannelId(publicChannel.getId());
-            assertTrue(beforeMessages.stream().anyMatch(m -> m.getId().equals(message.getId()))); //TODO: 객체를 포함하는걸로 봐야하는지 id들로만 빼서 id만 체크하는지 테스트 후 수정
+            Pageable pageable = PageRequest.of(0, 50);
+
+
+            Slice<MessageResponseDto> beforeMessageList = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+                    .map(messageMapper::toDto);
+
+            System.out.println("sliceMessageList = " + beforeMessageList);
+            assertTrue(beforeMessageList.stream().anyMatch(responseDto -> responseDto.id().equals(message.getId()))); //TODO: 객체를 포함하는걸로 봐야하는지 id들로만 빼서 id만 체크하는지 테스트 후 수정
 
             // when
             messageService.deleteMessage(message.getId());
 
-            List<Message> afterMessages = messageRepository.findAllByChannelId(publicChannel.getId());
+            em.flush();
+            em.clear();
+
+            Slice<MessageResponseDto> afterMessages = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+                    .map(messageMapper::toDto);
 
             //then
             assertAll(
@@ -220,7 +250,7 @@ public class MessageServiceIntegrationTest {
 
                     // 3) 채널 메시지 목록에서 제거되었는지
                     () -> assertFalse(
-                            afterMessages.stream().anyMatch(m -> m.getId().equals(message.getId())),
+                            afterMessages.stream().anyMatch(responseDto -> responseDto.id().equals(message.getId())),
                             "채널 내 메시지 목록에서도 제거되어야 함"
                     )
             );

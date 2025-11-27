@@ -63,7 +63,7 @@ public class BasicMessageService implements MessageService {
          */
         Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable)
                 .map(messageMapper::toDto);
-        // TODO: lazy라 MessageResponse 내부에서 author, channel N+1 인지보고 해결방안 및 심화요구사항 작성
+        // NOTE: fetch join, batch 이용 N+1, pagination 해결
 
         return PageResponseMapper.fromSlice(sliceMessageList);
 
