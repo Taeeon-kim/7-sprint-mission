@@ -66,7 +66,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "같은 email 또는 username를 사용하는 User가 이미 존재함"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void update /*updateUser*/(@PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+    public void update (@PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 
@@ -77,7 +77,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User가 성공적으로 삭제됨"),
             @ApiResponse(responseCode = "404", description = "User를 찾을 수 없음")
     })
-    public void delete /*deleteUser*/(@PathVariable("userId") UUID userId) {
+    public void delete (@PathVariable("userId") UUID userId) {
         userService.deleteUser(userId);
     }
 }

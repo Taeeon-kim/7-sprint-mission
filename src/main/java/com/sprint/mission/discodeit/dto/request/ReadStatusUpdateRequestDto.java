@@ -18,4 +18,9 @@ public class ReadStatusUpdateRequestDto {
     private UUID id; //uuid;
     private Instant newLastReadAt; //lastReadAt;
 //    private Instant updatedAt;
+
+
+    public void setNewLastReadAt(Instant newLastReadAt) {
+        this.newLastReadAt = Instant.now();
+    }
 }

@@ -32,7 +32,7 @@ public class UserStatus{
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
         this.userId = userId;
-        this.lastActiveAt = null;
+        this.lastActiveAt = Instant.now();
         this.status = StatusType.ONLINE;
     }
 
@@ -51,7 +51,7 @@ public class UserStatus{
     }
 
     public boolean isOnline() {
-        return Duration.between(createdAt, Instant.now()).toMinutes() <= 5;
+        return Duration.between(lastActiveAt, Instant.now()).toMinutes() <= 5;
     }
 
 }

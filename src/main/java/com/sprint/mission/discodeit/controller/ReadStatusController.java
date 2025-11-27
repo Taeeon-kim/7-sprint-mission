@@ -30,9 +30,9 @@ public class ReadStatusController {
             @ApiResponse(responseCode = "400", description = "이미 읽음 상태가 존재함"),
             @ApiResponse(responseCode = "404", description = "Channel 또는 User를 찾을 수 없음")
     })
-    public ReadStatusDto create_1 /*createStatus*/(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
-                                                   @RequestParam UUID userId,
-                                                   @RequestParam UUID channelId) {
+    public ReadStatusDto create_1(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
+                                  @RequestParam UUID userId,
+                                  @RequestParam UUID channelId) {
         readStatusCreateRequestDto.setUserId(userId);
         readStatusCreateRequestDto.setChannelId(channelId);
         return readStatusService.create(readStatusCreateRequestDto);
@@ -47,7 +47,8 @@ public class ReadStatusController {
     public ReadStatusDto updateStatus(@Parameter(description = "수정할 읽음 상태 ID")
                                       @PathVariable UUID readStatusId,
                                       @RequestBody ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
-//        readStatusUpdateRequestDto.setId(readStatusId);
+        readStatusUpdateRequestDto.setId(readStatusId);
+        readStatusUpdateRequestDto.setNewLastReadAt(readStatusUpdateRequestDto.getNewLastReadAt());
         return readStatusService.update(readStatusUpdateRequestDto);
     }
 
