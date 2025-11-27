@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.readStatus.*;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
@@ -25,6 +26,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final ChannelRepository channelRepository;
+    private final ReadStatusMapper readStatusMapper;
 
     @Override
     @Transactional
@@ -48,14 +50,14 @@ public class BasicReadStatusService implements ReadStatusService {
                 .build();
 
         ReadStatus saved = readStatusRepository.save(readStatus);
-        return ReadStatusResponseDto.from(saved);
+        return readStatusMapper.toDto(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ReadStatusResponseDto getReadStatus(UUID readStatusId) {
         ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new NoSuchElementException("읽음 상태가 존재하지 않습니다."));
-        return ReadStatusResponseDto.from(readStatus);
+        return readStatusMapper.toDto(readStatus);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class BasicReadStatusService implements ReadStatusService {
     public List<ReadStatusResponseDto> getAllReadStatusesByUserId(UUID userId) {
         List<ReadStatus> allByUserId = readStatusRepository.findAllByUserId(userId);
         return allByUserId.stream()
-                .map(ReadStatusResponseDto::from)
+                .map(readStatusMapper::toDto)
                 .toList();
     }
 

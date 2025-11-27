@@ -120,7 +120,6 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
 
-        // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
         return channelRepository.findAllVisibleByUserId(userId)
                 .stream()
                 .map(this::getChannelResponseDto)

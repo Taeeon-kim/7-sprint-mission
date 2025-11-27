@@ -185,7 +185,9 @@ public class ReadStatusServiceIntegrationTest {
 
             // when
             List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(creator.getId());
+            System.out.println("allReadStatusesByUserId = " + allReadStatusesByUserId.get(0).userId());
             List<ReadStatusResponseDto> allReadStatusesByUserId2 = readStatusService.getAllReadStatusesByUserId(member.getId());
+            System.out.println("allReadStatusesByUserId2 = " + allReadStatusesByUserId2);
             // then
             Set<UUID> readStatusIds = allReadStatusesByUserId.stream()
                     .map(ReadStatusResponseDto::id).collect(Collectors.toSet());

@@ -16,6 +16,14 @@ public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
 
     List<ReadStatus> findByChannelId(UUID id);
 
+    // TODO: N+1 이 해결되는 구조인지 다시보기
+    @Query("""
+            SELECT rs
+            FROM ReadStatus rs
+            JOIN FETCH rs.user
+            JOIN FETCH rs.channel
+            WHERE rs.user.id = :userId
+            """)
     List<ReadStatus> findAllByUserId(UUID userId);
 
     boolean existsByUserAndChannel(User user, Channel channel);
