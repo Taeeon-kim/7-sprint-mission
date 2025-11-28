@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,5 +63,5 @@ public interface MessageApi {
                     content = @Content(mediaType = "text/plain", schema = @Schema(type = "string"))
             )
     })
-    ResponseEntity<PageResponse<MessageResponseDto>> getAllMessagesByChannelId(UUID channelId, Pageable pageable);
+    ResponseEntity<PageResponse<MessageResponseDto>> getAllMessagesByChannelId(UUID channelId, Pageable pageable, Instant cursor);
 }

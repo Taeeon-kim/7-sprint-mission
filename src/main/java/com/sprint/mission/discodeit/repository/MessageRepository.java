@@ -5,7 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,9 +46,9 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
         join fetch m.author a
         join fetch a.userStatus
         left join fetch a.profile
-        where m.channel.id = :channelId
+        where m.channel.id = :channelId and m.createdAt < :cursor
 """)
-    Slice<Message> findAllByChannelId(UUID channelId, Pageable pageable);
+    Slice<Message> findAllByChannelId(UUID channelId, Pageable pageable,@Param("cursor") Instant cursor);
 
     Optional<Message> findByIdAndChannelId(UUID messageId, UUID channelId);
 

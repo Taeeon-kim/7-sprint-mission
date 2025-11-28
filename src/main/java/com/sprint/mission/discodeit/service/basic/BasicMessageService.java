@@ -24,6 +24,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -50,22 +51,31 @@ public class BasicMessageService implements MessageService {
 
     @Override
     @Transactional
-    public PageResponse<MessageResponseDto> getAllMessagesByChannelId(UUID channelId, Pageable pageable) {
+    public PageResponse<MessageResponseDto> getAllMessagesByChannelId(UUID channelId, Pageable pageable, Instant cursor) {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
+        System.out.println("cursor = " + cursor);
 
         /**
          NOTE: DTO 변환이유중하나가 엔티티를 그대로 컨트롤러까지 넘기면, @Transactional 범위 밖에서 직렬화(Jackson)가 author 같은 lazy 연관필드에 접근하면서
          영속성 컨텍스트/세션이 이미 닫혀 있는데 lazy 필드는 db에서 안 가져온 상태(프록시)라서 프록시를 초기화 하려고할때 LazyInitializationException 이 발생한다.
          그래서 트랜잭션 안에서 미리 DTO로 변환해서 필요한 값만 꺼내두는 것.
          */
-        Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable)
+
+        Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable,  Optional.ofNullable(cursor).orElse(Instant.now()))
                 .map(messageMapper::toDto);
         // NOTE: fetch join, batch 이용 N+1, pagination 해결
 
-        return PageResponseMapper.fromSlice(sliceMessageList);
+        Instant nextCursor = null;
+        if (!sliceMessageList.getContent().isEmpty()) {
+            nextCursor = sliceMessageList.getContent().get(sliceMessageList.getContent().size() - 1) // NOTE: 이부분에 대해서 좀더 볼것
+                    .createdAt();
+        }
+
+
+        return PageResponseMapper.fromSlice(sliceMessageList, nextCursor);
 
     }
 

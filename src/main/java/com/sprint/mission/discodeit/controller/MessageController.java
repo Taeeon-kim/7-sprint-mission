@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,9 +54,10 @@ public class MessageController implements MessageApi {
     @GetMapping("/messages")
     public ResponseEntity<PageResponse<MessageResponseDto>> getAllMessagesByChannelId(
             @RequestParam UUID channelId,
-            Pageable pageable // Pageable 명시에 놓으면 PageableHandlerMethodArgumentResolver 를통해 프론트에서 파라미터 형식 이름만 맞추면 바인딩해줌
+            Pageable pageable, // Pageable 명시에 놓으면 PageableHandlerMethodArgumentResolver 를통해 프론트에서 파라미터 형식 이름만 맞추면 바인딩해줌
+            @RequestParam(required = false) Instant cursor
             ) {
-        PageResponse<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId, pageable);
+        PageResponse<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(channelId, pageable, cursor);
         return ResponseEntity.ok(allMessagesByChannelId);
     }
 }
