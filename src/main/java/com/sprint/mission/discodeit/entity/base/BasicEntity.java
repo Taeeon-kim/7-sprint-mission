@@ -17,7 +17,7 @@ import java.util.UUID;
 public abstract class BasicEntity { // abstract 붙여 직접 생성하지 않고 반드시 상속을 통해 구현되어야 한다는 것을 강조하기위해 사용.
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
     private UUID id;
 

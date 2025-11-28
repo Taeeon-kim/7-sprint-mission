@@ -25,7 +25,6 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ReadStatusRepository readStatusRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
-    private final ChannelRepository channelRepository;
     private final ReadStatusMapper readStatusMapper;
 
     @Override
