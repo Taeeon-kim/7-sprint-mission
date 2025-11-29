@@ -22,16 +22,15 @@ public final class UserFixture {
         return userRepository.save(user);
     }
 
-    public static User createUserWithStatus(UserRepository userRepository,
-                                            UserStatusRepository userStatusRepository) {
+    public static User createUserWithStatus(UserRepository userRepository
+                                           ) {
         User user = defaultUser();
         user.initUserStatus();      // 양방향 세팅
         userRepository.save(user);
         return user;
     }
 
-    public static User createUserWithStatus(User user, UserRepository userRepository,
-                                            UserStatusRepository userStatusRepository) {
+    public static User createUserWithStatus(User user, UserRepository userRepository) {
         user.initUserStatus();// 양방향 세팅
         userRepository.save(user);
         return user;

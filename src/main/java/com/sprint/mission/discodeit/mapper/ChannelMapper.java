@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChannelMapper {
 
-    private final ReadStatusRepository readStatusRepository;
+    private final ReadStatusRepository readStatusRepository; // NOTE: repository는 MapSruct사용 불가, MapStruct은 순수 데이터 매핑
     private final MessageRepository messageRepository;
-    private final UserMapper userMapper;
+    private final UserMapperManual userMapper;
 
     public ChannelResponseDto toDto(Channel channel) {
         if (channel == null) return null;

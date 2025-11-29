@@ -69,7 +69,7 @@ public class MessageServiceIntegrationTest {
 
             // Given
 
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             MockMultipartFile file = new MockMultipartFile(
@@ -115,23 +115,24 @@ public class MessageServiceIntegrationTest {
         void getAllMessagesByChannelId_returns_message_list() { // 여기부터 다시 테스트 batch
 
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
             byte[] payload = "fake-bytes".getBytes(StandardCharsets.UTF_8);
             BinaryContent binaryContent = new BinaryContent("profile.png", "image/png", (long) payload.length);
 
             User member = User.create("another", "ee@ee.com", "password", binaryContent);
-            User user2 = UserFixture.createUserWithStatus(member, userRepository, userStatusRepository);
+            User user2 = UserFixture.createUserWithStatus(member, userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             Message message1 = MessageFixture.sendMessage("message1", user, publicChannel, null, messageRepository);
             Message message2 = MessageFixture.sendMessage("message2", user2, publicChannel, null, messageRepository);
             Pageable pageable = PageRequest.of(0, 50);
+            Instant now = Instant.now();
 
             em.flush();
             em.clear();
             // when
-            Slice<MessageResponseDto> allMessagesByChannelId = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+            Slice<MessageResponseDto> allMessagesByChannelId = messageRepository.findAllByChannelId(publicChannel.getId(), pageable, now)
                     .map(messageMapper::toDto);
 
             // then
@@ -174,7 +175,7 @@ public class MessageServiceIntegrationTest {
         @DisplayName("[Integration][Positive] 메세지 수정 - 작성자가 수정하면 내용과 updatedAt이 반영된다")
         void updateMessage_updates_content_when_edits() throws InterruptedException {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             Message message = MessageFixture.sendMessage(user, publicChannel, null, messageRepository);
@@ -215,7 +216,7 @@ public class MessageServiceIntegrationTest {
         void deleteMessage_then_not_found() throws IOException {
 
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             BinaryContent binaryContent = BinaryContentFixture.createBinaryContent(binaryContentRepository);
@@ -223,9 +224,9 @@ public class MessageServiceIntegrationTest {
             Message message = MessageFixture.sendMessage(user, publicChannel, List.of(binaryContent), messageRepository);
 
             Pageable pageable = PageRequest.of(0, 50);
+            Instant now = Instant.now();
 
-
-            Slice<MessageResponseDto> beforeMessageList = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+            Slice<MessageResponseDto> beforeMessageList = messageRepository.findAllByChannelId(publicChannel.getId(), pageable ,now)
                     .map(messageMapper::toDto);
 
             System.out.println("sliceMessageList = " + beforeMessageList);
@@ -237,7 +238,7 @@ public class MessageServiceIntegrationTest {
             em.flush();
             em.clear();
 
-            Slice<MessageResponseDto> afterMessages = messageRepository.findAllByChannelId(publicChannel.getId(), pageable)
+            Slice<MessageResponseDto> afterMessages = messageRepository.findAllByChannelId(publicChannel.getId(), pageable, now)
                     .map(messageMapper::toDto);
 
             //then

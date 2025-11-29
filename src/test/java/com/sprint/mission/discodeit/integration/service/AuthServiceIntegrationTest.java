@@ -46,7 +46,7 @@ public class AuthServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Flow][Positive] 로그인 - 아이디, 비밀번호 일치 시 회원 정보 반환")
         void login_then_returns_user() {
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             // when
             UserResponseDto loginUser = authService.login(AuthLoginRequestDto.builder()
                     .username(user.getUsername())
@@ -68,7 +68,7 @@ public class AuthServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 로그인 - 아이디, 비밀번호 불일치 시 NoSuchElement 예외")
         void login_throws_when_not_found() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
             // when & then
             assertAll(

@@ -67,12 +67,11 @@ public class UserStatusServiceIntegrationTest {
         void create_persists_and_returns_same_data() {
             // given
 
-            User savedUser = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
             int before = userStatusRepository.findAll().size();
+            User savedUser = UserFixture.createUserWithStatus(userRepository);
 
             // when
-            UUID statusId = userStatusService.createUserStatus(new UserStatusRequestDto(savedUser.getId()));
-            UserStatus userStatus = userStatusRepository.findById(statusId).orElseThrow(() -> new NoSuchElementException("해당 정보 없음"));
+            UserStatus userStatus = userStatusRepository.findById(savedUser.getUserStatus().getId()).orElseThrow(() -> new NoSuchElementException("해당 정보 없음"));
 
             // then
             int after = userStatusRepository.findAll().size();
@@ -113,18 +112,15 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][positive] 유저상태 조회 - id 조회시 UserStatusResponseDto로 유저상태정보 반환 성공")
         void getUserStatusById_returns_userStatus() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
-
-            User savedUser = userRepository.save(user);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
             // when
-            UUID userStatusId = userStatusService.createUserStatus(new UserStatusRequestDto(savedUser.getId()));
-            UserStatusResponseDto userStatusById = userStatusService.getUserStatus(userStatusId);
+            UserStatusResponseDto userStatusById = userStatusService.getUserStatus(user.getUserStatus().getId());
             // then
             assertAll(
                     () -> assertNotNull(userStatusById),
-                    () -> assertEquals(userStatusId, userStatusById.id()),
-                    () -> assertEquals(savedUser.getId(), userStatusById.userId()),
+                    () -> assertEquals(user.getUserStatus().getId(), userStatusById.id()),
+                    () -> assertEquals(user.getId(), userStatusById.userId()),
                     () -> assertNotNull(userStatusById.lastActiveAt()),
                     () -> assertTrue(userStatusById.lastActiveAt().isBefore(Instant.now().plusSeconds(10)))
             );
@@ -179,8 +175,8 @@ public class UserStatusServiceIntegrationTest {
                     .password("pwd2")
                     .profile(null)
                     .build();
-            User user = UserFixture.createUserWithStatus(member1, userRepository, userStatusRepository);
-            User user2 = UserFixture.createUserWithStatus(member2, userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(member1, userRepository);
+            User user2 = UserFixture.createUserWithStatus(member2, userRepository);
 
 
 
@@ -201,7 +197,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원상태 수정 - 기존과 다른값으로 변경 반영")
         void updateUserStatus_then_changedValues() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             UserStatus savedStatus = user.getUserStatus();
             Instant before = savedStatus.getLastActiveAt(); // 스냅샷
             UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
@@ -228,7 +224,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음 ")
         void updateUserStatus_noop_whenSameValue() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
             UserStatus savedStatus =user.getUserStatus();
 
@@ -253,7 +249,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원상태 수정 - 기존과 다른값으로 변경 반영")
         void updateUserStatusByUserId_then_changedValues() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             UserStatus savedStatus = user.getUserStatus();
             Instant before =  savedStatus.getLastActiveAt(); // 스냅샷
             UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
@@ -280,7 +276,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음 ")
         void updateUserStatusByUserId_noop_whenSameValue() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             UserStatus savedStatus = user.getUserStatus();
 
 
@@ -305,7 +301,7 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 회원상태 삭제 - 삭제 후 조회 불가 & 개수 감소")
         void deleteUserStatus_then_not_found_and_size_decreased() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             UserStatus savedStatus = user.getUserStatus();
             long before = userStatusRepository.findAll().size();
             //when

@@ -2,15 +2,13 @@ package com.sprint.mission.discodeit.unit.service.basic;
 
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.mapper.UserMapper;
+import com.sprint.mission.discodeit.mapper.UserMapperManual;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
-import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
@@ -30,7 +28,7 @@ class BasicUserServiceTest {
     private BasicUserService userService;
     private BinaryContentRepository binaryContentRepository;
     private BinaryContentService binaryContentService;
-    private UserMapper userMapper;
+    private UserMapperManual userMapper;
 
     @BeforeEach
     void setUp() {
@@ -38,7 +36,7 @@ class BasicUserServiceTest {
         userRepository = mock(UserRepository.class);
         userReader = mock(UserReader.class);
         userStatusRepository = mock(UserStatusRepository.class);
-        userMapper = mock(UserMapper.class);
+        userMapper = mock(UserMapperManual.class);
         binaryContentRepository = mock(BinaryContentRepository.class);
         binaryContentService = mock(BinaryContentService.class);
         userService = new BasicUserService(userRepository, userReader, binaryContentService, binaryContentRepository, userMapper);

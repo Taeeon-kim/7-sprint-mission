@@ -27,7 +27,7 @@ public class ChannelRepositoryIntegrationTest {
     @Test
     void channelTest(){
 
-        User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+        User user = UserFixture.createUserWithStatus(userRepository);
 
         List<Channel> allVisibleByUserId = channelRepository.findAllVisibleByUserId(user.getId());
         System.out.println("allVisibleByUserId = " + allVisibleByUserId);

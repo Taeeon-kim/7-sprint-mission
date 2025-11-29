@@ -2,39 +2,35 @@ package com.sprint.mission.discodeit.mapper;
 
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.Optional;
 
-@Component
-@RequiredArgsConstructor
-public class UserMapper {
+@Mapper( // NOTE: 스프링빈 등록, @Component 불필요
+        componentModel = "spring",
+        uses = { BinaryContentMapper.class}
+)
+public interface UserMapper {
 
-    private final BinaryContentMapper binaryContentMapper;
+    @Mapping(target = "profile", source = "profile")
+    @Mapping(target = "online", source = "userStatus", qualifiedByName = "mapUserActiveStatus")
+    UserResponseDto toDto(User user);
 
-    public UserResponseDto toDto(User user) {
-        if (user == null) return null;
-        BinaryContentResponseDto binaryContentResponseDto = Optional.ofNullable(user.getProfile()) // TODO: lazy가 나을지 eager가 나을지 혹은 feth join?
-                .map(binaryContentMapper::toDto)
-                .orElse(null);
 
-        UserActiveStatus userActiveStatus = Optional.ofNullable(user.getUserStatus()) // TODO: lazy가 나을지 eager가 나을지 혹은 feth join?
+
+
+    @Named("mapUserActiveStatus")
+    default boolean mapUserActiveStatus(UserStatus userStatus) {
+        UserActiveStatus activeStatus = Optional.ofNullable(userStatus)
                 .map(UserStatus::getUserStatus)
                 .orElse(UserActiveStatus.OFFLINE);
 
-        return new UserResponseDto(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                binaryContentResponseDto,
-                userActiveStatus == UserActiveStatus.ONLINE,
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
+        return activeStatus == UserActiveStatus.ONLINE;
     }
-
 }

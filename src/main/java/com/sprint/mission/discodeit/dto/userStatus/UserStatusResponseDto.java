@@ -10,13 +10,4 @@ public record UserStatusResponseDto(
         UUID userId,
         Instant lastActiveAt
 ) {
-
-    public static UserStatusResponseDto from(UserStatus userStatus) {
-        return new UserStatusResponseDto(
-                userStatus.getId(),
-                userStatus.getUser().getId(),
-                userStatus.getLastActiveAt()
-        );
-
-    }
 }

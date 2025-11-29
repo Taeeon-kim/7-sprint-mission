@@ -6,9 +6,11 @@ import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.mapper.UserStatusMapper;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,16 +19,15 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BasicUserStatusService implements UserStatusService {
 
 
     private final UserReader userReader;
     private final UserStatusRepository userStatusRepository;
+    private final UserStatusMapper userStatusMapper;
 
-    public BasicUserStatusService(UserReader userReader, UserStatusRepository userStatusRepository) {
-        this.userReader = userReader;
-        this.userStatusRepository = userStatusRepository;
-    }
+
 
     @Override
 //    @Transactional
@@ -49,7 +50,7 @@ public class BasicUserStatusService implements UserStatusService {
     @Transactional(readOnly = true)
     public UserStatusResponseDto getUserStatus(UUID id) {
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
-        return UserStatusResponseDto.from(userStatus);
+        return userStatusMapper.toDto(userStatus);
     }
 
     @Override
@@ -57,7 +58,7 @@ public class BasicUserStatusService implements UserStatusService {
     public List<UserStatusResponseDto> getAllUserStatuses() {
         List<UserStatus> userStatusList = userStatusRepository.findAll();
         return userStatusList.stream()
-                .map(userStatus -> UserStatusResponseDto.from(userStatus))
+                .map(userStatus -> userStatusMapper.toDto(userStatus))
                 .toList();
     }
 

@@ -112,7 +112,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Negative] public 채널 생성 - public 채널에 readStatus 생성 시도시 예외 발생")
         void createChannel_public_throws_when_try_create_read_status() throws InterruptedException {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
             assertThrows(IllegalArgumentException.class, () ->
                     ReadStatusFixture.joinChannel(user, publicChannel, readStatusRepository)
@@ -123,7 +123,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Negative] private 채널 생성 - 참여자가 2명이상이 아닐시 예외 발생")
         void updateMessage_updates_content_when_edits() {
             // given
-            User user = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
             //when & then
             assertThrows(IllegalArgumentException.class, () ->
@@ -236,7 +236,7 @@ public class ChannelServicentegrationTest {
         void getChannel_then_returns_result() throws InterruptedException {
 
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
 
             Channel channel = ChannelFixture.createPublicChannel("공지", "전체 공지", channelRepository);
 
@@ -272,7 +272,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Negative] 채널 조회 - 채널에 메세지가 없으면 lastMessageAt은 null 이다")
         void getChannel_null_when_message_not_found() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
 
             Channel channel = ChannelFixture.createPublicChannel("공지", "전체 공지", channelRepository);
 
@@ -293,7 +293,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Edge] 채널 조회 - 메시지가 하나도 없으면 currentMessagedAt == null")
         void getChannel_null_when_no_messages() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
 
             Channel channel = ChannelFixture.createPublicChannel("공지", "전체 공지", channelRepository);
 
@@ -315,7 +315,7 @@ public class ChannelServicentegrationTest {
         void getAllChannels_returns_channel_list_with_last_message_time() throws InterruptedException {
 
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
 
             Channel channelA = ChannelFixture.createPublicChannel("공지", "전체 공지", channelRepository);
 
@@ -369,7 +369,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 유저채널 조회 - Public 채널 및 자기속한 private 채널 조회")
         void getAllChannelsByUserId_returns_public_and_joined_private_channel_list() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
 
             Channel channelA = channelRepository.save(
                     Channel.createPublicChannel("공지", "전체 공지")
@@ -391,7 +391,7 @@ public class ChannelServicentegrationTest {
                     .email("aaaaac@ex.com")
                     .password("p111w")
                     .build();
-            User savedUser = UserFixture.createUserWithStatus(member1, userRepository, userStatusRepository);
+            User savedUser = UserFixture.createUserWithStatus(member1, userRepository);
 
             User member2 = User.builder()
                     .nickname("member2")
@@ -399,7 +399,7 @@ public class ChannelServicentegrationTest {
                     .password("xxx")
                     .build();
 
-            User savedUser2 = UserFixture.createUserWithStatus(member2, userRepository, userStatusRepository);
+            User savedUser2 = UserFixture.createUserWithStatus(member2, userRepository);
 
             ReadStatusFixture.joinChannel(member1, channelC, readStatusRepository);
 
@@ -450,7 +450,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 채널 변경 - Public 채널 수정시 내용 반영된다")
         void updateChannel_updates_public_channel_fields() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
             Channel channel = ChannelFixture.createPublicChannel(channelRepository);
 
 
@@ -495,7 +495,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Negative] 채널 변경 - Private 채널 수정시 예외가 발생한다.")
         void updateChannel_throws_when_update_private_channel() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository, userStatusRepository);
+            User creator = UserFixture.createUserWithStatus(userRepository);
             Channel privateChannel = ChannelFixture.createPrivateChannel(channelRepository);
 
             ChannelUpdateRequestDto request = ChannelUpdateRequestDto.builder()
@@ -517,9 +517,9 @@ public class ChannelServicentegrationTest {
             // given
 
             User member1 = UserFixture.createUserWithStatus(User.builder().nickname("member1").email("csdd@ex.com")
-                    .password("pssw").build(), userRepository, userStatusRepository);
+                    .password("pssw").build(), userRepository);
             User member2 = UserFixture.createUserWithStatus(User.builder().nickname("member2").email("cfffsdd@ex.com")
-                    .password("pssssw").build(), userRepository, userStatusRepository);
+                    .password("pssssw").build(), userRepository);
 
             ChannelCreateRequestDto dto = ChannelCreateRequestDto.builder()
                     .name(null)
