@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.controller.api.ChannelApi;
 import com.sprint.mission.discodeit.dto.request.ChannelPrivateCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelPublicCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequestDto;
@@ -24,39 +25,22 @@ import java.util.UUID;
 @RequestMapping("/api/channels")
 @RequiredArgsConstructor
 @Tag(name = "Channel")
-public class ChannelController {
+public class ChannelController implements ChannelApi {
     private final ChannelService channelService;
 
     // 공개 채널 생성
-    @PostMapping("/public")
-    @Operation(summary = "Public Channel 생성", operationId = "create_3")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Public Channel이 성공적으로 생성됨")
-    })
     public ResponseEntity<Void> createPublicChannel(@RequestBody ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
         channelService.createPublicChannel(channelPublicCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 비공개 채널 생성
-    @PostMapping("/private")
-    @Operation(summary = "Private Channel 생성", operationId = "create_4")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Private Channel이 성공적으로 생성됨")
-    })
     public ResponseEntity<Void> createPrivateChannel(@RequestBody ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
         channelService.createPrivateChannel(channelPrivateCreateRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     // 공개 채널 정보 수정
-    @PatchMapping("/{channelId}")
-    @Operation(summary = "Channel 정보 수정", operationId = "update_3")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Channel 정보가 성공적으로 수정됨"),
-            @ApiResponse(responseCode = "400", description = "Private Channel은 수정할 수 없음"),
-            @ApiResponse(responseCode = "404", description = "Channel을 찾을 수 없음")
-    })
     public void updateChannel(
             @Parameter(description = "수정할 Channel ID")
             @PathVariable UUID channelId,
@@ -65,12 +49,6 @@ public class ChannelController {
     }
 
     // 채널 삭제
-    @DeleteMapping("/{channelId}")
-    @Operation(summary = "Channel 삭제", operationId = "delete_2")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Channel이 성공적으로 삭제됨"),
-            @ApiResponse(responseCode = "404", description = "Channel을 찾을 수 없음")
-    })
     public ResponseEntity<Void> deleteChannel(
             @Parameter(description = "삭제할 Channel ID")
             @PathVariable("channelId") UUID uuid) {
@@ -79,11 +57,6 @@ public class ChannelController {
     }
 
     // 특정 사용자의 채널 목록 조회
-    @GetMapping
-    @Operation(summary = "User가 참여 중인 Channel 목록 조회", operationId = "findAll_1")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Channel 목록 조회 성공")
-    })
     public List<ChannelResponseDto> getChannel(
             @Parameter(description = "조회할 User ID")
             @RequestParam UUID userId) {
