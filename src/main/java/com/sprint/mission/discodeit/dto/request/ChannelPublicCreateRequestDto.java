@@ -16,7 +16,8 @@ import java.util.UUID;
 @Schema(description = "Public Channel 생성 정보")
 public class ChannelPublicCreateRequestDto {
 
-    private ChannelType channelType;
+//    private ChannelType channelType;
 //    private String channelName; // PUBLIC 일때 사용
     private String name;
+    private String description;
 }

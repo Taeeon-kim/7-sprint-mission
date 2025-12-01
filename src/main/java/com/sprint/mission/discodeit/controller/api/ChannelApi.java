@@ -4,8 +4,10 @@ import com.sprint.mission.discodeit.dto.request.ChannelPrivateCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelPublicCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.response.ChannelUpdateResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,7 +28,10 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "201",
                     description = "Public Channel이 성공적으로 생성됨",
-                    content = @Content(mediaType = "*/*")
+                    content = @Content(
+                            mediaType = "*/*",
+                            schema = @Schema(implementation = ChannelUpdateResponseDto.class)
+                    )
             )
     })
     public ResponseEntity<Void> createPublicChannel(
@@ -41,7 +46,7 @@ public interface ChannelApi {
                     description = "Private Channel이 성공적으로 생성됨",
                     content = @Content(
                             mediaType = "*/*",
-                            schema = @Schema(implementation = ChannelResponseDto.class)
+                            schema = @Schema(implementation = ChannelUpdateResponseDto.class)
                     )
             )
     })
@@ -58,13 +63,13 @@ public interface ChannelApi {
                     description = "Channel 정보가 성공적으로 수정됨",
                     content = @Content(
                             mediaType = "*/*",
-                            schema = @Schema(implementation = ChannelResponseDto.class)
+                            schema = @Schema(implementation = ChannelUpdateResponseDto.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Private Channel은 수정할 수 없음",
-                    content = @Content(mediaType = "*/*", examples =  @ExampleObject("Private channel cannot be updated"))
+                    content = @Content(mediaType = "*/*", examples = @ExampleObject("Private channel cannot be updated"))
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -104,7 +109,12 @@ public interface ChannelApi {
             @ApiResponse(
                     responseCode = "200",
                     description = "Channel 목록 조회 성공",
-                    content = @Content(mediaType = "*/*")
+                    content = @Content(
+                            mediaType = "*/*",
+                            array = @ArraySchema(
+                                    schema = @Schema(implementation = ChannelResponseDto.class)
+                            )
+                    )
             )
     })
     public List<ChannelResponseDto> getChannel(

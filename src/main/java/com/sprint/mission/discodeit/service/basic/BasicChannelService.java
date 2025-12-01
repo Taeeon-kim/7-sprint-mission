@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.request.ChannelPrivateCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelPublicCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.response.ChannelUpdateResponseDto;
 import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -31,20 +32,20 @@ public class BasicChannelService implements ChannelService {
     private final UserRepository userRepository; //테스트용
 
     @Override
-    public ChannelResponseDto createPublicChannel(ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
+    public ChannelUpdateResponseDto createPublicChannel(ChannelPublicCreateRequestDto channelPublicCreateRequestDto) {
         if (channelPublicCreateRequestDto.getName() == null
                 || channelPublicCreateRequestDto.getName().isBlank()) {
             throw new IllegalStateException("채널 이름이 필요합니다.");
         }
 
-        Channel channel = new Channel(channelPublicCreateRequestDto.getName(), PUBLIC);
+        Channel channel = new Channel(channelPublicCreateRequestDto.getName(), PUBLIC, channelPublicCreateRequestDto.getDescription());
         channelRepository.save(channel);
 
-        return ChannelResponseDto.from(channel, null, null);
+        return ChannelUpdateResponseDto.from(channel); //.from(channel, null, null);
     }
 
     @Override
-    public ChannelResponseDto createPrivateChannel(ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
+    public ChannelUpdateResponseDto createPrivateChannel(ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto) {
         List<UUID> participantIds = channelPrivateCreateRequestDto.getParticipantIds();
         if (participantIds == null || participantIds.size() <= 1) {
             throw new IllegalStateException("2명 이상의 참여 유저가 있어야 합니다.");
@@ -58,11 +59,11 @@ public class BasicChannelService implements ChannelService {
             readStatusRepository.save(readStatus);
 //            System.out.println("[ReadStatus] : " + readStatus);
         }
-        return ChannelResponseDto.from(channel, null, participantIds);
+        return ChannelUpdateResponseDto.from(channel); //.from(channel, null, participantIds);
     }
 
     @Override
-    public ChannelResponseDto findById(UUID channelId) {
+    public ChannelUpdateResponseDto findById(UUID channelId) {
         Channel channel = channelRepository.findByChannel(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
         //가장 최근 메시지 시간 정보 포함
@@ -74,7 +75,7 @@ public class BasicChannelService implements ChannelService {
             participantIds = channel.getParticipantIds();
         }
 
-        return ChannelResponseDto.from(channel, lastMessageAt, participantIds);
+        return ChannelUpdateResponseDto.from(channel);
     }
 
     @Override

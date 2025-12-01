@@ -17,7 +17,8 @@ import java.util.UUID;
 @Schema(description = "수정할 Channel 정보")
 public class ChannelUpdateRequestDto {
 
-    private UUID channelId;
+//    private UUID channelId;
 //    private String newChannelName;
     private String newName;
+    private String newDescription;
 }
