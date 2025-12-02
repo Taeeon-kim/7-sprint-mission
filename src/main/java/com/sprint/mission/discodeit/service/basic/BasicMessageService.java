@@ -39,13 +39,14 @@ public class BasicMessageService implements MessageService {
                                  List<MultipartFile> files) {
         channelRepository.findByChannel(messageCreateRequestDto.getChannelId())
                 .orElseThrow(() -> new IllegalStateException("채널정보를 찾을 수 없습니다."));
-        if (userRepository.findById(messageCreateRequestDto.getUserId()) == null)
+        if (userRepository.findById(messageCreateRequestDto.getAuthorId()) == null)
             throw new IllegalStateException("작성자가 없습니다.");
 
         // attachmentIds + 새로 업로드한 파일UUID
-        List<UUID> attachmentIds = messageCreateRequestDto.getAttachments() != null
-                ? new ArrayList<>(messageCreateRequestDto.getAttachments())
-                : new ArrayList<>();
+//        List<UUID> attachmentIds = messageCreateRequestDto.getAttachments() != null
+//                ? new ArrayList<>(messageCreateRequestDto.getAttachments())
+//                : new ArrayList<>();
+        List<UUID> attachmentIds = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
                 if (file == null || file.isEmpty()) continue;
@@ -63,7 +64,7 @@ public class BasicMessageService implements MessageService {
 
         Message message = new Message(
                 messageCreateRequestDto.getChannelId(),
-                messageCreateRequestDto.getUserId(),
+                messageCreateRequestDto.getAuthorId(),
                 messageCreateRequestDto.getContent(),
                 attachmentIds
 //                messageCreateRequestDto.getAttachmentIds() != null ? messageCreateRequestDto.getAttachmentIds() : new ArrayList<>()
@@ -98,8 +99,8 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto,
-                                 List<MultipartFile> files) {
+    public Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto){
+//                                 List<MultipartFile> files) {
         Message message = messageRepository.findByMessage(messageUpdateRequestDto.getMessageId())
                 .orElseThrow(() -> new IllegalArgumentException("수정할 메시지를 찾을 수 없습니다."));
 
@@ -108,21 +109,21 @@ public class BasicMessageService implements MessageService {
         List<UUID> attachments = message.getAttachmentIds() != null
                 ? new ArrayList<>(message.getAttachmentIds())
                 : new ArrayList<>();
-        if (files != null && !files.isEmpty()) {
-            for (MultipartFile file : files) {
-                if (file != null && !file.isEmpty()) {
-                    try {
-                        BinaryContent saved = binaryContentRepository.save(
-                                new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes())
-                        );
-                        attachments.add(saved.getUuid());
-                        System.out.println("[파일 저장 완료] : " + file.getOriginalFilename());
-                    } catch (Exception e) {
-                        throw new RuntimeException("파일 저장 실패", e);
-                    }
-                }
-            }
-        }
+//        if (files != null && !files.isEmpty()) {
+//            for (MultipartFile file : files) {
+//                if (file != null && !file.isEmpty()) {
+//                    try {
+//                        BinaryContent saved = binaryContentRepository.save(
+//                                new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes())
+//                        );
+//                        attachments.add(saved.getUuid());
+//                        System.out.println("[파일 저장 완료] : " + file.getOriginalFilename());
+//                    } catch (Exception e) {
+//                        throw new RuntimeException("파일 저장 실패", e);
+//                    }
+//                }
+//            }
+//        }
         message.setAttachmentIds(attachments);
         System.out.println("[Message 수정] : " + message.getContent());
         return messageRepository.save(message);
