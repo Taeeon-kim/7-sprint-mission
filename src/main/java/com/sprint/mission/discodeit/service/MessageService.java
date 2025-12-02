@@ -1,8 +1,10 @@
 package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.message.*;
-import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
+import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +14,7 @@ public interface MessageService {
     List<MessageResponseDto> getAllMessages();
 
     // 특정 채널의 모든 메세지 읽기
-    List<MessageResponseDto> getAllMessagesByChannelId(UUID channelId);
+    PageResponse<MessageResponseDto> getAllMessagesByChannelId(UUID channelId, Pageable pageable, Instant cursor);
 
     // 단일 특정 메세지 읽기
     MessageResponseDto getMessageById(UUID messageId);

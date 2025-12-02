@@ -2,24 +2,19 @@ package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserStatusRepository;
-import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.UserStatusService;
-import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
-import com.sprint.mission.discodeit.service.basic.BasicUserService;
-import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
-import com.sprint.mission.discodeit.service.reader.UserReader;
+
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,34 +24,27 @@ import java.util.UUID;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@SpringBootTest
+@Transactional
 public class UserServiceIntegrationTest {
 
-    private UserService userService;
-    private UserRepository userRepository;
-    private UserReader userReader;
-    private UserStatusRepository userStatusRepository;
-    private UserStatusService userStatusService;
-    private BinaryContentRepository binaryContentRepository;
-    private BinaryContentService binaryContentService;
+    @Autowired
+    private EntityManager em;
 
-    // TODO: SpringBoot, Autowire 로 변경,
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserStatusRepository userStatusRepository;
+
+    @Autowired
+    private BinaryContentRepository binaryContentRepository;
+
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository();
-        userReader = new UserReader(userRepository);
-        userStatusRepository = new JCFUserStatusRepository();
-        binaryContentRepository = new JCFBinaryContentRepository();
-        userStatusService = new BasicUserStatusService(userReader, userStatusRepository);
-        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
-        userService = new BasicUserService(
-                userRepository,
-                userReader,
-                userStatusService,
-                userStatusRepository,
-                binaryContentRepository,
-                binaryContentService
-        );
     }
 
 
@@ -78,7 +66,7 @@ public class UserServiceIntegrationTest {
             assertEquals(before + 1, after);
             User persistedUser = userRepository.findById(userResponseDto.id())
                     .orElseThrow(() -> new AssertionError("User not found"));
-            assertEquals("name", persistedUser.getNickname());
+            assertEquals("name", persistedUser.getUsername());
 
             assertEquals("example@email.com", persistedUser.getEmail());
             assertEquals("password", persistedUser.getPassword());
@@ -89,9 +77,11 @@ public class UserServiceIntegrationTest {
         @DisplayName("[Integration][Negative] 회원가입 - 잘못된 입력은 예외 & DB 변화 없음")
         void signUp_invalid_blocked() {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "pw"), null);
+            int before = userRepository.findAll().size();
             assertThrows(IllegalArgumentException.class,
                     () -> userService.signUp(command));
-            assertEquals(0, userRepository.findAll().size());
+            int after = userRepository.findAll().size();
+            assertEquals(before, after);
         }
 
         @Test
@@ -144,7 +134,7 @@ public class UserServiceIntegrationTest {
 
             // then
             assertNotNull(userStatusbByUserId);
-            assertEquals(responseDto.id(), userStatusbByUserId.getUserId());
+            assertEquals(responseDto.id(), userStatusbByUserId.getUser().getId());
 
         }
 
@@ -165,7 +155,7 @@ public class UserServiceIntegrationTest {
             UserResponseDto userById = userService.getUserById(responseDto.id());
 
             //then
-            assertEquals("name", userById.nickname());
+            assertEquals("name", userById.username());
             assertEquals(responseDto.id(), userById.id());
         }
 
@@ -188,9 +178,10 @@ public class UserServiceIntegrationTest {
     @Nested
     @DisplayName("updateUser")
     class UpdateUser {
+
         @Test
         @DisplayName("[Integration][Flow][Positive] 회원수정 - 이메일만 변경, 나머지 유지")
-        void updateUser_updates_only_email() throws InterruptedException {
+        void updateUser_updates_only_email() {
             //given
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
             UserResponseDto responseDto = userService.signUp(command);
@@ -198,10 +189,14 @@ public class UserServiceIntegrationTest {
             UserUpdateCommand updateCommand = UserUpdateCommand.from(responseDto.id(), new UserUpdateRequestDto(null, "b@c.com", null), null);
             //when
             userService.updateUser(updateCommand);
+
+            em.flush();
+            em.clear();
+
             //then
             User after = userRepository.findById(responseDto.id()).orElseThrow();
             assertEquals("b@c.com", after.getEmail());
-            assertEquals("nick", after.getNickname());
+            assertEquals("nick", after.getUsername());
 
             // 실제 update호출안된건지 update값 조회
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
@@ -226,7 +221,7 @@ public class UserServiceIntegrationTest {
 
             //then
             User after = userRepository.findById(responseDto.id()).orElseThrow();
-            assertEquals(before.getNickname(), after.getNickname());
+            assertEquals(before.getUsername(), after.getUsername());
             assertEquals(before.getEmail(), after.getEmail());
 
             assertEquals(beforeTime, after.getUpdatedAt());
@@ -244,10 +239,14 @@ public class UserServiceIntegrationTest {
 
             // when
             userService.updateUser(updateCommand);
+
+            em.flush();
+            em.clear();
+
             User after = userRepository.findById(responseDto.id()).orElseThrow();
-            assertEquals("nick2", after.getNickname());
+            assertEquals("nick2", after.getUsername());
             assertEquals("b@c.com", after.getEmail());
-            assertNotNull(after.getProfileId());
+            assertNotNull(after.getProfile().getId());
 
             assertTrue(after.getUpdatedAt().isAfter(beforeTime));
         }
@@ -256,6 +255,7 @@ public class UserServiceIntegrationTest {
     @Nested
     @DisplayName("deleteUser")
     class DeleteUser {
+
         @Test
         @DisplayName("[Integration][Flow] 회원삭제 - 삭제 후 조회 시 예외")
         void deleteUser_then_not_found() {
@@ -272,13 +272,15 @@ public class UserServiceIntegrationTest {
             // 결정적 픽스쳐 준비
             byte[] payload = "fake-bytes".getBytes(UTF_8);
             // 프로필이미지
-            BinaryContent savedBinarycontent = binaryContentRepository.save(new BinaryContent("profile.png", "image/png", payload));
-            User user = User.create("nick", "a@b.com", "pw", RoleType.USER, savedBinarycontent.getId());
-            UserStatus userStatus = new UserStatus(user.getId());
+            BinaryContent savedBinarycontent = binaryContentRepository.save(
+                    new BinaryContent("profile.png", "image/png", (long) payload.length)
+            );
+            User user = User.create("nick", "a@b.com", "pw", savedBinarycontent);
+            user.initUserStatus();
             //유저등록
             User savedUser = userRepository.save(user);
             // 유저상태
-            UserStatus savedUserStatus = userStatusRepository.save(userStatus);
+//            UserStatus savedUserStatus = userStatusRepository.save(userStatus);
 
             // preconditions
             assertAll(
@@ -294,7 +296,6 @@ public class UserServiceIntegrationTest {
             assertAll(
                     () -> assertTrue(userRepository.findById(savedUser.getId()).isEmpty()),
                     () -> assertTrue(userStatusRepository.findByUserId(savedUser.getId()).isEmpty()),
-                    () -> assertTrue(userStatusRepository.findById(savedUserStatus.getId()).isEmpty()),
                     () -> assertTrue(binaryContentRepository.findById(savedBinarycontent.getId()).isEmpty())
             );
         }
@@ -310,7 +311,7 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command2 = UserSignupCommand.from(new UserSignupRequestDto("b", "b@b.com", "p"), null);
             userService.signUp(command);
             userService.signUp(command2);
-            assertEquals(2, userService.getAllUsers().size());
+            assertTrue(userService.getAllUsers().size() >= 2);
         }
     }
 

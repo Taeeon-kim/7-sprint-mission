@@ -43,3 +43,10 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Generated ###
+META-INF/
+org/
+
+### Local storage ###
+storage/

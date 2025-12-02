@@ -21,7 +21,7 @@ public interface UserService {
     UserResponseDto updateUser(UserUpdateCommand updateCommand);
 
     // 모든 유저리스트 읽기(관리측면 메서드)
-    List<UserDto> getAllUsers();
+    List<UserResponseDto> getAllUsers();
 
     List<User> getUsersByIds(List<UUID> userIds);
 }

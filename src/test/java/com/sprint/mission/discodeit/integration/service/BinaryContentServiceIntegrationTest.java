@@ -5,11 +5,13 @@ import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
-import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,15 +19,18 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class BinaryContentServiceIntegrationTest {
+
+    @Autowired
     private BinaryContentRepository binaryContentRepository;
+
+    @Autowired
     private BinaryContentService binaryContentService;
 
     @BeforeEach
     void setUp() {
-
-        binaryContentRepository = new JCFBinaryContentRepository();
-        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
     }
 
     @AfterEach
@@ -59,7 +64,6 @@ public class BinaryContentServiceIntegrationTest {
 
             assertEquals(command.fileName(), binaryContent.getFileName());
             assertEquals(command.contentType(), binaryContent.getContentType());
-            assertArrayEquals(command.bytes(), binaryContent.getBytes());
 
         }
     }
@@ -71,7 +75,7 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 조회 - 요청 id에 해당하는 binaryContent 반환")
         void getBinaryContent_returns_saved_content() {
             //given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length());
             BinaryContent saved = binaryContentRepository.save(updateContent);
 
             // when
@@ -82,7 +86,6 @@ public class BinaryContentServiceIntegrationTest {
             assertEquals(saved.getFileName(), responseDtos.fileName());
             assertEquals(saved.getContentType(), responseDtos.contentType());
 
-            assertArrayEquals(saved.getBytes(), responseDtos.bytes()); // 내용비교를 위해 순회하면 하나씩 비교, 원소 수, 순서, 값 모두 같으면 통과
         }
 
         @Test
@@ -104,8 +107,8 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 다중 조회 - 요청 ids에 해당하는 binaryContent List 반환")
         void getBinaryContentsByIds_returns_saved_contents() {
             //given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
-            BinaryContent updateContent2 = new BinaryContent("test2.png", "image/png", "test222".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length());
+            BinaryContent updateContent2 = new BinaryContent("test2.png", "image/png", (long) "test".length());
             BinaryContent saved = binaryContentRepository.save(updateContent);
             BinaryContent saved2 = binaryContentRepository.save(updateContent2);
 
@@ -149,7 +152,7 @@ public class BinaryContentServiceIntegrationTest {
         @DisplayName("[Integration][Flow][Positive] 파일 삭제 - 삭제 후 조회 불가 & 개수 감소")
         void deleteBinaryContent_then_not_found_and_size_decreased() {
             // given
-            BinaryContent updateContent = new BinaryContent("test.png", "image/png", "test".getBytes());
+            BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length());
             BinaryContent saved = binaryContentRepository.save(updateContent);
             long before = binaryContentRepository.findAll().size();
 
@@ -159,7 +162,7 @@ public class BinaryContentServiceIntegrationTest {
             // then
             long after = binaryContentRepository.findAll().size();
             assertEquals(before - 1, after);
-            assertThrows(NoSuchElementException.class, ()-> binaryContentService.getBinaryContent(saved.getId()));
+            assertThrows(NoSuchElementException.class, () -> binaryContentService.getBinaryContent(saved.getId()));
         }
 
     }

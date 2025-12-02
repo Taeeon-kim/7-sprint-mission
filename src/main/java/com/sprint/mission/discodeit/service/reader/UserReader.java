@@ -30,6 +30,6 @@ public class UserReader {
         if (userIds == null) { // NOTE: 어디서 불를지 모르기때문에 불변식은 아니더래도 자기방어를 위한 방어코드 추가
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
-        return userRepository.findAllByIds(userIds);
+        return userRepository.findAllById(userIds);
     }
 }

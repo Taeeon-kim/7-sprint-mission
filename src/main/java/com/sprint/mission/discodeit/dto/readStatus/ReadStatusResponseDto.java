@@ -10,18 +10,14 @@ public record ReadStatusResponseDto(
         UUID id,
         UUID userId,
         UUID channelId,
-        Instant readAt,
-        Instant createdAt,
-        Instant updatedAt
+        Instant lastReadAt
 ) {
     public static ReadStatusResponseDto from(ReadStatus readStatus) {
         return new ReadStatusResponseDto(
                 readStatus.getId(),
-                readStatus.getUserId(),
-                readStatus.getChannelId(),
-                readStatus.getReadAt(),
-                readStatus.getCreatedAt(),
-                readStatus.getUpdatedAt()
+                readStatus.getUser().getId(),
+                readStatus.getChannel().getId(),
+                readStatus.getLastReadAt()
         );
 
 

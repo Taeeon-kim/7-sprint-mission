@@ -1,31 +1,38 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.RoleType;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public class User extends BasicEntity {
-    private static final long serialVersionUID = 1L;
-    private String nickname;
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "users")
+public class User extends BaseUpdatableEntity {
+
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
-    private RoleType role; // NOTE: 채널 맴버의 타입이아닌 회원의 역할을 말하는것(일반유저, 어드민)
-    private UUID profileId;
-//    private final List<User> friends;
 
-
-    private User() {
-    }
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_id")
+    private BinaryContent profile; // TODO: 아직 로직상 profileId로 쓰고있을수도잇으니 이부분 추후 요구사항의 Profile 객체로 변경
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserStatus userStatus; // 1:1 양방향
 
     @Builder
-    private User(String nickname, String email, String password, RoleType role, UUID profileId) {
-        super();
+    private User(String nickname, String email, String password, BinaryContent profile) {
           /*
         엔티티의 업데이트 메서드(전이)는 항상 관련 불변식을 재확인하는 검증을 포함한다.
         이 검증이 “입력 가드처럼 보일 수” 있지만, 목적은 외부 입력 차단이 아니라 내 상태 보전이기 때문에 불변식 검사라고 부른다.
@@ -34,56 +41,36 @@ public class User extends BasicEntity {
         if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("nickname invalid");
         if (email == null || !email.contains("@")) throw new IllegalArgumentException("email invalid");
         if (password == null || password.isBlank()) throw new IllegalArgumentException("password invalid");
-        if (role == null) throw new IllegalArgumentException("role invalid");
-        this.nickname = nickname;
+        this.username = nickname;
         this.email = email;
         this.password = password;
-        this.role = role;
-        this.profileId = profileId;
+        this.profile = profile;
     }
 
-    private User(User other) { //  NOTE: 복사용, 복사 생성자
-
-        super(other);
-        this.nickname = other.nickname;
-        this.email = other.email;
-        this.password = other.password;
-        this.role = other.role;
-        this.profileId = other.profileId;
-//        this.friends = new ArrayList<>(other.friends);
+    public static User create(String nickname, String email, String password, BinaryContent profile) {
+        return new User(nickname, email, password, profile);
     }
 
-    public static User copyOf(User other) {
-        return new User(other);
+    public void update(UserUpdateParams request) {
+
+        this.updateNickname(request.nickname());
+        this.updateEmail(request.email());
+        this.updatePassword(request.password());
+        this.updateProfile(request.profile());
+
     }
 
-    public static User create(String nickname, String email, String password, RoleType role, UUID profileId) {
-        return new User(nickname, email, password, role, profileId);
-    }
-
-    public boolean update(UserUpdateParams request) {
-        boolean changeFlag = false;
-        changeFlag |= this.updateNickname(request.nickname());
-        changeFlag |= this.updateEmail(request.email());
-        changeFlag |= this.updatePassword(request.password());
-        changeFlag |= this.updateProfileId(request.profileId());
-        if (changeFlag) {
-            this.setUpdatedAt(Instant.now());
-        }
-        return changeFlag;
-    }
-
-    private boolean updateProfileId(UUID profileId) {
-        if (profileId != null && !profileId.equals(this.profileId)) {
-            this.profileId = profileId;
+    private boolean updateProfile(BinaryContent profile) {
+        if (profile != null) {
+            this.profile = profile;
             return true;
         }
         return false;
     }
 
     public boolean updateNickname(String nickname) {
-        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.nickname)) {
-            this.nickname = nickname;
+        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.username)) {
+            this.username = nickname;
             return true;
         }
         return false;
@@ -104,6 +91,13 @@ public class User extends BasicEntity {
             return true;
         }
         return false;
+    }
+
+    // 편의 메서드 추가
+    public void initUserStatus() {
+        if (this.userStatus == null) {
+            this.userStatus = new UserStatus(this);
+        }
     }
 
 }

@@ -6,10 +6,7 @@ import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,8 +16,8 @@ public class AuthController implements AuthApi {
     private final AuthService authService;
 
     @Override
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<UserResponseDto> login(@RequestBody AuthLoginRequestDto authLoginRequestDto) {
+    @PostMapping("/login")
+    public ResponseEntity<UserResponseDto> login(@RequestBody AuthLoginRequestDto authLoginRequestDto) { // TODO: @Valid
 
         UserResponseDto responseDto = authService.login(authLoginRequestDto);
         return ResponseEntity.ok(responseDto);

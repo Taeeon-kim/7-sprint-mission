@@ -43,6 +43,4 @@ public interface ChannelService {
     // 참여인원조회 getAllMembers
     List<User> getAllMembers(UUID channelId);
 
-    // 특정 유저의 채널 목록 불러오기 getUserChannels(userId)
-    List<Channel> getChannelsByUserId(UUID userId);
 }

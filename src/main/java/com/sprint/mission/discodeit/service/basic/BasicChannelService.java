@@ -2,46 +2,40 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.channel.*;
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.factory.ChannelFactory;
-import com.sprint.mission.discodeit.service.factory.PrivateChannelCreator;
-import com.sprint.mission.discodeit.service.factory.PublicChannelCreator;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
+    private static final int MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL = 2;
+
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
     private final ReadStatusRepository readStatusRepository;
     private final ChannelFactory channelFactory;
-
-    public BasicChannelService(ChannelRepository channelRepository, MessageRepository messageRepository, UserReader userReader, ChannelReader channelReader, ReadStatusRepository readStatusRepository, ChannelFactory channelFactory) {
-        this.channelRepository = channelRepository;
-        this.messageRepository = messageRepository;
-        this.userReader = userReader;
-        this.channelReader = channelReader;
-        this.readStatusRepository = readStatusRepository;
-        this.channelFactory = channelFactory;
-    }
+    private final ChannelMapper channelMapper;
 
     @Override
+    @Transactional
     public ChannelResponseDto createChannel(ChannelCreateCommand command) {
 
         Channel channel = channelFactory.create(command);
@@ -49,15 +43,25 @@ public class BasicChannelService implements ChannelService {
         Channel saved = channelRepository.save(channel);
 
         if (saved.getType() == ChannelType.PRIVATE) {
-            for (UUID UserId : command.memberIds()) {
-                readStatusRepository.save(new ReadStatus(UserId, saved.getId(), Instant.now()));
+            List<User> users = userReader.findUsersByIds(command.memberIds());
+            if (users.size() < MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL) {
+                throw new IllegalArgumentException("PRIVATE 채널 최소 2명 이상이어야 합니다.");
             }
+            if (users.size() < command.memberIds().size()) {
+                throw new IllegalArgumentException("참여 유저가 잘못되었습니다.");
+            }
+
+            List<ReadStatus> readStatuses = users.stream()
+                    .map(user -> new ReadStatus(user, saved)).toList();
+
+            readStatusRepository.saveAll(readStatuses);
         }
-        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-        return ChannelResponseDto.from(saved, messageCreatedAtOfChannel);
+
+        return channelMapper.toDto(saved);
     }
 
     @Override
+    @Transactional
     public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {
         if (channelId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
@@ -68,92 +72,67 @@ public class BasicChannelService implements ChannelService {
             throw new IllegalArgumentException("해당 채널은 수정할수 없습니다.");
         }
         ChannelUpdateParams params = ChannelUpdateParams.from(request);
-        boolean changeFlag = channelById.update(params);
-        if (changeFlag) {
-            channelRepository.save(channelById);
-        }
+        channelById.update(params); // TODO: api ChannelDto 형식으로
+
+        channelRepository.save(channelById);
     }
 
-
     @Override
+    @Transactional
     public void deleteChannel(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        // 메세지 레포지토리에서 삭제 로직
-        List<UUID> channelMessageIds = channel.getMessageIds();
-        for (UUID messageId : channelMessageIds) {
-            messageRepository.deleteById(messageId);
-        }
-        // readStatus 삭제
-        List<ReadStatus> readStatuses = readStatusRepository.findByChannelId(channel.getId());
-        for (ReadStatus readStatus : readStatuses) {
-            readStatusRepository.deleteById(readStatus.getId());
-        }
+
+        messageRepository.deleteByChannelId(channel.getId());
+
+        readStatusRepository.deleteByChannelId(channel.getId());
+
         // 채널삭제
-        channelRepository.deleteById(channel.getId());
-        // NOTE: 보상로직 생략, DB 생기면 @Transactional
+        channelRepository.deleteById(channel.getId()); // NOTE : Channel쪽에 연관관계가없어서 CASCADE 발생이안됨 따라서 위에 명시적으로 삭제
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ChannelResponseDto getChannel(UUID channelId) {
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-        return getChannelResponseDto(channel, messageCreatedAtOfChannel);
+        return getChannelResponseDto(channel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannels() {
-        List<Channel> channelList = channelRepository.findAll();
+        List<Channel> channelList = channelRepository.findAll(); //
+        // TODO: N+1 발생하는 쿼리가 될거같은데 어떻게 최적화해야할지 생각해보기
         return channelList
                 .stream()
-                .map(channel -> {
-                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
-                })
+                .map(this::getChannelResponseDto)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChannelResponseDto> getAllChannelsByUserId(UUID userId) {
-        return channelRepository.findAllByUserId(userId)
+
+        return channelRepository.findAllVisibleByUserId(userId)
                 .stream()
-                .map(channel -> {
-                    Instant messageCreatedAtOfChannel = getLatestMessageCreatedAtOfChannel(channel);
-                    return getChannelResponseDto(channel, messageCreatedAtOfChannel);
-                })
+                .map(this::getChannelResponseDto)
                 .toList();
     }
 
-    // 헬퍼 메서드
-    private Instant getLatestMessageCreatedAtOfChannel(Channel channel) {
-        Instant messageCreatedAtOfChannel = null;
-        // 최신 메세지 하나가져오고
-        List<UUID> messageIds = channel.getMessageIds();
-        // 해당 메세지의 createdAt 추출하고 response dto에 포함
-        if (!messageIds.isEmpty()) {
-            UUID currentMessageId = messageIds.get(messageIds.size() - 1);
-
-            messageCreatedAtOfChannel = messageRepository.findById(currentMessageId)
-                    .map(Message::getCreatedAt)
-                    .orElse(null);
-
-        }
-        return messageCreatedAtOfChannel;
-    }
-
-    private ChannelResponseDto getChannelResponseDto(Channel channel, Instant messageCreatedAt) {
+    private ChannelResponseDto getChannelResponseDto(Channel channel) {
         if (channel.getType() == ChannelType.PUBLIC) {
-            return ChannelResponseDto.from(channel, messageCreatedAt);
+            return channelMapper.toDto(channel);
         } else if (channel.getType() == ChannelType.PRIVATE) {
-            return ChannelResponseDto.from(channel, messageCreatedAt);
+            return channelMapper.toDto(channel);
         } else {
             throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
         }
     }
 
     @Override
+    @Transactional
     public void joinChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -161,13 +140,19 @@ public class BasicChannelService implements ChannelService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         User user = userReader.findUserOrThrow(userId);
-        channel.addUserId(user.getId());
-        channelRepository.save(channel);
-        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
+        // 이미 참여했는지 체크 (메서드 없으면 아래 existsBy...를 리포지토리에 추가)
+        if (readStatusRepository.existsByUserAndChannel(user, channel)) {
+            throw new IllegalStateException("이미 참여한 유저입니다.");
+        }
+
+        // 참여 = ReadStatus 한 줄 생성
+        ReadStatus readStatus = new ReadStatus(user, channel);
+        readStatusRepository.save(readStatus);
 
     }
 
     @Override
+    @Transactional
     public void leaveChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
@@ -176,29 +161,23 @@ public class BasicChannelService implements ChannelService {
         Channel channel = channelReader.findChannelOrThrow(channelId);
 
         User user = userReader.findUserOrThrow(userId);
-        channel.removeUserId(user.getId());
-        channelRepository.save(channel);
-        // TODO: User에서는 따로 channnelIds 가없는데 messagesIds처럼 필요한지 검토필요
 
+        ReadStatus readStatus = readStatusRepository.findByUserAndChannel(user, channel)
+                .orElseThrow(() -> new IllegalStateException("채널에 참여하지 않은 사용자입니다."));
+
+        readStatusRepository.delete(readStatus);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> getAllMembers(UUID channelId) {
         if (channelId == null) {
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
 
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        List<UUID> userIds = List.copyOf(channel.getUserIds());
+        List<UUID> userIds = readStatusRepository.findUserIdsByChannelId(channel.getId());
         return userReader.findUsersByIds(userIds);
     }
 
-    @Override
-    public List<Channel> getChannelsByUserId(UUID userId) {
-        User userById = userReader.findUserOrThrow(userId);
-        List<Channel> allChannels = channelRepository.findAll();
-        return allChannels.stream()
-                .filter(channel -> channel.isMember(userById.getId()))
-                .toList();
-    }
 }
