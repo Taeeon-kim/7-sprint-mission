@@ -10,23 +10,23 @@ import java.util.UUID;
 @Getter
 @Builder
 public class MessageResponseDto {
-    private UUID messageId;
+    private UUID id; //messageId;
     private String content;
-    private UUID userId;
+    private UUID authorId; //userId;
     private UUID channelId;
-    private List<UUID> attachments;
-    private Instant createAt;
-    private Instant updateAt;
+    private List<UUID> attachmentIds;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public static MessageResponseDto from (Message message){
         return MessageResponseDto.builder()
-                .messageId(message.getUuid())
+                .id(message.getUuid())
                 .content(message.getContent())
-                .userId(message.getUserId())
+                .authorId(message.getUserId())
                 .channelId(message.getChannelId())
-                .attachments(message.getAttachmentIds())
-                .createAt(message.getCreateAt())
-                .updateAt(Instant.now())
+                .attachmentIds(message.getAttachmentIds())
+                .createdAt(message.getCreateAt())
+                .updatedAt(Instant.now())
                 .build();
     }
 }

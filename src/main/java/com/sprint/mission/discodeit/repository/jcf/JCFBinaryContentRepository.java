@@ -6,10 +6,7 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @ConditionalOnProperty(
@@ -41,11 +38,10 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
                 .toList();
     }
 
-//    public List<BinaryContent> findByInputId(UUID inputId){
-//        return binaryContentMap.values().stream()
-//                .filter(bc->bc.equals(bc.getInputId()))
-//                .toList();
-//    }
+    @Override
+    public List<BinaryContent> findAll() {
+        return new ArrayList<>(binaryContentMap.values());
+    }
 
     @Override
     public void delete(UUID uuid) {

@@ -1,57 +1,59 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.controller.api.UserApi;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.UserResponseDto;
 import com.sprint.mission.discodeit.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import jakarta.websocket.server.PathParam;
+import jdk.jfr.Description;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+@RequiredArgsConstructor
+@Tag(name = "User")
+public class UserController implements UserApi {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     //사용자 생성
-    @RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void createUser( @ModelAttribute UserCreateRequestDto userCreateRequestDto) {
-        userService.createUser(userCreateRequestDto);
-    }
-
-    //단건 조회
-    @RequestMapping(method = RequestMethod.GET, params = "userId")
-    public UserResponseDto getUser(@RequestParam String userId) {
-        return userService.findById(userId);
+    public void create( @ModelAttribute UserCreateRequestDto userCreateRequest) {
+        userService.createUser(userCreateRequest);
     }
 
     //전체 조회
-    @RequestMapping(method = RequestMethod.GET, params = "!userId")
-    public List<UserResponseDto> getUsers() {
+    public List<UserResponseDto>  findAll () {
         return userService.findAllUser();
     }
 
     //사용자 수정
-    @RequestMapping(method = RequestMethod.PUT, params = "userId", consumes = "multipart/form-data")
-    public void updateUser(@RequestParam String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+    public void update (
+            @Parameter(description = "수정할 User ID")
+            @PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 
     //사용자 삭제
-    @RequestMapping(method = RequestMethod.DELETE, params = "uuid")
-    public void deleteUser(@RequestParam UUID uuid) {
-        userService.deleteUser(uuid);
+    public void delete (
+            @Parameter(description = "삭제할 User ID")
+            @PathVariable("userId") UUID userId) {
+        userService.deleteUser(userId);
     }
 }

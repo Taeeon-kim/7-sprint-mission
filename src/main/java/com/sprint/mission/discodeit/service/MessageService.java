@@ -21,8 +21,8 @@ public interface MessageService {
 
     List<Message> findChannelAllMessage(Channel channels); // 채널 관련 전체 메시지 조회
 
-    Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto,
-                          List<MultipartFile> files); //수정
+    Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto);
+//                          List<MultipartFile> files); //수정
 
     void deleteMessage(UUID uuid); //삭제
 

@@ -1,24 +1,36 @@
 package com.sprint.mission.discodeit.dto.response;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
 @Builder
 public class BinaryContentResponseDto {
 
-    private UUID messageId;
+//    private UUID messageId;
+    private UUID id;
     private String fileName;
+    private String contentType;
     private long size;
+
+    @Schema(type = "string", format = "byte")
+    private String bytes;
+    private Instant createdAt;
 
     public static BinaryContentResponseDto from(BinaryContent binaryContent) {
         return BinaryContentResponseDto.builder()
-                .messageId(binaryContent.getUuid())
+//                .messageId(binaryContent.getUuid())
+                .id(binaryContent.getUuid())
+                .contentType(binaryContent.getContentType())
                 .fileName(binaryContent.getFileName())
                 .size(binaryContent.getBytes().length)
+                .bytes(binaryContent.getBytes().toString())
+                .createdAt(binaryContent.getCreateAt())
                 .build();
     }
 }

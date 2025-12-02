@@ -7,10 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @ConditionalOnProperty(
@@ -82,6 +79,11 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
         return binaryContentMap.values().stream()
                 .filter(content->uuid.equals((content.getUuid())))
                 .toList();
+    }
+
+    @Override
+    public List<BinaryContent> findAll() {
+        return new ArrayList<>(binaryContentMap.values());
     }
 
     @Override

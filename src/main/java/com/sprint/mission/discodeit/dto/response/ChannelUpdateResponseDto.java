@@ -2,14 +2,13 @@ package com.sprint.mission.discodeit.dto.response;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.entity.User;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
-import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
 
 /**
  * 채널 조회 응답
@@ -19,7 +18,7 @@ import static ch.qos.logback.classic.spi.ThrowableProxyVO.build;
 @Getter
 @ToString
 @Builder
-public class ChannelResponseDto {
+public class ChannelUpdateResponseDto {
 
 //    private UUID channelId;
     private UUID id;
@@ -27,20 +26,19 @@ public class ChannelResponseDto {
     private String name;
 //    private ChannelType channelType;
     private ChannelType type;
+    private Instant createdAt;
+    private Instant updatedAt;
     private String description;
-    private Instant lastMessageAt;
-    private List<UUID> participantIds;
 
-    public static ChannelResponseDto from(Channel channel , Instant lastMessageAt, List<UUID> participantIds) {
-        return ChannelResponseDto.builder()
+    public static ChannelUpdateResponseDto from(Channel channel) {
+        return ChannelUpdateResponseDto.builder()
                 .id(channel.getUuid())
                 .name(channel.getChannelName())
                 .type(channel.getChannelType())
-//                .createdAt(channel.getCreateAt())
-//                .updatedAt(channel.getUpdatedAt())
+                .createdAt(channel.getCreateAt())
+                .updatedAt(channel.getUpdatedAt())
                 .description(channel.getDiscription())
-                .lastMessageAt(lastMessageAt)
-                .participantIds(participantIds)
                 .build();
     }
+
 }

@@ -63,11 +63,11 @@ public class BasicReadStatusService implements ReadStatusService {
 
     @Override
     public ReadStatusDto update(ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
-        ReadStatus readStatus = readStatusRepository.findById(readStatusUpdateRequestDto.getUuid());
+        ReadStatus readStatus = readStatusRepository.findById(readStatusUpdateRequestDto.getId());
         if(readStatus == null) throw new IllegalArgumentException("ReadStatus not found");
-        if (readStatusUpdateRequestDto.getLastReadAt() != null
-                && readStatusUpdateRequestDto.getLastReadAt().isAfter(readStatus.getLastActiveAt())) {
-            readStatus.setUpdate(readStatusUpdateRequestDto.getLastReadAt());
+        if (readStatusUpdateRequestDto.getNewLastReadAt() != null
+                && readStatusUpdateRequestDto.getNewLastReadAt().isAfter(readStatus.getLastActiveAt())) {
+            readStatus.setUpdate(readStatusUpdateRequestDto.getNewLastReadAt());
             readStatusRepository.update(readStatus);
         }
         return ReadStatusDto.from(readStatus);

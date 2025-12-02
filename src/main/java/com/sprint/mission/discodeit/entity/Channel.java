@@ -16,6 +16,7 @@ public class Channel extends BaseEntity {
 
     private String channelName;
     private ChannelType channelType;
+    private String discription;
     private List<UUID> participantIds = new ArrayList<>();
 
     public void setUpdate(String newChannelName) {
@@ -26,10 +27,11 @@ public class Channel extends BaseEntity {
     }
 
     //PUBLIC
-    public Channel(String channelName, ChannelType channelType) {
+    public Channel(String channelName, ChannelType channelType, String discription) {
         super();
         this.channelName = channelName;
         this.channelType = channelType;
+        this.discription = discription;
     }
 
     public Channel(List<UUID> participantIds, ChannelType channelType) {

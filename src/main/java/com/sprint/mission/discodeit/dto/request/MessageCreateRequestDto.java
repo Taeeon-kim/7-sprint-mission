@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jdk.jfr.Description;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +16,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageCreateRequestDto {
-    private UUID userId;
-    private String userName;
+    private UUID authorId; // userId;
+//    private String userName;
     private UUID channelId;
-    private String channelName;
+//    private String channelName;
     private String content;
-    private List<UUID> attachmentIds =  new ArrayList<>();
+//    private List<UUID> attachments =  new ArrayList<>();
 }
