@@ -1,3 +1,15 @@
+--- 바이너리컨텐츠 테이블 DDL
+CREATE TABLE binary_contents
+(
+    id           UUID PRIMARY KEY,
+    file_name    VARCHAR(255)             NOT NULL,
+    size         BIGINT                   NOT NULL,
+    content_type VARCHAR(100)             NOT NULL,
+--     bytes        BYTEA                    NOT NULL, -- 고도화 단계에서 이부분 지울것, 성능 및 공간 차지 비효율
+    created_at   TIMESTAMP WITH TIME ZONE NOT NULL
+
+);
+
 --- 유저 테이블 DDL
 CREATE TABLE users
 (
@@ -9,18 +21,6 @@ CREATE TABLE users
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
     CONSTRAINT fk_user_profile FOREIGN KEY (profile_id) REFERENCES binary_contents (id) ON DELETE SET NULL
-);
-
---- 바이너리컨텐츠 테이블 DDL
-CREATE TABLE binary_contents
-(
-    id           UUID PRIMARY KEY,
-    file_name    VARCHAR(255)             NOT NULL,
-    size         BIGINT                   NOT NULL,
-    content_type VARCHAR(100)             NOT NULL,
---     bytes        BYTEA                    NOT NULL, -- 고도화 단계에서 이부분 지울것, 성능 및 공간 차지 비효율
-    created_at   TIMESTAMP WITH TIME ZONE NOT NULL
-
 );
 
 --- 유저상태 테이블 DDL
@@ -59,7 +59,7 @@ CREATE TABLE messages
 
     CONSTRAINT fk_message_channel FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE,
     CONSTRAINT fk_message_author FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE SET NULL
-)
+);
 
 CREATE TABLE read_statuses
 (
@@ -73,7 +73,7 @@ CREATE TABLE read_statuses
     CONSTRAINT fk_read_status_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_read_status_channel FOREIGN KEY (channel_id) REFERENCES channels (id) ON DELETE CASCADE,
     CONSTRAINT uk_read_status_user_channel UNIQUE (user_id, channel_id)
-)
+);
 
 CREATE TABLE message_attachments
 (
@@ -82,4 +82,4 @@ CREATE TABLE message_attachments
     PRIMARY KEY (message_id, attachment_id),
     CONSTRAINT fk_message_attachment_message FOREIGN KEY (message_id) REFERENCES messages (id) ON DELETE CASCADE,
     CONSTRAINT fk_message_attachment_binary_content FOREIGN KEY (attachment_id) REFERENCES binary_contents (id) ON DELETE CASCADE
-)
+);
