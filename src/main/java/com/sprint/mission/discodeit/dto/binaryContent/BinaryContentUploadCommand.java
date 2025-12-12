@@ -1,9 +1,11 @@
 package com.sprint.mission.discodeit.dto.binaryContent;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@Slf4j
 public record BinaryContentUploadCommand(
         String fileName,
         String contentType,
@@ -21,6 +23,7 @@ public record BinaryContentUploadCommand(
                     size
                     );
         } catch (IOException e) {
+            log.error("파일 업로드 중 바이너리 읽기 실패 fileName={}", file.getOriginalFilename(), e);
             throw new RuntimeException("파일 읽기 실패", e);
         }
     }
