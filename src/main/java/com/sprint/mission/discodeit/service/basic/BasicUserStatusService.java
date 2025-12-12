@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicUserStatusService implements UserStatusService {
@@ -26,7 +28,6 @@ public class BasicUserStatusService implements UserStatusService {
     private final UserReader userReader;
     private final UserStatusRepository userStatusRepository;
     private final UserStatusMapper userStatusMapper;
-
 
 
     @Override
@@ -43,6 +44,9 @@ public class BasicUserStatusService implements UserStatusService {
 
         UserStatus userStatus = new UserStatus(user);
         UserStatus savedStatus = userStatusRepository.save(userStatus);
+
+        log.info("유저 상태 생성 완료 - userStatusId={}, userId={}", savedStatus.getId(), user.getId());
+
         return savedStatus.getId();
     }
 
@@ -69,12 +73,18 @@ public class BasicUserStatusService implements UserStatusService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
+        log.debug(
+                "유저 활동시각 갱신 시도 - userStatusId={}, newLastActiveAt={}",
+                id,
+                userStatusUpdateRequestDto.newLastActiveAt()
+        );
+
         UserStatus userStatus = userStatusRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
         boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
-        System.out.println("before in = " + isUpdated);
+
         if (isUpdated) {
-            System.out.println("isUpdated = " + isUpdated);
             userStatusRepository.save(userStatus);
+            log.debug("유저 활동시각 갱신 완료 - userStatusId={}", id);
         }
     }
 
@@ -85,10 +95,13 @@ public class BasicUserStatusService implements UserStatusService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
+        log.debug("유저 활동시각 갱신 시도 - userId={}, newLastActiveAt={}", userId, userStatusUpdateRequestDto.newLastActiveAt());
+
         UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(() -> new NoSuchElementException("해당 정보가 없습니다."));
         boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
         if (isUpdated) {
             userStatusRepository.save(userStatus);
+            log.debug("유저 활동시각 갱신 완료 - userId={}", userId);
         }
     }
 
@@ -99,6 +112,7 @@ public class BasicUserStatusService implements UserStatusService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
         userStatusRepository.deleteById(id);
+        log.info("유저 상태 삭제 완료 - userStatusId={}", id);
     }
 }
 
