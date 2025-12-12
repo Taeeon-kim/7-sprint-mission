@@ -162,7 +162,6 @@ public class BasicChannelService implements ChannelService {
     @Transactional
     public void joinChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
-            log.warn("채널 참여 실패 - 잘못된 파라미터 channelId={} userId={}", channelId, userId);
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         log.info("채널 참여 시도 channelId={} userId={}", channelId, userId);
@@ -171,7 +170,6 @@ public class BasicChannelService implements ChannelService {
         User user = userReader.findUserOrThrow(userId);
         // 이미 참여했는지 체크 (메서드 없으면 아래 existsBy...를 리포지토리에 추가)
         if (readStatusRepository.existsByUserAndChannel(user, channel)) {
-            log.warn("채널 참여 실패 - 이미 참여한 유저 channelId={} userId={}", channelId, userId);
             throw new IllegalStateException("이미 참여한 유저입니다.");
         }
 
@@ -185,7 +183,6 @@ public class BasicChannelService implements ChannelService {
     @Transactional
     public void leaveChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
-            log.warn("채널 탈퇴 실패 - 잘못된 파라미터 channelId={} userId={}", channelId, userId);
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
         log.info("채널 탈퇴 시도 channelId={} userId={}", channelId, userId);
@@ -194,10 +191,7 @@ public class BasicChannelService implements ChannelService {
         User user = userReader.findUserOrThrow(userId);
 
         ReadStatus readStatus = readStatusRepository.findByUserAndChannel(user, channel)
-                .orElseThrow(() -> {
-                    log.warn("채널 탈퇴 실패 - 참여하지 않은 사용자 channelId={} userId={}", channelId, userId);
-                    return new IllegalStateException("채널에 참여하지 않은 사용자입니다.");
-                });
+                .orElseThrow(() -> new IllegalStateException("채널에 참여하지 않은 사용자입니다."));
         readStatusRepository.delete(readStatus);
         log.info("채널 탈퇴 성공 channelId={} userId={}", channelId, userId);
     }
@@ -206,7 +200,6 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public List<User> getAllMembers(UUID channelId) {
         if (channelId == null) {
-            log.warn("채널 멤버 조회 실패 - channelId null");
             throw new IllegalArgumentException("전달값을 확인해주세요.");
         }
 
