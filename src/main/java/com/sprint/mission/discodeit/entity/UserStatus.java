@@ -16,11 +16,7 @@ import java.util.UUID;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserStatus{
-
-    private UUID uuid; //UserStatus의 UUID
-    private Instant createdAt;
-    private Instant updatedAt;
+public class UserStatus extends BaseUpdatableEntity {
 
     private UUID userId; // 유저의 UUID
     private Instant lastActiveAt; //마지막 접속시간
@@ -28,9 +24,7 @@ public class UserStatus{
 
 
     public UserStatus(UUID userId) {
-        this.uuid = UUID.randomUUID();
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
+        super();
         this.userId = userId;
         this.lastActiveAt = Instant.now();
         this.status = StatusType.ONLINE;

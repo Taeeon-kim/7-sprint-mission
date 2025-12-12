@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Getter
 @ToString
-public class Message extends BaseEntity {
+public class Message extends BaseUpdatableEntity {
 
     private UUID channelId; //작성채널
     private UUID userId; //작성자

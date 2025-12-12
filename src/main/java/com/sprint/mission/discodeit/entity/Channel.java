@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Getter
 @ToString
-public class Channel extends BaseEntity {
+public class Channel extends BaseUpdatableEntity {
     //채널 id, 생성, 수정은 BaseEntity에
 
     private String channelName;

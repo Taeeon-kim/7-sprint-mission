@@ -14,20 +14,14 @@ import java.util.UUID;
  */
 @Getter
 @ToString
-public class ReadStatus {
-
-    private UUID uuid; //고유 uuid
-    private Instant createAt;
-    private Instant updateAt;
+public class ReadStatus extends BaseUpdatableEntity{
 
     private UUID userId; //읽은 유저 정보
     private UUID channelId; //채널 정보
     private Instant lastActiveAt; //마지막으로 읽은 시각
 
     public ReadStatus(UUID userId, UUID channelId) {
-        this.uuid = UUID.randomUUID();
-        this.createAt = Instant.now();
-        this.updateAt = Instant.now();
+        super();
         this.userId = userId;
         this.channelId = channelId;
         this.lastActiveAt = Instant.now();

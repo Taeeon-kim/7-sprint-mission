@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
-public class User extends BaseEntity {
+public class User extends BaseUpdatableEntity {
 
     private String userId; //가입 Id
     private String password; //비밀번호
