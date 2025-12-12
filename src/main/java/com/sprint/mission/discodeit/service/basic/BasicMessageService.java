@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.message.*;
+import com.sprint.mission.discodeit.dto.message.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.message.MessageSendCommand;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateCommand;
+import com.sprint.mission.discodeit.dto.message.MessageUpdateResponseDto;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -18,14 +21,18 @@ import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.MessageReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
@@ -54,6 +61,10 @@ public class BasicMessageService implements MessageService {
         if (channelId == null) {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
+
+        log.debug("메시지 목록 조회 시도 - channelId={}, page={}, size={}, cursor={}",
+                channelId, pageable.getPageNumber(), pageable.getPageSize(), cursor);
+
         Channel channel = channelReader.findChannelOrThrow(channelId);
         System.out.println("cursor = " + cursor);
 
@@ -63,7 +74,7 @@ public class BasicMessageService implements MessageService {
          그래서 트랜잭션 안에서 미리 DTO로 변환해서 필요한 값만 꺼내두는 것.
          */
 
-        Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable,  Optional.ofNullable(cursor).orElse(Instant.now()))
+        Slice<MessageResponseDto> sliceMessageList = messageRepository.findAllByChannelId(channel.getId(), pageable, Optional.ofNullable(cursor).orElse(Instant.now()))
                 .map(messageMapper::toDto);
         // NOTE: fetch join, batch 이용 N+1, pagination 해결
 
@@ -73,6 +84,8 @@ public class BasicMessageService implements MessageService {
                     .createdAt();
         }
 
+        log.debug("메시지 목록 조회 성공 - channelId={}, count={}, nextCursor={}",
+                channelId, sliceMessageList.getNumberOfElements(), nextCursor);
 
         return PageResponseMapper.fromSlice(sliceMessageList, nextCursor);
 
@@ -92,6 +105,11 @@ public class BasicMessageService implements MessageService {
         if (command.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
+
+        log.debug("메시지 전송 시도 - channelId={}, senderId={}, attachments={}",
+                command.channelId(), command.senderId(),
+                command.profiles() == null ? 0 : command.profiles().size());
+
         // NOTE: 1. 보내려는 유저가 맞는지 확인
         User sender = userReader.findUserOrThrow(command.senderId());
         // NOTE: 2. 보내려는 채널이있는지 확인
@@ -118,6 +136,10 @@ public class BasicMessageService implements MessageService {
                 .build();
 
         Message savedMessage = messageRepository.save(message);
+
+        log.info("메시지 전송 성공 - messageId={}, channelId={}, senderId={}",
+                savedMessage.getId(), channel.getId(), sender.getId());
+
         return messageMapper.toDto(savedMessage);
     }
 
@@ -127,17 +149,25 @@ public class BasicMessageService implements MessageService {
         if (command.messageId() == null || command.content() == null || command.content().trim().isEmpty()) {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
-
+        log.debug("메시지 수정 시도 - messageId={}", command.messageId());
         Message message = messageReader.findMessageOrThrow(command.messageId());
         boolean isUpdated = false;
         if (!command.content().equals(message.getContent())) {
+
             isUpdated = message.updateContent(command.content());
         }
 
         if (isUpdated) {
             Message saved = messageRepository.save(message);
+
+            log.info("메시지 수정 완료 - messageId={}", saved.getId());
+
             return messageMapper.toUpdateDto(saved);
         }
+        log.debug(
+                "메시지 수정 없음 - messageId={}, reason=same_content",
+                command.messageId()
+        );
         return null;
     }
 
@@ -147,7 +177,12 @@ public class BasicMessageService implements MessageService {
         if (messageId == null) {
             throw new IllegalArgumentException("전달값이 잘못되었습니다.");
         }
+        
+        log.debug("메시지 삭제 시도 - messageId={}", messageId);
+
         Message message = messageReader.findMessageOrThrow(messageId);
         messageRepository.deleteById(message.getId());
+
+        log.info("메시지 삭제 완료 - messageId={}", messageId);
     }
 }
