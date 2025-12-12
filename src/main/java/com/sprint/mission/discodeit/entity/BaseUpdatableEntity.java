@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
 
@@ -9,7 +10,8 @@ import java.time.Instant;
 @Setter
 public class BaseUpdatableEntity extends BaseEntity{
 
-    private Instant updatedAt; //객체 수정 시간
+    @LastModifiedDate
+    private Instant updatedAt;
 
     public BaseUpdatableEntity() {
         this.updatedAt = Instant.now();
