@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.user.*;
-
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
+import com.sprint.mission.discodeit.dto.user.UserSignupCommand;
+import com.sprint.mission.discodeit.dto.user.UserUpdateCommand;
+import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.mapper.UserMapperManual;
@@ -11,12 +13,14 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
@@ -41,6 +45,8 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못되었습니다.");
         }
 
+        log.debug("회원가입 처리 시작 - hasProfile={}", userSignupCommand.profile().isPresent());
+
         if (userRepository.existsByEmail(userSignupCommand.email()) || userRepository.existsByUsername(userSignupCommand.username())) {
             throw new IllegalArgumentException("이미 사용 중 입니다.");
         }
@@ -59,6 +65,8 @@ public class BasicUserService implements UserService {
         // NOTE: user객체 생성후 userStatus도 넣어서 cascade 영향으로 같이 insert되도록
         newUser.initUserStatus();
         User savedUser = userRepository.save(newUser);
+
+        log.info("회원가입 완료 - userId={}, hasProfile={}", savedUser.getId(), profileBinaryId != null);
 
         return userMapper.toDto(savedUser);
     }
@@ -79,8 +87,10 @@ public class BasicUserService implements UserService {
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
 
+        log.debug("회원 삭제 처리 시작 - userId={}", userId);
         User user = userReader.findUserOrThrow(userId);
         userRepository.deleteById(user.getId());
+        log.info("회원 삭제 완료 - userId={}", userId);
 
     }
 
@@ -91,6 +101,11 @@ public class BasicUserService implements UserService {
             // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
+
+        log.debug("회원 수정 처리 시작 - userId={}, hasProfile={}",
+                updateCommand.id(),
+                updateCommand.profile().isPresent()
+        );
 
         User userById = userReader.findUserOrThrow(updateCommand.id());
 
@@ -103,6 +118,9 @@ public class BasicUserService implements UserService {
         UserUpdateParams params = UserUpdateParams.from(updateCommand, binaryContent); // 경계분리
         userById.update(params);
         userRepository.save(userById);// user repository 사용 책임 분리
+
+        log.info("회원 수정 완료 - userId={}, profileChanged={}", updateCommand.id(), profileBinaryId != null);
+
         return userMapper.toDto(userById); // NOTE: 멱등성, dirty checking 으로 바뀌던 안바뀌던 해당 객체 반환
     }
 
@@ -124,6 +142,9 @@ public class BasicUserService implements UserService {
         if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
             throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
         }
+
+        log.debug("유저 다중 조회 - size={}", userIds.size());
+
         return userRepository.findAllById(userIds);
     }
 }
