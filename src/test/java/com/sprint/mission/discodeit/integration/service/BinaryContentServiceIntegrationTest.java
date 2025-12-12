@@ -14,8 +14,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -113,18 +116,19 @@ public class BinaryContentServiceIntegrationTest {
             BinaryContent saved2 = binaryContentRepository.save(updateContent2);
 
             // when
-            List<BinaryContentResponseDto> responseDtos = binaryContentService.getBinaryContentsByIds(List.of(saved.getId(), saved2.getId()));
+            List<BinaryContentResponseDto> responseDtos =
+                    binaryContentService.getBinaryContentsByIds(List.of(saved.getId(), saved2.getId()));
 
-            // then
+// then
+            Map<UUID, BinaryContentResponseDto> mapResponse = responseDtos.stream()
+                    .collect(Collectors.toMap(BinaryContentResponseDto::id, Function.identity()));
 
             assertAll(
                     () -> assertEquals(2, responseDtos.size()),
-                    () -> assertEquals(saved.getId(), responseDtos.get(0).id()),
-                    () -> assertEquals(saved2.getId(), responseDtos.get(1).id()),
-                    () -> assertEquals(saved.getFileName(), responseDtos.get(0).fileName()),
-                    () -> assertEquals(saved2.getFileName(), responseDtos.get(1).fileName()),
-                    () -> assertEquals(saved.getContentType(), responseDtos.get(0).contentType()),
-                    () -> assertEquals(saved2.getContentType(), responseDtos.get(1).contentType())
+                    () -> assertEquals(saved.getFileName(), mapResponse.get(saved.getId()).fileName()),
+                    () -> assertEquals(saved2.getFileName(), mapResponse.get(saved2.getId()).fileName()),
+                    () -> assertEquals(saved.getContentType(), mapResponse.get(saved.getId()).contentType()),
+                    () -> assertEquals(saved2.getContentType(), mapResponse.get(saved2.getId()).contentType())
             );
 
         }
@@ -157,7 +161,8 @@ public class BinaryContentServiceIntegrationTest {
             long before = binaryContentRepository.findAll().size();
 
             // when
-            binaryContentService.deleteBinaryContent(saved.getId());
+            binaryContentService.
+                    deleteBinaryContent(saved.getId());
 
             // then
             long after = binaryContentRepository.findAll().size();

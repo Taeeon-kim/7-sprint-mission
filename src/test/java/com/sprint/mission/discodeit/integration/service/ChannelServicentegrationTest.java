@@ -61,10 +61,10 @@ public class ChannelServicentegrationTest {
     JdbcTemplate jdbcTemplate;
 
 
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.execute("TRUNCATE TABLE read_statuses, messages, channels, users, user_statuses RESTART IDENTITY CASCADE");
-    }
+//    @BeforeEach
+//    void setUp() {
+//        jdbcTemplate.execute("TRUNCATE TABLE read_statuses, messages, channels, users, user_statuses RESTART IDENTITY CASCADE");
+//    }
 
     @Nested
     class CreateChannel {

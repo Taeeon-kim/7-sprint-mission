@@ -7,7 +7,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
+
+  sql:
+    init:
+      mode: never # schema.sql, data.sql 안 씀
 
   h2:
     console:
