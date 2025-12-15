@@ -5,7 +5,7 @@ import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.auth.AuthInvalidCredentialsException;
-import com.sprint.mission.discodeit.exception.userStatus.UserStatusNotFoundException;
+import com.sprint.mission.discodeit.exception.userStatus.UserStatusNotFoundByUserIdException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -31,12 +29,12 @@ public class BasicAuthService implements AuthService {
     public UserResponseDto login(AuthLoginRequestDto request) {
         log.debug("로그인 시도 username={}", request.username());
         User findUser = userRepository.findByUsernameAndPassword(
-                request.username(),
-                request.password())
+                        request.username(),
+                        request.password())
                 .orElseThrow(AuthInvalidCredentialsException::new);
         log.debug("사용자 조회 성공 userId={}", findUser.getId());
         // TODO: userState를 null이 아닌 online 값으로 추가
-        UserStatus userStatus = userStatusRepository.findByUserId(findUser.getId()).orElseThrow(UserStatusNotFoundException::new);
+        UserStatus userStatus = userStatusRepository.findByUserId(findUser.getId()).orElseThrow(() -> new UserStatusNotFoundByUserIdException(findUser.getId()));
         userStatus.markAsActive();
         UserStatus saved = userStatusRepository.save(userStatus);
         log.debug("사용자 상태 업데이트 userId={}", findUser.getId());

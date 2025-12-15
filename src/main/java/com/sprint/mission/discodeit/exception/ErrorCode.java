@@ -41,7 +41,8 @@ public enum ErrorCode {
     READ_STATUS_NOT_FOUND("읽음 상태가 존재하지 않습니다.", HttpStatus.NOT_FOUND, "RS-002"),
 
     // UserStatus
-    USER_STATUS_NOT_FOUND("유저 상태를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR, "US-001");
+    USER_STATUS_NOT_FOUND("유저 상태를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR, "US-001"),
+    USER_STATUS_ALREADY_EXISTS("해당 유저의 상태는 이미 등록되었습니다.", HttpStatus.CONFLICT, "US-002");
 
     private final String message;
     private final HttpStatus status;
