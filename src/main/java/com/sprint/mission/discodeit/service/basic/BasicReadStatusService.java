@@ -1,9 +1,16 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.readStatus.*;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusDuplicatedException;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusNotFoundException;
 import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
@@ -15,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Slf4j
@@ -32,7 +38,7 @@ public class BasicReadStatusService implements ReadStatusService {
     @Transactional
     public ReadStatusResponseDto createReadStatus(ReadStatusCreateRequestDto requestDto) {
         if (requestDto.userId() == null || requestDto.channelId() == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("읽음 상태 생성 시도 - userId={}, channelId={}", requestDto.userId(), requestDto.channelId());
@@ -41,7 +47,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
 
         if (readStatusRepository.existsByUserIdAndChannelId(requestDto.userId(), requestDto.channelId())) {
-            throw new IllegalArgumentException("이미 존재합니다.");
+            throw new ReadStatusDuplicatedException(requestDto.userId(), requestDto.channelId());
         }
 
 
@@ -62,7 +68,7 @@ public class BasicReadStatusService implements ReadStatusService {
     @Transactional(readOnly = true)
     public ReadStatusResponseDto getReadStatus(UUID readStatusId) {
         log.debug("읽음 상태 단건 조회 - readStatusId={}", readStatusId);
-        ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new NoSuchElementException("읽음 상태가 존재하지 않습니다."));
+        ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new ReadStatusNotFoundException(readStatusId));
         return readStatusMapper.toDto(readStatus);
     }
 

@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,7 +46,7 @@ public class ReadStatus extends BaseUpdatableEntity {
     public boolean updateReadAt(Instant readAt) {
 
         if (readAt == null) {
-            throw new IllegalArgumentException("값이 잘못되었습니다");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         // 최초이면 무조건 세팅
         if (this.lastReadAt == null) {
