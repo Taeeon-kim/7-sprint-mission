@@ -1,10 +1,14 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.channel.*;
+import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
+import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateParams;
+import com.sprint.mission.discodeit.dto.channel.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.exception.channel.ChannelMinimumMembersNotMetException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -52,7 +56,11 @@ public class BasicChannelService implements ChannelService {
             if (users.size() < MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL) {
                 log.warn("PRIVATE 채널 생성 실패 - 최소 인원 부족 channelId={} required={} actual={}",
                         saved.getId(), MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL, users.size());
-                throw new IllegalArgumentException("PRIVATE 채널 최소 2명 이상이어야 합니다.");
+                throw new ChannelMinimumMembersNotMetException(
+                        users.size(),
+                        MIN_PARTICIPANTS_FOR_PRIVATE_CHANNEL,
+                        users.stream().map(User::getId).toList()
+                );
             }
             if (users.size() < command.memberIds().size()) {
                 log.warn("PRIVATE 채널 생성 실패 - 잘못된 참여 유저 존재 channelId={} requestedIds={} foundUsers={}",

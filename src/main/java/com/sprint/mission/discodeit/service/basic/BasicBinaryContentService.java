@@ -3,6 +3,9 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.binaryContent.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -49,7 +52,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     @Transactional(readOnly = true)
     public BinaryContentResponseDto getBinaryContent(UUID id) {
         log.debug("binary content 조회 시도 id={}", id);
-        BinaryContent binaryContent = binaryContentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을수 없습니다."));
+        BinaryContent binaryContent = binaryContentRepository.findById(id).orElseThrow(() -> new BinaryContentNotFoundException(id));
         log.debug("binary content 조회 성공 binaryId={}", binaryContent.getId()); // NOTE: read는 너무많은 info 발생하므로 debug로
         return binaryContentMapper.toDto(binaryContent);
     }
@@ -67,7 +70,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     @Transactional
     public void deleteBinaryContent(UUID id) {
         if (id == null) {
-            throw new IllegalArgumentException("전달값이 잘못되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         binaryContentRepository.deleteById(id);
     }
