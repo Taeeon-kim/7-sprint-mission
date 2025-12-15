@@ -10,6 +10,9 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.message.MessageSendNotAllowed;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -59,7 +62,7 @@ public class BasicMessageService implements MessageService {
     @Transactional
     public PageResponse<MessageResponseDto> getAllMessagesByChannelId(UUID channelId, Pageable pageable, Instant cursor) {
         if (channelId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("메시지 목록 조회 시도 - channelId={}, page={}, size={}, cursor={}",
@@ -102,8 +105,8 @@ public class BasicMessageService implements MessageService {
     @Override
     @Transactional
     public MessageResponseDto sendMessageToChannel(MessageSendCommand command) {
-        if (command.content() == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        if (command.content() == null) { // NOTE: 서비스 레이어 public API라 컨트롤러 외 테스트, 배치, 이벤트 핸들러에서 요청 가능하므로 최소 필수 가드로 남김
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("메시지 전송 시도 - channelId={}, senderId={}, attachments={}",
@@ -119,7 +122,7 @@ public class BasicMessageService implements MessageService {
         if (channel.getType() == ChannelType.PRIVATE) {
             boolean isMember = readStatusRepository.existsByUserIdAndChannelId(sender.getId(), channel.getId());
             if (!isMember) {
-                throw new IllegalStateException("채널 맴버만 메세지 전송 가능합니다.");
+                throw new MessageSendNotAllowed(sender.getId(), channel.getId(), channel.getType());
             }
         }
 
@@ -147,37 +150,31 @@ public class BasicMessageService implements MessageService {
     @Transactional
     public MessageUpdateResponseDto updateMessage(MessageUpdateCommand command) {
         if (command.messageId() == null || command.content() == null || command.content().trim().isEmpty()) {
-            throw new IllegalArgumentException("입력값이 잘못되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         log.debug("메시지 수정 시도 - messageId={}", command.messageId());
         Message message = messageReader.findMessageOrThrow(command.messageId());
-        boolean isUpdated = false;
+
         if (!command.content().equals(message.getContent())) {
-
-            isUpdated = message.updateContent(command.content());
+            message.updateContent(command.content());
+            log.info("메시지 수정 완료 - messageId={}", message.getId());
+        } else {
+            log.debug(
+                    "메시지 수정 없음 - messageId={}, reason=same_content",
+                    command.messageId()
+            );
         }
 
-        if (isUpdated) {
-            Message saved = messageRepository.save(message);
-
-            log.info("메시지 수정 완료 - messageId={}", saved.getId());
-
-            return messageMapper.toUpdateDto(saved);
-        }
-        log.debug(
-                "메시지 수정 없음 - messageId={}, reason=same_content",
-                command.messageId()
-        );
-        return null;
+        return messageMapper.toUpdateDto(message);
     }
 
     @Override
     @Transactional
     public void deleteMessage(UUID messageId) {
         if (messageId == null) {
-            throw new IllegalArgumentException("전달값이 잘못되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
-        
+
         log.debug("메시지 삭제 시도 - messageId={}", messageId);
 
         Message message = messageReader.findMessageOrThrow(messageId);
