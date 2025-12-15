@@ -4,6 +4,8 @@ import com.sprint.mission.discodeit.dto.auth.AuthLoginRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.auth.AuthInvalidCredentialsException;
+import com.sprint.mission.discodeit.exception.userStatus.UserStatusNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -24,7 +26,6 @@ public class BasicAuthService implements AuthService {
     private final UserStatusRepository userStatusRepository;
     private final UserMapper userMapper;
 
-
     @Override
     @Transactional
     public UserResponseDto login(AuthLoginRequestDto request) {
@@ -32,10 +33,10 @@ public class BasicAuthService implements AuthService {
         User findUser = userRepository.findByUsernameAndPassword(
                 request.username(),
                 request.password())
-                .orElseThrow(() -> new IllegalArgumentException("이름 또는 비밀번호를 다시 확인해주세요"));
+                .orElseThrow(AuthInvalidCredentialsException::new);
         log.debug("사용자 조회 성공 userId={}", findUser.getId());
         // TODO: userState를 null이 아닌 online 값으로 추가
-        UserStatus userStatus = userStatusRepository.findByUserId(findUser.getId()).orElseThrow(() -> new NoSuchElementException("유저 상태가없습니다."));
+        UserStatus userStatus = userStatusRepository.findByUserId(findUser.getId()).orElseThrow(UserStatusNotFoundException::new);
         userStatus.markAsActive();
         UserStatus saved = userStatusRepository.save(userStatus);
         log.debug("사용자 상태 업데이트 userId={}", findUser.getId());

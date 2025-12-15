@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Instant;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -28,6 +29,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(DiscodeitException.class)
+    public ResponseEntity<ErrorResponse> handleDiscodeitException(DiscodeitException e) {
+        log.error(e.getMessage());
+        ErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.getStatus())
+                .body(new ErrorResponse(
+                        e.getTimestamp(),
+                        code.getCode(),
+                        code.getMessage(),
+                        e.getDetails(),
+                        code.getClass().getSimpleName(),
+                        code.getStatus().value()
+                ));
     }
 
     @ExceptionHandler(Exception.class)

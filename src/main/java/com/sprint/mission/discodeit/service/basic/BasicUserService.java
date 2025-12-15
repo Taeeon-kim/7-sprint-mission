@@ -6,6 +6,9 @@ import com.sprint.mission.discodeit.dto.user.UserUpdateCommand;
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.user.UserDuplicateException;
 import com.sprint.mission.discodeit.mapper.UserMapperManual;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -42,13 +45,13 @@ public class BasicUserService implements UserService {
                         userSignupCommand.email() == null || userSignupCommand.email().isBlank()
 
         ) {
-            throw new IllegalArgumentException("입력값이 잘못되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("회원가입 처리 시작 - hasProfile={}", userSignupCommand.profile().isPresent());
 
         if (userRepository.existsByEmail(userSignupCommand.email()) || userRepository.existsByUsername(userSignupCommand.username())) {
-            throw new IllegalArgumentException("이미 사용 중 입니다.");
+            throw new UserDuplicateException();
         }
 
         UUID profileBinaryId = userSignupCommand.profile().map(binaryContentService::uploadBinaryContent).orElse(null); // NOTE: 서비스 의존은 지양해야하지만, 순환참조 없고 해당 서비스가 다른 서비스에 의존하는게 아니면 공통된건 사용해도 좋고, 오히려 Service라는 이름보단 -Uploader @Component로 구성하는게 나을수도있다.
@@ -83,8 +86,8 @@ public class BasicUserService implements UserService {
     @Override
     @Transactional
     public void deleteUser(UUID userId) {
-        if (userId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        if (userId == null) { // NOTE: 서비스 레이어 public API라 컨트롤러 외 테스트, 배치, 이벤트 핸들러에서 요청 가능하므로 최소 필수 가드로 남김
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("회원 삭제 처리 시작 - userId={}", userId);
@@ -98,8 +101,8 @@ public class BasicUserService implements UserService {
     @Transactional
     public UserResponseDto updateUser(UserUpdateCommand updateCommand) {
         if (updateCommand.id() == null) { // NOTE: update 는 부분 변경이므로 userId만 가드, 나머지는 Null 허용으로 미변경 정책으로 봄
-            // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            // NOTE: 서비스 레이어 public API라 컨트롤러 외 테스트, 배치, 이벤트 핸들러에서 요청 가능하므로 최소 필수 가드로 남김
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("회원 수정 처리 시작 - userId={}, hasProfile={}",
@@ -139,8 +142,8 @@ public class BasicUserService implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> getUsersByIds(List<UUID> userIds) {
-        if (userIds == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+        if (userIds == null) {  // NOTE: 서비스 레이어 public API라 컨트롤러 외 테스트, 배치, 이벤트 핸들러에서 요청 가능하므로 최소 필수 가드로 남김
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("유저 다중 조회 - size={}", userIds.size());

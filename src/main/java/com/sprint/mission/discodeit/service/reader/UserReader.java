@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.service.reader;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +23,15 @@ public class UserReader {
 
     public User findUserOrThrow(UUID userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     public List<User> findUsersByIds(List<UUID> userIds) {
         if (userIds == null) { // NOTE: 어디서 불를지 모르기때문에 불변식은 아니더래도 자기방어를 위한 방어코드 추가
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         return userRepository.findAllById(userIds);
     }
