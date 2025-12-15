@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -14,6 +15,15 @@ public class User extends BaseUpdatableEntity {
     private String email; //이메일
     private String userName; //유저 이름
     private UUID profileImageId; //프로필
+
+    // 1:1 관계
+    private UserStatus userStatus;
+
+    // N:M 관계
+    private List<Channel> channels;
+
+    // N:M 관계
+    private List<ReadStatus> readStatuses;
 
     public User(String userId, String password, String email, String userName, UUID profileImageId) {
         super();

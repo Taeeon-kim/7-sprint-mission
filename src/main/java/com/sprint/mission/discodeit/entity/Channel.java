@@ -12,16 +12,32 @@ import java.util.UUID;
 @Getter
 @ToString
 public class Channel extends BaseUpdatableEntity {
-    //채널 id, 생성, 수정은 BaseEntity에
 
     private String channelName;
     private ChannelType channelType;
     private String discription;
-    private List<UUID> participantIds = new ArrayList<>();
+//    private List<UUID> participantIds = new ArrayList<>();
 
-    public void setUpdate(String newChannelName) {
-        if(newChannelName != null && !newChannelName.equals(this.channelName)){
+    // 1:N 관계
+    private List<Message> messages;
+
+    // N:M 관계
+    private List<User> member;
+
+    // 1:N 관계
+    private List<ReadStatus> readStatuses;
+
+    public void setUpdate(String newChannelName, String newDiscription) {
+        if(this.channelType == ChannelType.PRIVATE){
+            throw new UnsupportedOperationException("Private channels cannot be updated");
+        }
+        if(newChannelName != null && !newChannelName.equals(this.channelName)) {
             this.channelName = newChannelName;
+        }
+        if(newDiscription != null && !newDiscription.equals(this.discription)) {
+            this.discription = newDiscription;
+        }
+        if(newChannelName != null || newDiscription != null) {
             setUpdatedAt(Instant.now());
         }
     }
@@ -34,10 +50,10 @@ public class Channel extends BaseUpdatableEntity {
         this.discription = discription;
     }
 
-    public Channel(List<UUID> participantIds, ChannelType channelType) {
+    public Channel(ChannelType channelType) {
         super();
-        this.participantIds = participantIds;
         this.channelType = channelType;
         this.channelName = null;
+        this.discription = null;
     }
 }
