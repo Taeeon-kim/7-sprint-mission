@@ -94,7 +94,7 @@ public class UserStatusServiceIntegrationTest {
             UserNotFoundException userNotFoundException = assertThrows(UserNotFoundException.class, () -> userStatusService.createUserStatus(new UserStatusRequestDto(id)));
             assertEquals(ErrorCode.USER_NOT_FOUND, userNotFoundException.getErrorCode());
             assertEquals(HttpStatus.NOT_FOUND, userNotFoundException.getErrorCode().getStatus());
-            assertEquals("U-001", userNotFoundException.getErrorCode().getCode());
+            assertEquals(ErrorCode.USER_NOT_FOUND.getCode(), userNotFoundException.getErrorCode().getCode());
         }
 
         @Test
@@ -144,7 +144,7 @@ public class UserStatusServiceIntegrationTest {
             UserStatusNotFoundException userStatusNotFoundException = assertThrows(UserStatusNotFoundException.class, () -> userStatusService.getUserStatus(id));
             assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundException.getErrorCode());
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundException.getErrorCode().getStatus());
-            assertEquals("US-001", userStatusNotFoundException.getErrorCode().getCode());
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND.getCode(), userStatusNotFoundException.getErrorCode().getCode());
         }
 
     }
@@ -231,7 +231,7 @@ public class UserStatusServiceIntegrationTest {
                     () -> userStatusService.updateUserStatus(id, updateDto));
             assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundException.getErrorCode());
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundException.getErrorCode().getStatus());
-            assertEquals("US-001", userStatusNotFoundException.getErrorCode().getCode());
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND.getCode(), userStatusNotFoundException.getErrorCode().getCode());
         }
 
         @Test
@@ -286,7 +286,7 @@ public class UserStatusServiceIntegrationTest {
                     () -> userStatusService.updateUserStatusByUserId(id, updateDto));
             assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundByUserIdException.getErrorCode());
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundByUserIdException.getErrorCode().getStatus());
-            assertEquals("US-001", userStatusNotFoundByUserIdException.getErrorCode().getCode());
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND.getCode(), userStatusNotFoundByUserIdException.getErrorCode().getCode());
         }
 
         @Test

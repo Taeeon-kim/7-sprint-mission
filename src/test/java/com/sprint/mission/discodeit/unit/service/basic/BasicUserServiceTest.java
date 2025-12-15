@@ -216,7 +216,7 @@ class BasicUserServiceTest {
             DiscodeitException discodeitException = assertThrows(DiscodeitException.class, () -> userService.deleteUser(null));
             assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
             assertEquals(HttpStatus.BAD_REQUEST, discodeitException.getErrorCode().getStatus());
-            assertEquals("CM-001", discodeitException.getErrorCode().getCode());
+            assertEquals(ErrorCode.INVALID_INPUT.getCode(), discodeitException.getErrorCode().getCode());
             verify(userRepository, never()).deleteById(any());
         }
     }
@@ -438,7 +438,7 @@ class BasicUserServiceTest {
             DiscodeitException discodeitException = assertThrows(DiscodeitException.class, () -> userService.getUsersByIds(null));
             assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
             assertEquals(HttpStatus.BAD_REQUEST, discodeitException.getErrorCode().getStatus());
-            assertEquals("CM-001", discodeitException.getErrorCode().getCode());
+            assertEquals(ErrorCode.INVALID_INPUT.getCode(), discodeitException.getErrorCode().getCode());
             verify(userRepository, never()).findAllById(any()); // TODO: 단위테스트에서도 해당 jpa 메서드 호출하는지 한번 검토 문제없을시 다른부분도 안봐도됨
         }
 
