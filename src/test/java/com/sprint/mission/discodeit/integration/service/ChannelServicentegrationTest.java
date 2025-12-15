@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.exception.channel.*;
 import com.sprint.mission.discodeit.integration.fixtures.ChannelFixture;
 import com.sprint.mission.discodeit.integration.fixtures.MessageFixture;
 import com.sprint.mission.discodeit.integration.fixtures.ReadStatusFixture;
@@ -16,7 +17,6 @@ import com.sprint.mission.discodeit.integration.fixtures.UserFixture;
 import com.sprint.mission.discodeit.repository.*;
 import com.sprint.mission.discodeit.service.ChannelService;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -126,7 +125,7 @@ public class ChannelServicentegrationTest {
             User user = UserFixture.createUserWithStatus(userRepository);
 
             //when & then
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(ChannelMinimumMembersNotMetException.class, () ->
                     channelService.createChannel(ChannelCreateCommand.from(
                             new ChannelCreateRequestDto(null, null, List.of(user.getId())),
                             ChannelType.PRIVATE
@@ -208,11 +207,11 @@ public class ChannelServicentegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Negative] private채널 생성 - 존재하지 않는 멤버 포함 시 예외")
+        @DisplayName("[Integration][Negative] private채널 생성 - 존재하지 않는 멤버로 private 채널 생성시 인원불충족으로 예외")
         void createChannel_private_throws_when_member_not_found() {
-            User creator = userRepository.save(User.builder()
-                    .nickname("c").email("c@ex.com").password("pw")
-                    .build());
+//            User creator = userRepository.save(User.builder()
+//                    .nickname("c").email("c@ex.com").password("pw")
+//                    .build());
 
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
                     null, null, List.of(UUID.randomUUID()) // 존재하지 않는 유저
@@ -220,7 +219,7 @@ public class ChannelServicentegrationTest {
 
             ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto, ChannelType.PRIVATE);
 
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(ChannelMinimumMembersNotMetException.class,
                     () -> channelService.createChannel(cmd));
         }
 
@@ -265,7 +264,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 채널 조회 - 존재하지않는 채널 조회시 예외")
         void getChannel_throws_when_not_found() {
             UUID id = UUID.randomUUID();
-            assertThrows(NoSuchElementException.class, () -> channelService.getChannel(id));
+            assertThrows(ChannelNotFoundException.class, () -> channelService.getChannel(id));
         }
 
         @Test
@@ -503,7 +502,7 @@ public class ChannelServicentegrationTest {
                     .newDescription("수정한 설명란")
                     .build();
             // when & then
-            assertThrows(IllegalArgumentException.class, () -> channelService.updateChannel(privateChannel.getId(), request));
+            assertThrows(ChannelModificationNotAllowedException.class, () -> channelService.updateChannel(privateChannel.getId(), request));
         }
     }
 

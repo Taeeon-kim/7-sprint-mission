@@ -4,6 +4,9 @@ import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.user.UserDuplicateException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -78,7 +81,7 @@ public class UserServiceIntegrationTest {
         void signUp_invalid_blocked() {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "pw"), null);
             int before = userRepository.findAll().size();
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(DiscodeitException.class,
                     () -> userService.signUp(command));
             int after = userRepository.findAll().size();
             assertEquals(before, after);
@@ -94,7 +97,7 @@ public class UserServiceIntegrationTest {
 
             // when & then
             UserSignupCommand duplicateCommand = UserSignupCommand.from(new UserSignupRequestDto("different", "example@email.com", "password"), null);
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(duplicateCommand));
+            assertThrows(UserDuplicateException.class, () -> userService.signUp(duplicateCommand));
 
             // then
             int after = userRepository.findAll().size();
@@ -111,7 +114,7 @@ public class UserServiceIntegrationTest {
 
             // when & then
             UserSignupCommand duplicateCommand = UserSignupCommand.from(new UserSignupRequestDto("name", "different@email.com", "password"), null);
-            assertThrows(IllegalArgumentException.class, () -> userService.signUp(duplicateCommand));
+            assertThrows(UserDuplicateException.class, () -> userService.signUp(duplicateCommand));
 
             // then
             int after = userRepository.findAll().size();
@@ -162,7 +165,7 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Exception] 회원조회 - 미존재 → 예외 전파")
         void getUserById_throws_when_not_found() {
-            assertThrows(NoSuchElementException.class,
+            assertThrows(UserNotFoundException.class,
                     () -> userService.getUserById(UUID.randomUUID()));
         }
 
@@ -262,7 +265,7 @@ public class UserServiceIntegrationTest {
             UserSignupCommand command = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", "pw"), null);
             UserResponseDto responseDto = userService.signUp(command);
             userService.deleteUser(responseDto.id());
-            assertThrows(NoSuchElementException.class, () -> userService.getUserById(responseDto.id()));
+            assertThrows(UserNotFoundException.class, () -> userService.getUserById(responseDto.id()));
         }
 
         @Test
@@ -338,7 +341,7 @@ public class UserServiceIntegrationTest {
         @Test
         @DisplayName("[Integration][Negative] null 입력 → 예외")
         void getUsersByIds_null_ids_throws() {
-            assertThrows(IllegalArgumentException.class, () -> userService.getUsersByIds(null));
+            assertThrows(DiscodeitException.class, () -> userService.getUsersByIds(null));
         }
     }
 

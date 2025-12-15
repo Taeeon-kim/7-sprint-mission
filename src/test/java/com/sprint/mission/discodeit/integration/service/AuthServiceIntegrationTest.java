@@ -2,10 +2,8 @@ package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.auth.AuthLoginRequestDto;
 import com.sprint.mission.discodeit.dto.user.UserResponseDto;
-import com.sprint.mission.discodeit.entity.UserStatus;
-import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
-import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.auth.AuthInvalidCredentialsException;
 import com.sprint.mission.discodeit.integration.fixtures.UserFixture;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -65,18 +63,18 @@ public class AuthServiceIntegrationTest {
 
 
         @Test
-        @DisplayName("[Integration][Flow][Negative] 로그인 - 아이디, 비밀번호 불일치 시 NoSuchElement 예외")
+        @DisplayName("[Integration][Flow][Negative] 로그인 - 아이디, 비밀번호 불일치 시 AuthInvalidCredentialsException 예외")
         void login_throws_when_not_found() {
             // given
             User user = UserFixture.createUserWithStatus(userRepository);
 
             // when & then
             assertAll(
-                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(AuthInvalidCredentialsException.class, () -> authService.login(AuthLoginRequestDto.builder()
                             .username(user.getUsername())
                             .password("wrongPassword")
                             .build())),
-                    () -> assertThrows(IllegalArgumentException.class, () -> authService.login(AuthLoginRequestDto.builder()
+                    () -> assertThrows(AuthInvalidCredentialsException.class, () -> authService.login(AuthLoginRequestDto.builder()
                                     .username("wrongName")
                                     .password(user.getPassword())
                                     .build()

@@ -4,6 +4,8 @@ import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.mapper.UserMapperManual;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -13,6 +15,7 @@ import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
 import org.mockito.InOrder;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.*;
@@ -84,26 +87,26 @@ class BasicUserServiceTest {
             UserSignupCommand passwordNullCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", " "), null);
 
             // isBlank
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(userNameBlankCommand));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(emailBlankCommand));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(passwordBlankCommand));
 
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(userNameBlankCommand2));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(emailBlankCommand2));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(passwordBlankCommand2));
 
             // null
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(userNameNullCommand));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(emailNullCommand));
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(DiscodeitException.class, () ->
                     userService.signUp(passwordNullCommand));
 
 
@@ -210,7 +213,10 @@ class BasicUserServiceTest {
         @Test
         @DisplayName("[Branch][Negative] 회원삭제 - 유효하지않은 입력값일때 IllegalArgumentException 발생 및 Repository 미호출")
         void deleteUser_shouldThrowException_whenIdIsNull() {
-            assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(null));
+            DiscodeitException discodeitException = assertThrows(DiscodeitException.class, () -> userService.deleteUser(null));
+            assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
+            assertEquals(HttpStatus.BAD_REQUEST, discodeitException.getErrorCode().getStatus());
+            assertEquals("CM-001", discodeitException.getErrorCode().getCode());
             verify(userRepository, never()).deleteById(any());
         }
     }
@@ -427,9 +433,12 @@ class BasicUserServiceTest {
     @DisplayName("getUsersByIds")
     class GetUsersByIds {
         @Test
-        @DisplayName("[Branch][Negative] 특정 회원리스트 조회- 입력이 null이면 IllegalArgumentException 예외 발생")
+        @DisplayName("[Branch][Negative] 특정 회원리스트 조회- 입력이 null이면 DiscodeitException 예외 발생")
         void getUsersByIds_shouldThrowException_whenInputNull() {
-            assertThrows(IllegalArgumentException.class, () -> userService.getUsersByIds(null));
+            DiscodeitException discodeitException = assertThrows(DiscodeitException.class, () -> userService.getUsersByIds(null));
+            assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
+            assertEquals(HttpStatus.BAD_REQUEST, discodeitException.getErrorCode().getStatus());
+            assertEquals("CM-001", discodeitException.getErrorCode().getCode());
             verify(userRepository, never()).findAllById(any()); // TODO: 단위테스트에서도 해당 jpa 메서드 호출하는지 한번 검토 문제없을시 다른부분도 안봐도됨
         }
 

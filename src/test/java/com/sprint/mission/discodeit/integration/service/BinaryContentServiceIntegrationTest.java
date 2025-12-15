@@ -3,10 +3,10 @@ package com.sprint.mission.discodeit.integration.service;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.binaryContent.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 
 import com.sprint.mission.discodeit.service.BinaryContentService;
-import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -92,13 +91,13 @@ public class BinaryContentServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Flow][Negative] 파일 조회 - 존재하지 않는 Id로 조회시 NoSuchElementException 예외")
+        @DisplayName("[Integration][Flow][Negative] 파일 조회 - 존재하지 않는 Id로 조회시 BinaryContentNotFoundException 예외")
         void getBinaryContent_thorws_when_not_found() {
             // given
             UUID id = UUID.randomUUID();
 
             // when & then
-            assertThrows(NoSuchElementException.class, () -> binaryContentService.getBinaryContent(id));
+            assertThrows(BinaryContentNotFoundException.class, () -> binaryContentService.getBinaryContent(id));
         }
     }
 
@@ -153,7 +152,7 @@ public class BinaryContentServiceIntegrationTest {
     class deleteBinaryContent {
 
         @Test
-        @DisplayName("[Integration][Flow][Positive] 파일 삭제 - 삭제 후 조회 불가 & 개수 감소")
+        @DisplayName("[Integration][Flow][Positive] 파일 삭제 - 삭제 후 조회 불가(BinaryContentNotFoundException 예외) & 개수 감소")
         void deleteBinaryContent_then_not_found_and_size_decreased() {
             // given
             BinaryContent updateContent = new BinaryContent("test.png", "image/png", (long) "test".length());
@@ -167,7 +166,7 @@ public class BinaryContentServiceIntegrationTest {
             // then
             long after = binaryContentRepository.findAll().size();
             assertEquals(before - 1, after);
-            assertThrows(NoSuchElementException.class, () -> binaryContentService.getBinaryContent(saved.getId()));
+            assertThrows(BinaryContentNotFoundException.class, () -> binaryContentService.getBinaryContent(saved.getId()));
         }
 
     }

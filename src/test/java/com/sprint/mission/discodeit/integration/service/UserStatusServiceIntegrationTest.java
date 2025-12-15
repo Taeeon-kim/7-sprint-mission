@@ -6,10 +6,14 @@ import com.sprint.mission.discodeit.dto.user.UserSignupRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusRequestDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusResponseDto;
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateRequestDto;
-import com.sprint.mission.discodeit.entity.type.RoleType;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import com.sprint.mission.discodeit.exception.userStatus.UserStatusAlreadyExistsException;
+import com.sprint.mission.discodeit.exception.userStatus.UserStatusNotFoundByUserIdException;
+import com.sprint.mission.discodeit.exception.userStatus.UserStatusNotFoundException;
 import com.sprint.mission.discodeit.integration.fixtures.UserFixture;
 
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -22,6 +26,7 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -86,7 +91,10 @@ public class UserStatusServiceIntegrationTest {
         @DisplayName("[Integration][Flow][negative] 유저상태 생성 - 존재하지않는 유저로 등록시 예외 발생")
         void create_whenUserNotFound_thenThrows() {
             UUID id = UUID.randomUUID();
-            assertThrows(NoSuchElementException.class, () -> userStatusService.createUserStatus(new UserStatusRequestDto(id)));
+            UserNotFoundException userNotFoundException = assertThrows(UserNotFoundException.class, () -> userStatusService.createUserStatus(new UserStatusRequestDto(id)));
+            assertEquals(ErrorCode.USER_NOT_FOUND, userNotFoundException.getErrorCode());
+            assertEquals(HttpStatus.NOT_FOUND, userNotFoundException.getErrorCode().getStatus());
+            assertEquals("U-001", userNotFoundException.getErrorCode().getCode());
         }
 
         @Test
@@ -97,7 +105,7 @@ public class UserStatusServiceIntegrationTest {
             UserResponseDto responseDto = userService.signUp(command);
 
             // when & then
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(UserStatusAlreadyExistsException.class,
                     () -> userStatusService.createUserStatus(new UserStatusRequestDto(responseDto.id())));
 
         }
@@ -133,7 +141,10 @@ public class UserStatusServiceIntegrationTest {
             UUID id = UUID.randomUUID();
 
             // when & then
-            assertThrows(NoSuchElementException.class, () -> userStatusService.getUserStatus(id));
+            UserStatusNotFoundException userStatusNotFoundException = assertThrows(UserStatusNotFoundException.class, () -> userStatusService.getUserStatus(id));
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundException.getErrorCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundException.getErrorCode().getStatus());
+            assertEquals("US-001", userStatusNotFoundException.getErrorCode().getCode());
         }
 
     }
@@ -216,8 +227,11 @@ public class UserStatusServiceIntegrationTest {
         void updateUserStatus_throws_whenIdNotFound() {
             UUID id = UUID.randomUUID();
             UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
-            assertThrows(NoSuchElementException.class,
+            UserStatusNotFoundException userStatusNotFoundException = assertThrows(UserStatusNotFoundException.class,
                     () -> userStatusService.updateUserStatus(id, updateDto));
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundException.getErrorCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundException.getErrorCode().getStatus());
+            assertEquals("US-001", userStatusNotFoundException.getErrorCode().getCode());
         }
 
         @Test
@@ -268,8 +282,11 @@ public class UserStatusServiceIntegrationTest {
         void updateUserStatusByUserId_throws_whenIdNotFound() {
             UUID id = UUID.randomUUID();
             UserStatusUpdateRequestDto updateDto = new UserStatusUpdateRequestDto(Instant.now());
-            assertThrows(NoSuchElementException.class,
+            UserStatusNotFoundByUserIdException userStatusNotFoundByUserIdException = assertThrows(UserStatusNotFoundByUserIdException.class,
                     () -> userStatusService.updateUserStatusByUserId(id, updateDto));
+            assertEquals(ErrorCode.USER_STATUS_NOT_FOUND, userStatusNotFoundByUserIdException.getErrorCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, userStatusNotFoundByUserIdException.getErrorCode().getStatus());
+            assertEquals("US-001", userStatusNotFoundByUserIdException.getErrorCode().getCode());
         }
 
         @Test

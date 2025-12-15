@@ -7,9 +7,8 @@ import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.type.RoleType;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusNotFoundException;
 import com.sprint.mission.discodeit.integration.fixtures.ChannelFixture;
-import com.sprint.mission.discodeit.integration.fixtures.ReadStatusFixture;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -128,7 +126,7 @@ public class ReadStatusServiceIntegrationTest {
 
             UUID readStatusId = UUID.randomUUID();
 
-            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+            assertThrows(ReadStatusNotFoundException.class, () -> readStatusService.getReadStatus(readStatusId));
 
         }
 
@@ -271,7 +269,7 @@ public class ReadStatusServiceIntegrationTest {
             readStatusService.deleteReadStatus(responseDto.id());
 
             // then
-            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(responseDto.id()));
+            assertThrows(ReadStatusNotFoundException.class, () -> readStatusService.getReadStatus(responseDto.id()));
 
 
         }
