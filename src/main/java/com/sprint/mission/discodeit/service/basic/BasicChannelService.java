@@ -8,7 +8,9 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
-import com.sprint.mission.discodeit.exception.channel.ChannelMinimumMembersNotMetException;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.*;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Slf4j
@@ -65,7 +66,10 @@ public class BasicChannelService implements ChannelService {
             if (users.size() < command.memberIds().size()) {
                 log.warn("PRIVATE 채널 생성 실패 - 잘못된 참여 유저 존재 channelId={} requestedIds={} foundUsers={}",
                         saved.getId(), command.memberIds().size(), users.size());
-                throw new IllegalArgumentException("참여 유저가 잘못되었습니다.");
+                throw new ChannelInvalidParticipantsException(
+                        command.memberIds().size(),
+                        users.size()
+                );
             }
 
             List<ReadStatus> readStatuses = users.stream()
@@ -82,15 +86,15 @@ public class BasicChannelService implements ChannelService {
     @Override
     @Transactional
     public void updateChannel(UUID channelId, ChannelUpdateRequestDto request) {
-        if (channelId == null) { // TODO: 추후 컨트롤러 생성시 책임을 컨트롤러로 넘기고 트레이드오프로 신뢰한다는 가정하에 진행 , 굳이 방어적코드 x
+        if (channelId == null) { // NOTE: 서비스 레이어 public API라 컨트롤러 외 테스트, 배치, 이벤트 핸들러에서 요청 가능하므로 최소 필수 가드로 남김
             log.warn("채널 수정 실패 - channelId null");
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         log.info("채널 수정 시도 channelId={}", channelId);
-        Channel channelById = channelRepository.findById(channelId).orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
+        Channel channelById = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
         if (channelById.getType() == ChannelType.PRIVATE) {
             log.warn("채널 수정 실패 - PRIVATE 채널 수정 불가 channelId={}", channelId);
-            throw new IllegalArgumentException("해당 채널은 수정할수 없습니다.");
+            throw new ChannelModificationNotAllowedException(channelId, channelById.getType());
         }
         ChannelUpdateParams params = ChannelUpdateParams.from(request);
         channelById.update(params); // TODO: api ChannelDto 형식으로
@@ -104,7 +108,7 @@ public class BasicChannelService implements ChannelService {
     public void deleteChannel(UUID channelId) {
         if (channelId == null) {
             log.warn("채널 삭제 실패 - channelId null");
-            throw new IllegalArgumentException("전달값을 확인해주세요.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         log.info("채널 삭제 시도 channelId={}", channelId);
 
@@ -117,11 +121,8 @@ public class BasicChannelService implements ChannelService {
         log.debug("채널 관련 데이터 삭제 channelId={}",
                 channel.getId());
 
-        channelRepository.deleteById(channel.getId());
-        log.info("채널 삭제 성공 channelId={}", channelId);
-
-        // 채널삭제
         channelRepository.deleteById(channel.getId()); // NOTE : Channel쪽에 연관관계가없어서 CASCADE 발생이안됨 따라서 위에 명시적으로 삭제
+        log.info("채널 삭제 성공 channelId={}", channelId);
     }
 
     @Override
@@ -157,20 +158,17 @@ public class BasicChannelService implements ChannelService {
     }
 
     private ChannelResponseDto getChannelResponseDto(Channel channel) {
-        if (channel.getType() == ChannelType.PUBLIC) {
-            return channelMapper.toDto(channel);
-        } else if (channel.getType() == ChannelType.PRIVATE) {
-            return channelMapper.toDto(channel);
-        } else {
-            throw new IllegalArgumentException("unsupported channel type: " + channel.getType());
-        }
+        return switch (channel.getType()) {
+            case PUBLIC, PRIVATE -> channelMapper.toDto(channel);
+            default -> throw new ChannelUnsupportedTypeException(channel.getId(), channel.getType());
+        };
     }
 
     @Override
     @Transactional
     public void joinChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
-            throw new IllegalArgumentException("전달값을 확인해주세요.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         log.info("채널 참여 시도 channelId={} userId={}", channelId, userId);
         Channel channel = channelReader.findChannelOrThrow(channelId);
@@ -178,7 +176,7 @@ public class BasicChannelService implements ChannelService {
         User user = userReader.findUserOrThrow(userId);
         // 이미 참여했는지 체크 (메서드 없으면 아래 existsBy...를 리포지토리에 추가)
         if (readStatusRepository.existsByUserAndChannel(user, channel)) {
-            throw new IllegalStateException("이미 참여한 유저입니다.");
+            throw new ChannelAlreadyJoinedException(user.getId(), channel.getId());
         }
 
         // 참여 = ReadStatus 한 줄 생성
@@ -191,7 +189,7 @@ public class BasicChannelService implements ChannelService {
     @Transactional
     public void leaveChannel(UUID channelId, UUID userId) {
         if (channelId == null || userId == null) {
-            throw new IllegalArgumentException("전달값을 확인해주세요.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         log.info("채널 탈퇴 시도 channelId={} userId={}", channelId, userId);
         Channel channel = channelReader.findChannelOrThrow(channelId);
@@ -199,7 +197,7 @@ public class BasicChannelService implements ChannelService {
         User user = userReader.findUserOrThrow(userId);
 
         ReadStatus readStatus = readStatusRepository.findByUserAndChannel(user, channel)
-                .orElseThrow(() -> new IllegalStateException("채널에 참여하지 않은 사용자입니다."));
+                .orElseThrow(() -> new ChannelNotJoinedException(user.getId(), channel.getId()));
         readStatusRepository.delete(readStatus);
         log.info("채널 탈퇴 성공 channelId={} userId={}", channelId, userId);
     }
@@ -208,7 +206,7 @@ public class BasicChannelService implements ChannelService {
     @Transactional(readOnly = true)
     public List<User> getAllMembers(UUID channelId) {
         if (channelId == null) {
-            throw new IllegalArgumentException("전달값을 확인해주세요.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("채널 멤버 조회 시도 channelId={}", channelId);

@@ -21,6 +21,11 @@ public enum ErrorCode {
     //    PRIVATE_CHANNEL_UPDATE("프라이빗 채널 업데이트를 할 수 없습니다.", HttpStatus.BAD_REQUEST, "CH-002"), // TODO: 용도 볼것
     CHANNEL_ACCESS_DENIED("채널 권한이 없습니다.", HttpStatus.FORBIDDEN, "CH-003"),
     CHANNEL_MINIMUM_MEMBERS_NOT_MET("PRIVATE 채널 최소 2명 이상이어야 합니다.", HttpStatus.BAD_REQUEST, "CH-004"),
+    CHANNEL_INVALID_PARTICIPANTS("참여 유저가 잘못되었습니다.", HttpStatus.BAD_REQUEST, "CH-005"),
+    CHANNEL_MODIFICATION_NOT_ALLOWED("해당 채널은 수정할 수 없습니다.", HttpStatus.CONFLICT, "CH-006"),
+    UNSUPPORTED_CHANNEL_TYPE("지원하지 않는 채널 타입입니다.", HttpStatus.BAD_REQUEST, "CH-007"),
+    CHANNEL_ALREADY_JOINED("이미 참여한 유저입니다.", HttpStatus.CONFLICT, "CH-008"),
+    CHANNEL_NOT_JOINED("채널에 참여하지 않은 사용자입니다.", HttpStatus.CONFLICT, "CH-009"),
 
     // Auth
     INVALID_CREDENTIALS("이름 또는 비밀번호가 잘못되었습니다.", HttpStatus.UNAUTHORIZED, "AU-001"),
