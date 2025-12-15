@@ -1,55 +1,76 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.api.UserApi;
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.service.UserService;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserApi {
 
     private final UserService userService;
 
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UUID> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
-                                           @RequestPart(value = "profile", required = false) MultipartFile profile
+    @Override
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto, // TODO: @Valid
+                                                      @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
+
+        log.info("회원가입 요청 - hasProfile={}", profile != null);
         UserSignupCommand command = UserSignupCommand.from(userSignupRequestDto, profile);
-        UUID uuid = userService.signUp(command);
-        return ResponseEntity.created(URI.create("/api/users/" + uuid)).body(uuid);
+        UserResponseDto responseDto = userService.signUp(command);
+        log.info("회원가입 성공 - userId={}", responseDto.id());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH,  consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUser(
+    @Override
+    @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID userId,
             @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
             @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
+
+        log.debug("회원 수정 요청 - userId={}, hasProfile={}", userId, profile != null);
         UserUpdateCommand command = UserUpdateCommand.from(userId, request, profile);
-        userService.updateUser(command);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        UserResponseDto userResponseDto = userService.updateUser(command);
+        log.info("회원 수정 성공 - userId={}", userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> allUsers = userService.getAllUsers();
+    @Override
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+
+        log.debug("회원 목록 조회 요청");
+        List<UserResponseDto> allUsers = userService.getAllUsers();
+        log.debug("회원 목록 조회 성공 - count={}", allUsers.size());
+
         return ResponseEntity.ok(allUsers);
     }
 
-    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    @Override
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+
+        log.info("회원 삭제 요청 - userId={}", userId);
         userService.deleteUser(userId);
+        log.info("회원 삭제 성공 - userId={}", userId);
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

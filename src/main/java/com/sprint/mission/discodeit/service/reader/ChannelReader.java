@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.service.reader;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +21,9 @@ public class ChannelReader {
 
     public Channel findChannelOrThrow(UUID channelId) {
         if (channelId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         return channelRepository.findById(channelId)
-                .orElseThrow(() -> new NoSuchElementException("채널이 없습니다."));
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
     }
 }

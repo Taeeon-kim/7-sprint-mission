@@ -1,40 +1,59 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-
-public class Message extends BasicEntity {
-    private static final long serialVersionUID = 1L;
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "messages")
+public class Message extends BaseUpdatableEntity {
     private String content;
-    private final UUID senderId;
-    //    private final UUID receiverId; // 일단 dm 없으므로 제외
-    private final UUID channelId; // TODO: Channel과 연관관계 체크할것
-    private List<UUID> attachmentIds;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author; //TODO: Channel과 연관관계 체크할것
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "channel_id")
+    private Channel channel; // TODO: Channel과 연관관계 체크할것
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) // N:1 테이블
+    @JoinTable(
+            name = "message_attachments",
+            joinColumns = @JoinColumn(name = "message_id"),         // 이 엔티티의 FK
+            inverseJoinColumns = @JoinColumn(name = "attachment_id") // BinaryContent FK
+    )
+    @BatchSize(size = 50)
+    private List<BinaryContent> attachments = new ArrayList<>();
 
     @Builder
-    public Message(String content, UUID senderId, UUID channelId, List<UUID> attachmentIds) {
+    public Message(String content, User author, Channel channel, List<BinaryContent> attachments) {
 
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Content is invalid");
         }
-        if (senderId == null) {
-            throw new IllegalArgumentException("SenderId is null");
+        if (author == null) {
+            throw new IllegalArgumentException("author is null");
         }
 
-        if (channelId == null) {
-            throw new IllegalArgumentException("ChannelId is null");
+        if (channel == null) {
+            throw new IllegalArgumentException("channel is null");
         }
         this.content = content.trim();
-        this.senderId = senderId;
-//        this.receiverId = receiverId;
-        this.channelId = channelId;
-        this.attachmentIds = (attachmentIds == null) ? new ArrayList<>() : attachmentIds;
+        this.author = author;
+        this.channel = channel;
+        if (attachments != null) {
+            this.attachments.addAll(attachments);
+        }
     }
 
 
@@ -54,9 +73,6 @@ public class Message extends BasicEntity {
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
                 ", content='" + content + '\'' +
-                ", senderId=" + senderId +
-//                ", receiverId=" + receiverId +
-                ", channelId=" + channelId +
                 "}\n";
     }
 }

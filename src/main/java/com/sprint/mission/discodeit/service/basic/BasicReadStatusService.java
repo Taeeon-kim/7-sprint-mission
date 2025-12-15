@@ -3,24 +3,28 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusResponseDto;
 import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateCommand;
-import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
+import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateResponseDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.type.ChannelType;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusDuplicatedException;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusNotFoundException;
+import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.reader.ChannelReader;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicReadStatusService implements ReadStatusService {
@@ -28,67 +32,81 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ReadStatusRepository readStatusRepository;
     private final UserReader userReader;
     private final ChannelReader channelReader;
-    private final ChannelRepository channelRepository;
+    private final ReadStatusMapper readStatusMapper;
 
     @Override
-    public UUID createReadStatus(ReadStatusCreateRequestDto requestDto) {
+    @Transactional
+    public ReadStatusResponseDto createReadStatus(ReadStatusCreateRequestDto requestDto) {
         if (requestDto.userId() == null || requestDto.channelId() == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
+        log.debug("읽음 상태 생성 시도 - userId={}, channelId={}", requestDto.userId(), requestDto.channelId());
         User user = userReader.findUserOrThrow(requestDto.userId());
         Channel channel = channelReader.findChannelOrThrow(requestDto.channelId());
 
-//        if (channel.getType() == ChannelType.PUBLIC) {
-//            throw new IllegalArgumentException("수신정보 생성 불가능한 타입의 채널입니다");
-//        }
 
-        for (ReadStatus readStatus : readStatusRepository.findAllByUserId(user.getId())) {
-            if (readStatus.getChannelId().equals(channel.getId())) {
-                throw new IllegalArgumentException("이미 존재합니다.");
-            }
+        if (readStatusRepository.existsByUserIdAndChannelId(requestDto.userId(), requestDto.channelId())) {
+            throw new ReadStatusDuplicatedException(requestDto.userId(), requestDto.channelId());
         }
 
-        channel.addUserId(requestDto.userId());
 
         ReadStatus readStatus = ReadStatus.builder()
-                .userId(user.getId())
-                .channelId(channel.getId())
-                .readAt(Instant.now())
+                .user(user)
+                .channel(channel)
                 .build();
 
-        channelRepository.save(channel);
         ReadStatus saved = readStatusRepository.save(readStatus);
-        return saved.getId();
+
+        log.info("읽음 상태 생성 완료 - readStatusId={}, userId={}, channelId={}",
+                saved.getId(), requestDto.userId(), requestDto.channelId());
+
+        return readStatusMapper.toDto(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReadStatusResponseDto getReadStatus(UUID readStatusId) {
-        ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new NoSuchElementException("읽음 상태가 존재하지 않습니다."));
-        return ReadStatusResponseDto.from(readStatus);
+        log.debug("읽음 상태 단건 조회 - readStatusId={}", readStatusId);
+        ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow(() -> new ReadStatusNotFoundException(readStatusId));
+        return readStatusMapper.toDto(readStatus);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReadStatusResponseDto> getAllReadStatusesByUserId(UUID userId) {
+        log.debug("유저별 읽음 상태 목록 조회 - userId={}", userId);
         List<ReadStatus> allByUserId = readStatusRepository.findAllByUserId(userId);
+        log.debug("유저별 읽음 상태 목록 조회 결과 - userId={}, count={}", userId, allByUserId.size());
         return allByUserId.stream()
-                .map(ReadStatusResponseDto::from)
+                .map(readStatusMapper::toDto)
                 .toList();
     }
 
     @Override
-    public void updateReadStatus(ReadStatusUpdateCommand command) {
+    @Transactional
+    public ReadStatusUpdateResponseDto updateReadStatus(ReadStatusUpdateCommand command) {
+        log.debug("읽음 상태 수정 시도 - readStatusId={}", command.id());
         ReadStatus readStatusById = readStatusRepository.findById(command.id()).orElseThrow();
 
         boolean isUpdated = readStatusById.updateReadAt(command.readAt());
         if (isUpdated) {
-            readStatusRepository.save(readStatusById);
+            ReadStatus saved = readStatusRepository.save(readStatusById);
+            log.info("읽음 상태 수정 완료 - readStatusId={}, readAt={}", saved.getId(), command.readAt());
+
+            return ReadStatusUpdateResponseDto.from(saved);
         }
+
+        log.debug("읽음 상태 수정 없음 - readStatusId={}, reason=no_change", command.id());
+        return null;
     }
 
     @Override
+    @Transactional
     public void deleteReadStatus(UUID id) {
+        log.debug("읽음 상태 삭제 시도 - readStatusId={}", id);
         readStatusRepository.deleteById(id);
+        log.info("읽음 상태 삭제 완료 - readStatusId={}", id);
     }
 
 }

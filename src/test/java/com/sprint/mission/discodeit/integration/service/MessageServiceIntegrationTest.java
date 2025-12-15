@@ -2,70 +2,59 @@ package com.sprint.mission.discodeit.integration.service;
 
 import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentUploadCommand;
 import com.sprint.mission.discodeit.dto.message.*;
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.type.RoleType;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFBinaryContentRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
-import com.sprint.mission.discodeit.service.BinaryContentService;
+import com.sprint.mission.discodeit.entity.*;
+import com.sprint.mission.discodeit.integration.fixtures.*;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
+import com.sprint.mission.discodeit.repository.*;
+
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
-import com.sprint.mission.discodeit.service.basic.BasicMessageService;
-import com.sprint.mission.discodeit.service.reader.ChannelReader;
-import com.sprint.mission.discodeit.service.reader.MessageReader;
-import com.sprint.mission.discodeit.service.reader.UserReader;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class MessageServiceIntegrationTest {
 
+    @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
     private ChannelRepository channelRepository;
+
+    @Autowired
     private UserRepository userRepository;
-    private UserReader userReader;
-    private ChannelReader channelReader;
-    private MessageReader messageReader;
 
+    @Autowired
+    private UserStatusRepository userStatusRepository;
+
+    @Autowired
     private MessageService messageService;
-    private BinaryContentRepository binaryContentRepository;
-    private BinaryContentService binaryContentService;
 
+    @Autowired
+    private BinaryContentRepository binaryContentRepository;
+
+    @Autowired
+    private MessageMapper messageMapper;
+
+    @Autowired
+    private EntityManager em;
 
     @BeforeEach
     void setUp() {
-        messageRepository = new JCFMessageRepository();
-        channelRepository = new JCFChannelRepository();
-        userRepository = new JCFUserRepository();
-        userReader = new UserReader(userRepository);
-        channelReader = new ChannelReader(channelRepository);
-        messageReader = new MessageReader(messageRepository);
-        binaryContentRepository = new JCFBinaryContentRepository();
-        binaryContentService = new BasicBinaryContentService(binaryContentRepository);
-        messageService = new BasicMessageService(
-                messageRepository,
-                channelRepository,
-                userReader,
-                channelReader,
-                messageReader,
-                binaryContentRepository,
-                binaryContentService
-        );
 
     }
 
@@ -80,19 +69,8 @@ public class MessageServiceIntegrationTest {
 
             // Given
 
-            User sender = User.builder()
-                    .email("aaa@exmple.com")
-                    .profileId(null)
-                    .role(RoleType.USER)
-                    .password("password")
-                    .nickname("nickname")
-                    .build();
-
-            userRepository.save(sender);
-            Channel publicChannel = Channel.createPublicChannel("channel", "description");
-            publicChannel.addUserId(sender.getId());
-            channelRepository.save(publicChannel);
-
+            User user = UserFixture.createUserWithStatus(userRepository);
+            Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
             MockMultipartFile file = new MockMultipartFile(
                     "file",                // form field name
@@ -104,28 +82,23 @@ public class MessageServiceIntegrationTest {
             BinaryContentUploadCommand binaryContentUploadCommand = BinaryContentUploadCommand.from(file);
 
             // When
-            UUID messageId = messageService.sendMessageToChannel(
-                    new MessageSendCommand(publicChannel.getId(), sender.getId(), "message", List.of(binaryContentUploadCommand))
+            MessageResponseDto responseDto = messageService.sendMessageToChannel(
+                    new MessageSendCommand(publicChannel.getId(), user.getId(), "message", List.of(binaryContentUploadCommand))
             );
 
 
             // Then
-            Message message = messageRepository.findById(messageId).orElseThrow();
-            List<UUID> attachmentIds = message.getAttachmentIds();
-            List<BinaryContent> binaryContentByIds = attachmentIds.stream()
-                    .map(attachmentId -> binaryContentRepository.findById(attachmentId).orElseThrow())
-                    .toList();
+            Message message = messageRepository.findById(responseDto.id()).orElseThrow();
+            List<BinaryContent> attachments = message.getAttachments();
 
 
             assertAll(
-                    () -> assertEquals(messageId, message.getId()),
-                    () -> assertEquals(sender.getId(), message.getSenderId()),
-                    () -> assertEquals(publicChannel.getId(), message.getChannelId()),
+                    () -> assertEquals(responseDto.id(), message.getId()),
+                    () -> assertEquals(user.getId(), message.getAuthor().getId()),
+                    () -> assertEquals(publicChannel.getId(), message.getChannel().getId()),
                     () -> assertEquals("message", message.getContent()),
-                    () -> assertEquals(message.getAttachmentIds(), binaryContentByIds.stream().map(BinaryContent::getId).toList()),
-                    () -> assertEquals(binaryContentUploadCommand.contentType(), binaryContentByIds.get(0).getContentType()),
-                    () -> assertEquals(binaryContentUploadCommand.fileName(), binaryContentByIds.get(0).getFileName()),
-                    () -> assertEquals(binaryContentUploadCommand.bytes(), binaryContentByIds.get(0).getBytes())
+                    () -> assertEquals(binaryContentUploadCommand.contentType(), attachments.get(0).getContentType()),
+                    () -> assertEquals(binaryContentUploadCommand.fileName(), attachments.get(0).getFileName())
             );
 
         }
@@ -139,94 +112,88 @@ public class MessageServiceIntegrationTest {
 
         @Test
         @DisplayName("[Integration][Positive] 다중 메세지 조회 - 해당 채널의 메세지들 반환")
-        void getAllMessagesByChannelId_returns_message_list() {
+        void getAllMessagesByChannelId_returns_message_list() { // 여기부터 다시 테스트 batch
 
             // given
-            User user = User.builder()
-                    .nickname("name")
-                    .email("ee@exam.com")
-                    .profileId(null)
-                    .role(RoleType.USER)
-                    .password("dsfsdfdf")
-                    .build();
-            userRepository.save(user);
+            User user = UserFixture.createUserWithStatus(userRepository);
 
-            Channel publicChannel = Channel.createPublicChannel("title", "description");
-            publicChannel.addUserId(user.getId());
-            channelRepository.save(publicChannel);
+            byte[] payload = "fake-bytes".getBytes(StandardCharsets.UTF_8);
+            BinaryContent binaryContent = new BinaryContent("profile.png", "image/png", (long) payload.length);
 
-            Message message1 = messageRepository.save(new Message("message1", user.getId(), publicChannel.getId(), null));
-            Message message2 = messageRepository.save(new Message("message2", user.getId(), publicChannel.getId(), null));
+            User member = User.create("another", "ee@ee.com", "password", binaryContent);
+            User user2 = UserFixture.createUserWithStatus(member, userRepository);
+            Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
-            publicChannel.addMessageId(message1.getId());
-            publicChannel.addMessageId(message2.getId());
-            channelRepository.save(publicChannel);
+            Message message1 = MessageFixture.sendMessage("message1", user, publicChannel, null, messageRepository);
+            Message message2 = MessageFixture.sendMessage("message2", user2, publicChannel, null, messageRepository);
+            Pageable pageable = PageRequest.of(0, 50);
+            Instant now = Instant.now();
 
+            em.flush();
+            em.clear();
             // when
-            List<MessageResponseDto> allMessagesByChannelId = messageService.getAllMessagesByChannelId(publicChannel.getId());
+            Slice<MessageResponseDto> allMessagesByChannelId = messageRepository.findAllByChannelId(publicChannel.getId(), pageable, now)
+                    .map(messageMapper::toDto);
 
             // then
             MessageResponseDto foundMessage1 = allMessagesByChannelId.stream()
-                    .filter(message -> message.id() == message1.getId())
+                    .filter(message -> message.id().equals(message1.getId()))
                     .findFirst()
                     .orElseThrow();
 
             MessageResponseDto foundMessage2 = allMessagesByChannelId.stream()
-                    .filter(message -> message.id() == message2.getId())
+                    .filter(message -> message.id().equals(message2.getId()))
                     .findFirst()
                     .orElseThrow();
 
             assertAll(
-                    () -> assertEquals(2, allMessagesByChannelId.size()),
+                    () -> assertEquals(2, allMessagesByChannelId.getContent().size()),
                     () -> assertEquals(message1.getId(), foundMessage1.id()),
                     () -> assertEquals(message2.getId(), foundMessage2.id()),
                     () -> assertEquals(message1.getContent(), foundMessage1.content()),
                     () -> assertEquals(message2.getContent(), foundMessage2.content()),
-                    () -> assertEquals(message1.getChannelId(), foundMessage1.channelId()),
-                    () -> assertEquals(message2.getChannelId(), foundMessage2.channelId()),
-                    () -> assertEquals(message1.getSenderId(), foundMessage1.authorId()),
-                    () -> assertEquals(message2.getSenderId(), foundMessage2.authorId())
+                    () -> assertEquals(message1.getChannel().getId(), foundMessage1.channelId()),
+                    () -> assertEquals(message2.getChannel().getId(), foundMessage2.channelId()),
+                    () -> assertEquals(message1.getAuthor().getId(), foundMessage1.author().id()),
+                    () -> assertEquals(message2.getAuthor().getId(), foundMessage2.author().id())
             );
 
 
         }
+
+        //TODO: Slice, Pageable 정보가 맞는지 테스트 케이스 추가 ex) slice.getSize, slice.getNuber, slice.hasNext 등
     }
 
     @Nested
     @DisplayName("updateMessage")
     class updateMessage {
 
+        @Autowired
+        EntityManager em;
+
         @Test
         @DisplayName("[Integration][Positive] 메세지 수정 - 작성자가 수정하면 내용과 updatedAt이 반영된다")
         void updateMessage_updates_content_when_edits() throws InterruptedException {
             // given
-            User user = User.builder()
-                    .nickname("name")
-                    .email("ee@exam.com")
-                    .profileId(null)
-                    .role(RoleType.USER)
-                    .password("dsfsdfdf")
-                    .build();
-            userRepository.save(user);
+            User user = UserFixture.createUserWithStatus(userRepository);
+            Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
-            Channel publicChannel = Channel.createPublicChannel("title", "description");
-            publicChannel.addUserId(user.getId());
-            channelRepository.save(publicChannel);
-
-            Message message = messageRepository.save(new Message("message1", publicChannel.getId(), user.getId(), null));
+            Message message = MessageFixture.sendMessage(user, publicChannel, null, messageRepository);
 
             Instant before = message.getUpdatedAt(); // 또는 createdAt
             Thread.sleep(5);
 
             // when
             messageService.updateMessage(
-
                     MessageUpdateCommand.from(
                             MessageUpdateRequestDto.builder()
                                     .content("updated message")
                                     .build(),
                             message.getId()
                     ));
+
+            em.flush();
+            em.clear();
 
             // then
             Message findMessage = messageRepository.findById(message.getId()).orElseThrow();
@@ -249,56 +216,44 @@ public class MessageServiceIntegrationTest {
         void deleteMessage_then_not_found() throws IOException {
 
             // given
-            User user = User.builder()
-                    .nickname("name")
-                    .email("ee@exam.com")
-                    .profileId(null)
-                    .role(RoleType.USER)
-                    .password("dsfsdfdf")
-                    .build();
-            userRepository.save(user);
+            User user = UserFixture.createUserWithStatus(userRepository);
+            Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
 
-            Channel publicChannel = Channel.createPublicChannel("title", "description");
-            publicChannel.addUserId(user.getId());
-            channelRepository.save(publicChannel);
+            BinaryContent binaryContent = BinaryContentFixture.createBinaryContent(binaryContentRepository);
 
+            Message message = MessageFixture.sendMessage(user, publicChannel, List.of(binaryContent), messageRepository);
 
-            MockMultipartFile file = new MockMultipartFile(
-                    "file",                // form field name
-                    "test.png",            // filename
-                    "image/png",           // content type
-                    "test".getBytes()      // file content
-            );
+            Pageable pageable = PageRequest.of(0, 50);
+            Instant now = Instant.now();
 
-            BinaryContent binaryContent = BinaryContent.builder()
-                    .bytes(file.getBytes())
-                    .contentType(file.getContentType())
-                    .fileName(file.getOriginalFilename())
-                    .build();
+            Slice<MessageResponseDto> beforeMessageList = messageRepository.findAllByChannelId(publicChannel.getId(), pageable ,now)
+                    .map(messageMapper::toDto);
 
-            BinaryContent savedBinaryContent = binaryContentRepository.save(binaryContent);
-            Message savedMessage = messageRepository.save(
-                    new Message("message1",
-                            user.getId(),
-                            publicChannel.getId(),
-                            List.of(savedBinaryContent.getId())
-                    )
-            );
-            publicChannel.addMessageId(savedMessage.getId());
-            channelRepository.save(publicChannel);
+            System.out.println("sliceMessageList = " + beforeMessageList);
+            assertTrue(beforeMessageList.stream().anyMatch(responseDto -> responseDto.id().equals(message.getId()))); //TODO: 객체를 포함하는걸로 봐야하는지 id들로만 빼서 id만 체크하는지 테스트 후 수정
 
-            Channel reloadedChannel = channelRepository.findById(publicChannel.getId()).orElseThrow();
-
-            assertTrue(reloadedChannel.getMessageIds().contains(savedMessage.getId()));
             // when
-            messageService.deleteMessage(savedMessage.getId());
+            messageService.deleteMessage(message.getId());
+
+            em.flush();
+            em.clear();
+
+            Slice<MessageResponseDto> afterMessages = messageRepository.findAllByChannelId(publicChannel.getId(), pageable, now)
+                    .map(messageMapper::toDto);
 
             //then
             assertAll(
-                    () -> assertThrows(NoSuchElementException.class, () -> messageRepository.findById(savedMessage.getId()).orElseThrow()),
-                    () -> assertThrows(NoSuchElementException.class, () -> binaryContentRepository.findById(savedBinaryContent.getId()).orElseThrow()),
-                    () -> assertFalse(reloadedChannel.getMessageIds().contains(savedMessage.getId()), "채널 내 메시지 목록에서도 제거되어야 함")
+                    // 1) 메시지 자체는 더 이상 조회되지 않아야 함
+                    () -> assertTrue(messageRepository.findById(message.getId()).isEmpty()),
 
+                    // 2) 첨부파일도 같이 삭제되었는지 (cascade / 도메인 정책 검증)
+                    () -> assertTrue(binaryContentRepository.findById(binaryContent.getId()).isEmpty()),
+
+                    // 3) 채널 메시지 목록에서 제거되었는지
+                    () -> assertFalse(
+                            afterMessages.stream().anyMatch(responseDto -> responseDto.id().equals(message.getId())),
+                            "채널 내 메시지 목록에서도 제거되어야 함"
+                    )
             );
 
         }

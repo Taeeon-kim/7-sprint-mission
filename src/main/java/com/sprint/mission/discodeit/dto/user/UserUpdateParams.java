@@ -1,20 +1,20 @@
 package com.sprint.mission.discodeit.dto.user;
 
-import java.util.UUID;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 
 public record UserUpdateParams(
         String nickname,
         String email,
         String password,
-        UUID profileId
+        BinaryContent profile
 ) {
 
-    public static UserUpdateParams from(UserUpdateCommand updateCommand, UUID profileBinaryId) {
+    public static UserUpdateParams from(UserUpdateCommand updateCommand, BinaryContent binaryContent) {
         return new UserUpdateParams(
                 updateCommand.username(),
                 updateCommand.email(),
                 updateCommand.password(),
-                profileBinaryId
+                binaryContent
         );
 
     }

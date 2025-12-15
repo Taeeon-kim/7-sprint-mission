@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface UserService {
     // 회원가입
-    UUID signUp(UserSignupCommand signupCommand);
+    UserResponseDto signUp(UserSignupCommand signupCommand);
 
     // 회원정보 읽기
     UserResponseDto getUserById(UUID userId);
@@ -18,10 +18,10 @@ public interface UserService {
     void deleteUser(UUID userId);
 
     // 정보수정
-    void updateUser(UserUpdateCommand updateCommand);
+    UserResponseDto updateUser(UserUpdateCommand updateCommand);
 
     // 모든 유저리스트 읽기(관리측면 메서드)
-    List<UserDto> getAllUsers();
+    List<UserResponseDto> getAllUsers();
 
     List<User> getUsersByIds(List<UUID> userIds);
 }

@@ -7,45 +7,44 @@ import com.sprint.mission.discodeit.dto.readStatus.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.type.RoleType;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusNotFoundException;
+import com.sprint.mission.discodeit.integration.fixtures.ChannelFixture;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFReadStatusRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
-import com.sprint.mission.discodeit.service.basic.BasicReadStatusService;
-import com.sprint.mission.discodeit.service.reader.ChannelReader;
-import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 public class ReadStatusServiceIntegrationTest {
 
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private ChannelRepository channelRepository;
+
+    @Autowired
     private ReadStatusRepository readStatusRepository;
+
+    @Autowired
     private ReadStatusService readStatusService;
-    private UserReader userReader;
-    private ChannelReader channelReader;
 
     @BeforeEach
     void setUp() {
-        userRepository = new JCFUserRepository();
-        channelRepository = new JCFChannelRepository();
-        readStatusRepository = new JCFReadStatusRepository();
-        userReader = new UserReader(userRepository);
-        channelReader = new ChannelReader(channelRepository);
-        readStatusService = new BasicReadStatusService(readStatusRepository, userReader, channelReader, channelRepository);
+
     }
 
     @AfterEach
@@ -63,7 +62,7 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             Channel channel = Channel.createPrivateChannel();
@@ -71,7 +70,7 @@ public class ReadStatusServiceIntegrationTest {
             int before = readStatusRepository.findAll().size();
 
             // When
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
@@ -80,10 +79,10 @@ public class ReadStatusServiceIntegrationTest {
             // Then
             int after = readStatusRepository.findAll().size();
             assertEquals(before + 1, after);
-            ReadStatus readStatus = readStatusRepository.findById(readStatusId).orElseThrow();
-            assertEquals(creator.getId(), readStatus.getUserId());
-            assertEquals(channel.getId(), readStatus.getChannelId());
-            assertNotNull(readStatus.getReadAt());
+            ReadStatus readStatus = readStatusRepository.findById(responseDto.id()).orElseThrow();
+            assertEquals(creator.getId(), readStatus.getUser().getId());
+            assertEquals(channel.getId(), readStatus.getChannel().getId());
+            assertNotNull(readStatus.getLastReadAt());
 
         }
     }
@@ -98,26 +97,26 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             Channel channel = Channel.createPrivateChannel();
             channelRepository.save(channel);
 
 
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
             // when
-            ReadStatusResponseDto readStatus = readStatusService.getReadStatus(readStatusId);
+            ReadStatusResponseDto readStatus = readStatusService.getReadStatus(responseDto.id());
 
             // then
             assertEquals(creator.getId(), readStatus.userId());
             assertEquals(channel.getId(), readStatus.channelId());
-            assertNotNull(readStatus.readAt());
+            assertNotNull(readStatus.lastReadAt());
 
         }
 
@@ -127,7 +126,7 @@ public class ReadStatusServiceIntegrationTest {
 
             UUID readStatusId = UUID.randomUUID();
 
-            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+            assertThrows(ReadStatusNotFoundException.class, () -> readStatusService.getReadStatus(readStatusId));
 
         }
 
@@ -145,42 +144,37 @@ public class ReadStatusServiceIntegrationTest {
             // Given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
             User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                    User.builder().nickname("creator2").email("c2@ex.com")
+                            .password("pw").build()
             );
 
-            Channel channel = Channel.createPrivateChannel();
-            Channel savedChannel = channelRepository.save(channel);
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
-            Channel channel2 = Channel.createPrivateChannel();
-            Channel savedChannel2 = channelRepository.save(channel2);
+            Channel channel2 = ChannelFixture.createPrivateChannel(channelRepository);
 
-
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
-
-            UUID readStatusId2 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto2 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel2.getId()).build()
             );
 
-
-            UUID readStatusId3 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto3 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(member.getId())
                             .channelId(channel.getId()).build()
             );
 
-            UUID readStatusId4 = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto4 = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(member.getId())
                             .channelId(channel2.getId()).build()
@@ -189,7 +183,9 @@ public class ReadStatusServiceIntegrationTest {
 
             // when
             List<ReadStatusResponseDto> allReadStatusesByUserId = readStatusService.getAllReadStatusesByUserId(creator.getId());
+            System.out.println("allReadStatusesByUserId = " + allReadStatusesByUserId.get(0).userId());
             List<ReadStatusResponseDto> allReadStatusesByUserId2 = readStatusService.getAllReadStatusesByUserId(member.getId());
+            System.out.println("allReadStatusesByUserId2 = " + allReadStatusesByUserId2);
             // then
             Set<UUID> readStatusIds = allReadStatusesByUserId.stream()
                     .map(ReadStatusResponseDto::id).collect(Collectors.toSet());
@@ -198,10 +194,10 @@ public class ReadStatusServiceIntegrationTest {
 
             assertAll(
                     () -> assertEquals(2, allReadStatusesByUserId.size()),
-                    () -> assertEquals(Set.of(readStatusId, readStatusId2), readStatusIds),
+                    () -> assertEquals(Set.of(responseDto.id(), responseDto2.id()), readStatusIds),
                     () -> assertTrue(allReadStatusesByUserId.stream().allMatch(readStatus -> readStatus.userId().equals(creator.getId()))),
                     () -> assertEquals(2, allReadStatusesByUserId2.size()),
-                    () -> assertEquals(Set.of(readStatusId3, readStatusId4), readStatusIds2),
+                    () -> assertEquals(Set.of(responseDto3.id(), responseDto4.id()), readStatusIds2),
                     () -> assertTrue(allReadStatusesByUserId2.stream().allMatch(readStatus -> readStatus.userId().equals(member.getId())))
             );
 
@@ -218,19 +214,12 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
-            User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
-            );
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
-            Channel channel = Channel.createPrivateChannel();
-
-            Channel savedChannel = channelRepository.save(channel);
-
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
@@ -239,14 +228,14 @@ public class ReadStatusServiceIntegrationTest {
             // when
             Instant expectedReadAt = Instant.now();
             readStatusService.updateReadStatus(
-                    ReadStatusUpdateCommand.from(readStatusId,
+                    ReadStatusUpdateCommand.from(responseDto.id(),
                             ReadStatusUpdateRequestDto.builder()
                                     .newLastReadAt(expectedReadAt)
                                     .build())
             );
 
             // then
-            Instant readAt = readStatusRepository.findById(readStatusId).orElseThrow().getReadAt();
+            Instant readAt = readStatusRepository.findById(responseDto.id()).orElseThrow().getLastReadAt();
             assertEquals(expectedReadAt, readAt);
 
         }
@@ -264,29 +253,23 @@ public class ReadStatusServiceIntegrationTest {
             // given
             User creator = userRepository.save(
                     User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
+                            .password("pw").build()
             );
 
-            User member = userRepository.save(
-                    User.builder().nickname("creator").email("c@ex.com")
-                            .password("pw").role(RoleType.USER).build()
-            );
 
-            Channel channel = Channel.createPrivateChannel();
+            Channel channel = ChannelFixture.createPrivateChannel(channelRepository);
 
-            Channel savedChannel = channelRepository.save(channel);
-
-            UUID readStatusId = readStatusService.createReadStatus(
+            ReadStatusResponseDto responseDto = readStatusService.createReadStatus(
                     ReadStatusCreateRequestDto.builder()
                             .userId(creator.getId())
                             .channelId(channel.getId()).build()
             );
 
             // when
-            readStatusService.deleteReadStatus(readStatusId);
+            readStatusService.deleteReadStatus(responseDto.id());
 
             // then
-            assertThrows(NoSuchElementException.class, () -> readStatusService.getReadStatus(readStatusId));
+            assertThrows(ReadStatusNotFoundException.class, () -> readStatusService.getReadStatus(responseDto.id()));
 
 
         }

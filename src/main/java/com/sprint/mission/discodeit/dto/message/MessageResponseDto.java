@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.dto.message;
 
-import com.sprint.mission.discodeit.entity.Message;
-import lombok.Builder;
+import com.sprint.mission.discodeit.dto.binaryContent.BinaryContentResponseDto;
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 
 import java.time.Instant;
 import java.util.List;
@@ -11,23 +11,11 @@ import java.util.UUID;
 public record MessageResponseDto(
         UUID id,
         UUID channelId,
-        UUID authorId,
+        UserResponseDto author,
         String content,
-        List<UUID> attachmentIds,
+        List<BinaryContentResponseDto> attachments,
         Instant createdAt,
         Instant updatedAt
 
 ) {
-
-    public static MessageResponseDto from(Message message) {
-        return new MessageResponseDto(
-                message.getId(),
-                message.getChannelId(),
-                message.getSenderId(),
-                message.getContent(),
-                message.getAttachmentIds() == null ? List.of() : message.getAttachmentIds(),
-                message.getCreatedAt(),
-                message.getUpdatedAt()
-        );
-    }
 }

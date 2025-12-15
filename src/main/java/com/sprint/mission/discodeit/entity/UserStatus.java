@@ -1,25 +1,33 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.status.UserActiveStatus;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
-public class UserStatus extends BasicEntity {
-    private final UUID userId;
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@Entity
+@Table(name = "user_statuses")
+public class UserStatus extends BaseUpdatableEntity {
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Column(name = "last_active_at", nullable = false)
     private Instant lastActiveAt;
 
     public void markAsActive() {
         this.lastActiveAt = Instant.now();
-        setUpdatedAt(Instant.now());
     }
 
-    public UserStatus(UUID userId) {
-        this.userId = userId;
-        this.lastActiveAt = Instant.now();
+    public UserStatus(User user) {
+        this.user = user;
+        this.lastActiveAt = Instant.now(); // 이건 JPA/DB 자동 삽입 없는지 체크
     }
 
     public UserActiveStatus getUserStatus() {
@@ -39,5 +47,4 @@ public class UserStatus extends BasicEntity {
         }
         return false;
     }
-
 }

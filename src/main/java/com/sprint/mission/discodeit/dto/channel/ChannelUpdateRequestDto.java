@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ChannelUpdateRequestDto(
-        String title,
-        String description
+        String newName,
+        String newDescription
 ) {
 
 }

@@ -1,13 +1,31 @@
 spring:
   application:
     name: discodeit
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  profiles:
+    active: dev
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 50
+    open-in-view: false # TODO: 디버깅모드 혹은 jconsole등 영속성컨텍스트/스레드 값 체크하여 실제 어느 스코프까지 가지고있는지 모니터링해볼것
+
+logging:
+  level:
+    root: info
 
 discodeit:
+  storage:
+    type: local          # <= 여기 값이 'local'일 때만 LocalBinaryContentStorage를 빈으로 등록
+    local:
+      root-path: ./storage    # 프로젝트 폴더 아래 storage 디렉토리
   repository:
     type: jcf
     file-directory: ./data
