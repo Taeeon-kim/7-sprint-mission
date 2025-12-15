@@ -1,22 +1,29 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
-
 
 @Getter
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "user_statuses")
 public class UserStatus extends BaseUpdatableEntity {
 
+    @Column(name = "last_active_at", nullable = false)
     private Instant lastActiveAt; //마지막 접속시간
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusType status; //Online, Offline 표시
 
     // 1:1
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     public UserStatus(User user) {

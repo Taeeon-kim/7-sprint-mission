@@ -1,22 +1,37 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Table(name = "users")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA 사용을 위한 기본 생성자 추가
 public class User extends BaseUpdatableEntity {
 
-    private String userId; //가입 Id
+//    private String userId; //가입 Id
+    @Column(length = 60, nullable = false)
     private String password; //비밀번호
+
+    @Column(length = 100, nullable = false, unique = true)
     private String email; //이메일
+
+    @Column(name = "username", length = 50, nullable = false, unique = true)
     private String userName; //유저 이름
-    private UUID profileImageId; //프로필
+
+//    private UUID profileImageId; //프로필
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", unique = true)
+    private BinaryContent profile;
 
     // 1:1 관계
+    @Setter(AccessLevel.PROTECTED)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserStatus userStatus;
 
     // N:M 관계
@@ -25,13 +40,12 @@ public class User extends BaseUpdatableEntity {
     // N:M 관계
     private List<ReadStatus> readStatuses;
 
-    public User(String userId, String password, String email, String userName, UUID profileImageId) {
+    public User(String password, String email, String userName, BinaryContent profile) {
         super();
-        this.userId = userId;
         this.password = password;
         this.email = email;
         this.userName = userName;
-        this.profileImageId = profileImageId;
+        this.profile = profile;
     }
 
     public void setPassword(String newPassword) {
@@ -55,9 +69,9 @@ public class User extends BaseUpdatableEntity {
         }
     }
 
-    public void setProfileImageId(UUID newProfileImageId) {
-        if(newProfileImageId !=null&&!newProfileImageId.equals(this.profileImageId)) { //프로필 변경
-            this.profileImageId = newProfileImageId;
+    public void setProfileImageId(BinaryContent newProfile) {
+        if(newProfile !=null&&!newProfile.equals(this.profile)) { //프로필 변경
+            this.profile = newProfile;
             setUpdatedAt(Instant.now());
         }
     }

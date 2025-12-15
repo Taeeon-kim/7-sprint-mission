@@ -1,32 +1,42 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.AllArgsConstructor;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
-@ToString
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "messages")
 public class Message extends BaseUpdatableEntity {
 
-//    private UUID channelId; //작성채널
-//    private UUID userId; //작성자
     private String content; //내용 입력
-//    private List<UUID> attachmentIds; //첨부파일
 
     // N:1 관계
-    private Channel channel;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "channel_id", nullable = false)
+    private Channel channel; //작성채널
 
     // N:1 관계
-    private User author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author; //작성자
 
     // N:M 관계
-    private List<BinaryContent> attachments;
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "message_attachemnts",
+            joinColumns = @JoinColumn(name = "message_id"),
+            inverseJoinColumns = @JoinColumn(name = "attachment_id")
+    )
+    private List<BinaryContent> attachments; //첨부파일
 
     public Message(Channel channel, User author, String content, List<BinaryContent> attachmentx) {
         super();
