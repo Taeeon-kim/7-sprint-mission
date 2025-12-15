@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class MessageException extends DiscodeitException {
+
+    protected MessageException(ErrorCode errorCode, UUID userId) {
+        super(errorCode, Map.of("userId", userId));
+    }
+
     protected MessageException(ErrorCode errorCode, UUID userId, UUID channelId, ChannelType channelType) {
         super(errorCode, Map.of("userId", userId, "channelId", channelId, "channelType", channelType));
     }
