@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.exception.DiscodeitException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusCreateNotAllowedException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -37,7 +37,7 @@ public class ReadStatus extends BaseUpdatableEntity {
     @Builder
     public ReadStatus(User user, Channel channel) {
         if (channel.getType() != ChannelType.PRIVATE) {
-            throw new IllegalArgumentException("public channel은 readStatus 생성 허용 되지 않습니다.");
+            throw new ReadStatusCreateNotAllowedException(channel.getType());
         }
         this.user = user;
         this.channel = channel;

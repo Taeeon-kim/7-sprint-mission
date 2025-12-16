@@ -52,7 +52,7 @@ public class User extends BaseUpdatableEntity {
     }
 
     public void update(UserUpdateParams request) {
-
+        // PUT 방식처럼 전체를 덮어씌우는 방식이라 null 체크없이 바로 업데이트
         this.updateNickname(request.nickname());
         this.updateEmail(request.email());
         this.updatePassword(request.password());

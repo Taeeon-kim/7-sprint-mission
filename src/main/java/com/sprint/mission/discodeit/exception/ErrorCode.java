@@ -39,6 +39,8 @@ public enum ErrorCode {
     // ReadStatus
     READ_STATUS_DUPLICATED("이미 ReadStatus가 존재합니다.", HttpStatus.CONFLICT, "RS-001"),
     READ_STATUS_NOT_FOUND("읽음 상태가 존재하지 않습니다.", HttpStatus.NOT_FOUND, "RS-002"),
+    // ReadStatus
+    READ_STATUS_CREATE_NOT_ALLOWED("해당 채널 타입에서는 ReadStatus를 생성할 수 없습니다.", HttpStatus.CONFLICT, "RS-003"),
 
     // UserStatus
     USER_STATUS_NOT_FOUND("유저 상태를 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR, "US-001"),
