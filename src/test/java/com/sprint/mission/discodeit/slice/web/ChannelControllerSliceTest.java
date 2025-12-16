@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.controller.ChannelController;
 import com.sprint.mission.discodeit.dto.channel.ChannelCreateCommand;
 import com.sprint.mission.discodeit.dto.channel.ChannelResponseDto;
+import com.sprint.mission.discodeit.dto.user.UserResponseDto;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
 import com.sprint.mission.discodeit.service.ChannelService;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -112,18 +114,38 @@ public class ChannelControllerSliceTest {
         void create_private_channel_returns_201() throws Exception {
             // given
             Map<String, Object> body = Map.of(
-                    "name", "private-channel",
-                    "description", "desc"
+                    "memberIds" , List.of(UUID.randomUUID(), UUID.randomUUID())
             );
 
             UUID channelId = UUID.randomUUID();
 
+
+            UserResponseDto user1 = new UserResponseDto(
+                    UUID.randomUUID(),
+                    "user1",
+                    "user1@test.com",
+                    null,
+                    true,
+                    Instant.now(),
+                    Instant.now()
+            );
+
+            UserResponseDto user2 = new UserResponseDto(
+                    UUID.randomUUID(),
+                    "user2",
+                    "user2@test.com",
+                    null,
+                    true,
+                    Instant.now(),
+                    Instant.now()
+            );
+            List<UserResponseDto> participants = List.of(user1, user2);
             when(channelService.createChannel(any(ChannelCreateCommand.class)))
                     .thenReturn(new ChannelResponseDto(
                             channelId,
-                            "public-channel",
-                            "desc",
                             null,
+                            null,
+                            participants,
                             ChannelType.PRIVATE,
                             Instant.now()
                     ));
