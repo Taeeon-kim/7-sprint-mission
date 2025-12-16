@@ -1,19 +1,18 @@
 package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface ReadStatusRepository {
+public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
 
-    // 유저-채널 읽음 상태 저장
-    void save(ReadStatus readStatus);
+    // 유저-채널 읽음 상태 저장 : save
 
     // 특정 유저가 특정 채널에서 마지막으로 읽은 시점을 가져옴
     ReadStatus findByUserAndChannel(UUID userId, UUID channelId);
-
-    ReadStatus findById(UUID uuid);
 
     // 채널 참여자별 미확인 메시지 수 계산
     List<ReadStatus> findByChannelId(UUID channelId);
@@ -24,8 +23,7 @@ public interface ReadStatusRepository {
     // 읽음 상태 업데이트
     void update(ReadStatus readStatus);
 
-    // 사용자가 채널을 떠난 경우 삭제
-    void delete(UUID uuid);
+    // 사용자가 채널을 떠난 경우 삭제 : delete
 
     // 특정 채널 읽음 상태 삭제, 채널 삭제 시 cascade
     void deleteAllByChannelId(UUID channelId);
