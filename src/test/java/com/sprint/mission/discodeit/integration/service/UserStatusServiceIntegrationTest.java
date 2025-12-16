@@ -290,22 +290,28 @@ public class UserStatusServiceIntegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음 ")
+        @DisplayName("[Integration][Flow][Negative] 회원상태 수정 - 동일 값이면 변화없음")
         void updateUserStatusByUserId_noop_whenSameValue() {
             // given
             User user = UserFixture.createUserWithStatus(userRepository);
             UserStatus savedStatus = user.getUserStatus();
 
+            Instant beforeLastActiveAt = savedStatus.getLastActiveAt();
+            Instant beforeUpdatedAt = savedStatus.getUpdatedAt();
 
-            UserStatusUpdateRequestDto dto = new UserStatusUpdateRequestDto(savedStatus.getLastActiveAt());
+            UserStatusUpdateRequestDto dto =
+                    new UserStatusUpdateRequestDto(beforeLastActiveAt);
 
             // when
             userStatusService.updateUserStatusByUserId(user.getId(), dto);
+            em.flush();
+            em.clear();
 
             // then
             UserStatus after = userStatusRepository.findByUserId(user.getId()).orElseThrow();
-            // 예: 동일값이면 변화 없음(정책에 맞게 선택)
-            assertEquals(savedStatus.getLastActiveAt(), after.getLastActiveAt());
+            assertEquals(beforeLastActiveAt, after.getLastActiveAt());
+            assertEquals(beforeUpdatedAt, after.getUpdatedAt(),
+                    "동일 값이면 updatedAt도 변경되면 안 된다");
         }
     }
 
