@@ -26,3 +26,33 @@ logging:
 
 server:
   port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    health:
+      show-details: always  # Health 상세 정보 표시
+
+  info:
+    env:
+      enabled: true
+
+info:
+  datasource:
+    url: ${spring.datasource.url}
+    driver: ${spring.datasource.driver-class-name}
+
+  jpa:
+    ddl-auto: ${spring.jpa.hibernate.ddl-auto}
+
+  storage:
+    type: ${discodeit.storage.type}
+    path: ${discodeit.storage.local.root-path}
+
+  multipart:
+    max-file-size: ${spring.servlet.multipart.max-file-size}
+    max-request-size: ${spring.servlet.multipart.max-request-size}

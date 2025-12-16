@@ -29,3 +29,12 @@ discodeit:
   repository:
     type: jcf
     file-directory: ./data
+
+info:
+  app:
+    name: Discodeit
+    version: 1.7.0
+
+  runtime:
+    java-version: 17
+    spring-boot-version: 3.4.0

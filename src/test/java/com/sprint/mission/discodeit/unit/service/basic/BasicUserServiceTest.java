@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.DiscodeitException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapperManual;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -18,9 +19,13 @@ import org.mockito.InOrder;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class BasicUserServiceTest {
@@ -71,7 +76,7 @@ class BasicUserServiceTest {
         }
 
         @Test
-        @DisplayName("[Branch][Negative] 회원가입 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생 및 repository.save()미호출")
+        @DisplayName("[Branch][Negative] 회원가입 - 유효하지않은 입력값일때 DiscodeitException 예외 발생 및 repository.save()미호출")
         void signUp_shouldThrowException_whenInValidInput() {
             UserSignupCommand userNameBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("", "a@b.com", "123"), null);
             UserSignupCommand emailBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "", "pw"), null);
@@ -164,19 +169,19 @@ class BasicUserServiceTest {
         }
 
         @Test
-        @DisplayName("[Exception] 회원조회 - 기존 회원이 없다면 NoSuchElementException 예외 전파")
+        @DisplayName("[Exception] 회원조회 - 기존 회원이 없다면 UserNotFoundException 예외 전파")
         void getUserById_shouldPropagateException_whenReaderThrowNotFound() {
             UUID id = UUID.randomUUID();
-            when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
+            when(userReader.findUserOrThrow(id)).thenThrow(new UserNotFoundException(id));
 
-            assertThrows(NoSuchElementException.class, () -> userService.getUserById(id));
+            assertThrows(UserNotFoundException.class, () -> userService.getUserById(id));
         }
 
         @Test
-        @DisplayName("[Branch][Negative] 회원조회 - 유효하지않은 입력값일때 IllegalArgumentException 예외 발생")
+        @DisplayName("[Branch][Negative] 회원조회 - 유효하지않은 입력값일때 DiscodeitException 예외 발생")
         void getUserById_shouldThrowException_whenIdIsInvalid() {
-            when(userReader.findUserOrThrow(null)).thenThrow(new IllegalArgumentException("not found"));
-            assertThrows(IllegalArgumentException.class, () -> userService.getUserById(null));
+            when(userReader.findUserOrThrow(null)).thenThrow(new DiscodeitException(ErrorCode.INVALID_INPUT));
+            assertThrows(DiscodeitException.class, () -> userService.getUserById(null));
             verify(userReader).findUserOrThrow(null);
         }
     }
@@ -200,8 +205,6 @@ class BasicUserServiceTest {
 
             when(userStatusRepository.findByUserId(any(UUID.class))).thenReturn(Optional.of(userStatus));
 
-//            when(binaryContentRepository);
-
             // when
             userService.deleteUser(id);
 
@@ -211,7 +214,7 @@ class BasicUserServiceTest {
         }
 
         @Test
-        @DisplayName("[Branch][Negative] 회원삭제 - 유효하지않은 입력값일때 IllegalArgumentException 발생 및 Repository 미호출")
+        @DisplayName("[Branch][Negative] 회원삭제 - 유효하지않은 입력값일때 DiscodeitException 발생 및 Repository 미호출")
         void deleteUser_shouldThrowException_whenIdIsNull() {
             DiscodeitException discodeitException = assertThrows(DiscodeitException.class, () -> userService.deleteUser(null));
             assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
@@ -226,15 +229,15 @@ class BasicUserServiceTest {
     class UpdateUser {
 
         @Test
-        @DisplayName("[Exception] 회원수정 - 미존재 유저 일경우 NoSuchElementException 전파")
+        @DisplayName("[Exception] 회원수정 - 미존재 유저 일경우 UserNotFoundException 전파")
         void updateUser_shouldThrowException_whenUserNotFound() {
             //given
             UUID id = UUID.randomUUID();
-            when(userReader.findUserOrThrow(id)).thenThrow(new NoSuchElementException("not found"));
+            when(userReader.findUserOrThrow(id)).thenThrow(new UserNotFoundException(id));
             UserUpdateCommand updateCommand = UserUpdateCommand.from(id, new UserUpdateRequestDto("new", null, null), null);
             //when+then
             assertThrows(
-                    NoSuchElementException.class,
+                    UserNotFoundException.class,
                     () -> userService.updateUser(updateCommand)
             );
 
@@ -319,24 +322,6 @@ class BasicUserServiceTest {
             inOrder.verify(userReader).findUserOrThrow(id);
             inOrder.verify(userRepository).save(real);
         }
-
-//        @Test
-//        @DisplayName("[Behavior + Branch] 회원수정 - 전화번호 변경 시 userRepository.save() 호출")
-//        void updateUser_shouldCallRepositorySave_whenPhoneChanged() {
-//            // given
-//            UUID id = UUID.randomUUID();
-//
-//            User real = User.create("nick", "a@b.com", "pw", RoleType.USER, null);
-//            when(userReader.findUserOrThrow(id)).thenReturn(real);
-//
-//            // when
-//            userService.updateUser(id, new UserUpdateRequestDto(null, null, null, "010-9999-9999", null));
-//
-//            // then
-//            InOrder inOrder = inOrder(userReader, userRepository);
-//            inOrder.verify(userReader).findUserOrThrow(id);
-//            inOrder.verify(userRepository).save(real);
-//        }
 
         @Test
         @DisplayName("[Behavior + Branch] 회원수정 - 프로필이미지 id 변경 시 userRepository.save() 호출")
