@@ -18,13 +18,44 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Test + JaCoCo report
-        run: ./gradlew test jacocoTestReport
+      # 1) 테스트는 실패해도 다음 단계로 진행
+      - name: Test
+        id: tests
+        continue-on-error: true
+        run: ./gradlew test
 
+      # 2) 테스트 성공/실패와 무관하게 JaCoCo 리포트 생성 시도
+      - name: JaCoCo report
+        if: always()
+        run: ./gradlew jacocoTestReport
+
+      # 3) PR 코멘트도 항상 시도 (xml이 없으면 여기서 실패할 수 있음)
       - name: Comment coverage on PR
+        if: always()
         uses: madrapps/jacoco-report@v1
         with:
           path: build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "JaCoCo Coverage"
           update-comment: true
+
+      # (선택) 테스트 리포트도 같이 올리면 CI에서 디버깅이 쉬움
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
+
+      # (선택) JaCoCo HTML 리포트도 올리기
+      - name: Upload JaCoCo HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html
+          path: build/reports/jacoco/test/html
+
+      # 4) 마지막에 테스트가 실패했으면 job을 실패로 만들기(merge 막고 싶을 때)
+      - name: Fail if tests failed
+        if: steps.tests.outcome != 'success'
+        run: exit 1
