@@ -54,8 +54,6 @@ class UserServiceUnitTest {
     @InjectMocks
     private BasicUserService userService;
 
-    // --- grouped by use-case with @Nested ---
-
     @Nested
     @DisplayName("signUp")
     class SignUp {

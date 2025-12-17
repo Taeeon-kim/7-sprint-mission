@@ -17,7 +17,6 @@ import java.util.*;
 @Table(name = "channels")
 public class Channel extends BaseUpdatableEntity {
 
-
     private String name;
     private String description;
 
