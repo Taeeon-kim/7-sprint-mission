@@ -46,7 +46,7 @@ public class UserController implements UserApi {
     //사용자 수정
     public void update (
             @Parameter(description = "수정할 User ID")
-            @PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+            @PathVariable UUID userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 
