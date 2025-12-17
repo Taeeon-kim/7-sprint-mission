@@ -137,19 +137,18 @@ public class ChannelServiceUnitTest {
         }
 
         @Test
-        @DisplayName("[Branch][Negative] PRIVATE 채널 생성 - 멤버가 없으면 INVALID_INPUT 예외 + 어떤 협력자도 호출하지 않음")
+        @DisplayName("[Behavior + Branch][Negative] PRIVATE 채널 생성 - 멤버가 없으면 ChannelMinimumMembersNotMetException 예외 + readStatus, channel mapper 미호출")
         void createPrivateChannel_shouldThrow_whenMemberIdsMissing() {
+
             // given
             ChannelCreateRequestDto dto = new ChannelCreateRequestDto("비공개 채널", "설명", List.of());
             ChannelCreateCommand command = ChannelCreateCommand.from(dto, ChannelType.PRIVATE);
             Channel privateChannel = mock(Channel.class);
-            Channel saved = mock(Channel.class);
 
             given(channelFactory.create(command)).willReturn(privateChannel);
-            given(channelRepository.save(privateChannel)).willReturn(saved);
-            given(saved.getType()).willReturn(ChannelType.PRIVATE);
+            given(channelRepository.save(privateChannel)).willReturn(privateChannel);
+            given(privateChannel.getType()).willReturn(ChannelType.PRIVATE);
             given(userReader.findUsersByIds(command.memberIds())).willReturn(List.of());
-
 
             // when + then
             assertThrows(ChannelMinimumMembersNotMetException.class, () -> channelService.createChannel(command));
