@@ -9,12 +9,20 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
-import com.sprint.mission.discodeit.exception.channel.*;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.ChannelMinimumMembersNotMetException;
+import com.sprint.mission.discodeit.exception.channel.ChannelModificationNotAllowedException;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusCreateNotAllowedException;
 import com.sprint.mission.discodeit.integration.fixtures.ChannelFixture;
 import com.sprint.mission.discodeit.integration.fixtures.MessageFixture;
 import com.sprint.mission.discodeit.integration.fixtures.ReadStatusFixture;
 import com.sprint.mission.discodeit.integration.fixtures.UserFixture;
-import com.sprint.mission.discodeit.repository.*;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +30,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -42,9 +49,6 @@ public class ChannelServicentegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private UserStatusRepository userStatusRepository;
-
-    @Autowired
     private ChannelRepository channelRepository;
 
     @Autowired
@@ -55,10 +59,6 @@ public class ChannelServicentegrationTest {
 
     @Autowired
     private MessageRepository messageRepository;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
 
 //    @BeforeEach
 //    void setUp() {
@@ -113,7 +113,7 @@ public class ChannelServicentegrationTest {
             // given
             User user = UserFixture.createUserWithStatus(userRepository);
             Channel publicChannel = ChannelFixture.createPublicChannel(channelRepository);
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(ReadStatusCreateNotAllowedException.class, () ->
                     ReadStatusFixture.joinChannel(user, publicChannel, readStatusRepository)
             );
         }
@@ -134,27 +134,25 @@ public class ChannelServicentegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Negative] public채널 생성 - title/description 누락 시 예외")
+        @DisplayName("[Integration][Negative] public채널 생성 - title/description 누락 시 DiscodeitException 예외")
         void createChannel_public_throws_when_invalid_fields() {
-            User creator = userRepository.save(User.builder()
-                    .nickname("c").email("c@ex.com").password("pw")
-                    .build());
-
+            // given
             // DTO 시그니처: (title, description, type, memberIds)
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(" ", null, null);
             ChannelCreateCommand cmd = ChannelCreateCommand.from(channelCreateRequestDto, ChannelType.PUBLIC);
-            assertThrows(IllegalArgumentException.class,
+
+            // when & then
+            DiscodeitException discodeitException = assertThrows(DiscodeitException.class,
                     () -> channelService.createChannel(cmd));
+            assertEquals(ErrorCode.INVALID_INPUT, discodeitException.getErrorCode());
+            assertEquals(ErrorCode.INVALID_INPUT.getStatus(), discodeitException.getErrorCode().getStatus());
+            assertEquals(ErrorCode.INVALID_INPUT.getCode(), discodeitException.getErrorCode().getCode());
         }
 
         @Test
         @DisplayName("[Integration][Flow] private채널 생성 - 채널 저장 & 멤버별 ReadStatus 생성")
         void createChannel_private_then_persists_channel_and_readStatuses() {
             // given
-            User creator = userRepository.save(User.builder()
-                    .nickname("c").email("c@ex.com").password("pw")
-                    .build());
-
             User m1 = userRepository.save(User.builder()
                     .nickname("m1").email("m1@ex.com").password("pw")
                     .build());
@@ -207,11 +205,8 @@ public class ChannelServicentegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Negative] private채널 생성 - 존재하지 않는 멤버로 private 채널 생성시 인원불충족으로 예외")
+        @DisplayName("[Integration][Negative] private채널 생성 - 존재하지 않는 멤버로 private 채널 생성시 인원불충족으로 ChannelMinimumMembersNotMetException 예외")
         void createChannel_private_throws_when_member_not_found() {
-//            User creator = userRepository.save(User.builder()
-//                    .nickname("c").email("c@ex.com").password("pw")
-//                    .build());
 
             ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(
                     null, null, List.of(UUID.randomUUID()) // 존재하지 않는 유저
@@ -261,7 +256,7 @@ public class ChannelServicentegrationTest {
         }
 
         @Test
-        @DisplayName("[Integration][Positive] 채널 조회 - 존재하지않는 채널 조회시 예외")
+        @DisplayName("[Integration][Positive] 채널 조회 - 존재하지않는 채널 조회시 ChannelNotFoundException 예외")
         void getChannel_throws_when_not_found() {
             UUID id = UUID.randomUUID();
             assertThrows(ChannelNotFoundException.class, () -> channelService.getChannel(id));
@@ -368,8 +363,6 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 유저채널 조회 - Public 채널 및 자기속한 private 채널 조회")
         void getAllChannelsByUserId_returns_public_and_joined_private_channel_list() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository);
-
             Channel channelA = channelRepository.save(
                     Channel.createPublicChannel("공지", "전체 공지")
             );
@@ -384,7 +377,6 @@ public class ChannelServicentegrationTest {
             );
 
             // joined member
-
             User member1 = User.builder()
                     .nickname("member1")
                     .email("aaaaac@ex.com")
@@ -449,7 +441,6 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 채널 변경 - Public 채널 수정시 내용 반영된다")
         void updateChannel_updates_public_channel_fields() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository);
             Channel channel = ChannelFixture.createPublicChannel(channelRepository);
 
 
@@ -483,7 +474,7 @@ public class ChannelServicentegrationTest {
 
                     // updatedAt 갱신 확인(널 아님 + 이전보다 늦음)
                     () -> assertNotNull(updatedChannel.getUpdatedAt()),
-                    () -> assertNotEquals(updatedChannel.getUpdatedAt(),beforeUpdatedAt)
+                    () -> assertNotEquals(updatedChannel.getUpdatedAt(), beforeUpdatedAt)
             );
         }
 
@@ -491,7 +482,7 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Negative] 채널 변경 - Private 채널 수정시 예외가 발생한다.")
         void updateChannel_throws_when_update_private_channel() {
             // given
-            User creator = UserFixture.createUserWithStatus(userRepository);
+
             Channel privateChannel = ChannelFixture.createPrivateChannel(channelRepository);
 
             ChannelUpdateRequestDto request = ChannelUpdateRequestDto.builder()
@@ -511,7 +502,6 @@ public class ChannelServicentegrationTest {
         @DisplayName("[Integration][Positive] 채널 삭제 - 채널/메시지/읽음상태 모두 삭제된다 ")
         void deleteChannel_deletes_channel_and_related_messages_read_statuses() {
             // given
-
             User member1 = UserFixture.createUserWithStatus(User.builder().nickname("member1").email("csdd@ex.com")
                     .password("pssw").build(), userRepository);
             User member2 = UserFixture.createUserWithStatus(User.builder().nickname("member2").email("cfffsdd@ex.com")

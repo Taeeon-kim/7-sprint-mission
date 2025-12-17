@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.unit.service.basic;
+package com.sprint.mission.discodeit.unit.service;
 
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.entity.BinaryContent;
@@ -15,40 +15,44 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.reader.UserReader;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-class BasicUserServiceTest {
+@ExtendWith(MockitoExtension.class) // NOTE: strict stubs(엄격 모드)로 진행, 안쓰이는 when(스텁)있을시 실패 에러발생
+class UserServiceUnitTest {
 
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
     private UserReader userReader;
+
+    @Mock
     private UserStatusRepository userStatusRepository;
-    private BasicUserService userService;
+
+    @Mock
     private BinaryContentRepository binaryContentRepository;
+
+    @Mock
     private BinaryContentService binaryContentService;
+
+    @Mock
     private UserMapperManual userMapper;
 
-    @BeforeEach
-    void setUp() {
-        // TODO: 중복 생성이 너무많으니 픽스처 도입 할것
-        userRepository = mock(UserRepository.class);
-        userReader = mock(UserReader.class);
-        userStatusRepository = mock(UserStatusRepository.class);
-        userMapper = mock(UserMapperManual.class);
-        binaryContentRepository = mock(BinaryContentRepository.class);
-        binaryContentService = mock(BinaryContentService.class);
-        userService = new BasicUserService(userRepository, userReader, binaryContentService, binaryContentRepository, userMapper);
-    }
+    @InjectMocks
+    private BasicUserService userService;
 
     // --- grouped by use-case with @Nested ---
 
@@ -82,7 +86,6 @@ class BasicUserServiceTest {
             UserSignupCommand emailBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "", "pw"), null);
             UserSignupCommand passwordBlankCommand = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", ""), null);
 
-
             UserSignupCommand userNameBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto(" ", "a@b.com", "123"), null);
             UserSignupCommand emailBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto("nick", " ", "pw"), null);
             UserSignupCommand passwordBlankCommand2 = UserSignupCommand.from(new UserSignupRequestDto("nick", "a@b.com", " "), null);
@@ -114,7 +117,6 @@ class BasicUserServiceTest {
             assertThrows(DiscodeitException.class, () ->
                     userService.signUp(passwordNullCommand));
 
-
             verify(userRepository, never()).save(any());
         }
     }
@@ -127,9 +129,7 @@ class BasicUserServiceTest {
         void getUserById_shouldDelegateToUserReader_whenCalled() {
             // given
             User user = User.create("name", "email@emc.com", "password", null);
-            when(userStatusRepository
-                    .findByUserId(user.getId()))
-                    .thenReturn(Optional.of(new UserStatus(user)));
+
             when(userReader.findUserOrThrow(user.getId())).thenReturn(User.create("nickname", "email@exa.com", "pwd", null));
 
             // when
@@ -146,8 +146,6 @@ class BasicUserServiceTest {
             UUID id = UUID.randomUUID();
             User user = User.create("taeeon", "a@b.com", "pw", null);
             when(userReader.findUserOrThrow(id)).thenReturn(user); // Stub
-            when(userStatusRepository.findByUserId(id))
-                    .thenReturn(Optional.of(new UserStatus(user)));
             when(userMapper.toDto(user)).thenReturn(
                     new UserResponseDto(
                             id,
@@ -202,8 +200,6 @@ class BasicUserServiceTest {
                     .build();
             UserStatus userStatus = new UserStatus(user);
             when(userReader.findUserOrThrow(any())).thenReturn(user);
-
-            when(userStatusRepository.findByUserId(any(UUID.class))).thenReturn(Optional.of(userStatus));
 
             // when
             userService.deleteUser(id);
