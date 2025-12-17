@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ReadStatus extends BaseUpdatableEntity {
 
     @Column(name = "last_read_at", nullable = false)
-    private Instant lastActiveAt; //마지막으로 읽은 시각
+    private Instant lastReadAt; //마지막으로 읽은 시각
 
     //N:1
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,12 +36,12 @@ public class ReadStatus extends BaseUpdatableEntity {
         super();
         this.user = user;
         this.channel = channel;
-        this.lastActiveAt = Instant.now();
+        this.lastReadAt = Instant.now();
     }
 
-    public void setUpdate(Instant newLastActiveAt) {
-        if(newLastActiveAt != null && newLastActiveAt.isAfter(this.lastActiveAt)) {
-            this.lastActiveAt = newLastActiveAt;
+    public void setUpdate(Instant newLastReadAt) {
+        if(newLastReadAt != null && newLastReadAt.isAfter(this.lastReadAt)) {
+            this.lastReadAt = newLastReadAt;
         }
     }
 }

@@ -32,13 +32,13 @@ public class Message extends BaseUpdatableEntity {
     // N:M 관계
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "message_attachemnts",
+            name = "message_attachements",
             joinColumns = @JoinColumn(name = "message_id"),
             inverseJoinColumns = @JoinColumn(name = "attachment_id")
     )
     private List<BinaryContent> attachments; //첨부파일
 
-    public Message(Channel channel, User author, String content, List<BinaryContent> attachmentx) {
+    public Message(Channel channel, User author, String content, List<BinaryContent> attachments) {
         super();
         this.channel = channel;
         this.author = author;

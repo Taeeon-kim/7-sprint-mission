@@ -8,7 +8,7 @@ import lombok.*;
 
 @Getter
 @Entity
-@Table(name = "binary_content")
+@Table(name = "binary_contents")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BinaryContent extends BaseEntity {
 

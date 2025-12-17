@@ -24,45 +24,48 @@ public class Channel extends BaseUpdatableEntity {
     private String name;
 
     @Column(length = 500)
-    private String discription;
+    private String description;
 //    private List<UUID> participantIds = new ArrayList<>();
 
     // 1:N 관계
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;
 
     // N:M 관계
+    @ManyToMany(mappedBy = "channels")
     private List<User> member;
 
     // 1:N 관계
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReadStatus> readStatuses;
 
-    public void setUpdate(String newName, String newDiscription) {
+    public void setUpdate(String newName, String newDescription) {
         if(this.type == ChannelType.PRIVATE){
             throw new UnsupportedOperationException("Private channels cannot be updated");
         }
         if(newName != null && !newName.equals(this.name)) {
             this.name = newName;
         }
-        if(newDiscription != null && !newDiscription.equals(this.discription)) {
-            this.discription = newDiscription;
+        if(newDescription != null && !newDescription.equals(this.description)) {
+            this.description = newDescription;
         }
-        if(newName != null || newDiscription != null) {
+        if(newName != null || newDescription != null) {
             setUpdatedAt(Instant.now());
         }
     }
 
     //PUBLIC
-    public Channel(String name, ChannelType type, String discription) {
+    public Channel(String name, ChannelType type, String description) {
         super();
         this.name = name;
         this.type = type;
-        this.discription = discription;
+        this.description = description;
     }
 
     public Channel(ChannelType type) {
         super();
         this.type = type;
         this.name = null;
-        this.discription = null;
+        this.description = null;
     }
 }

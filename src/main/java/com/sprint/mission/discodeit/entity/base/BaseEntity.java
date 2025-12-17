@@ -14,11 +14,11 @@ public class BaseEntity {//implements Serializable {
 //    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id; //객체 식별 id
 
     @CreatedDate
-    @Column(columnDefinition = "timestamp_t_z", updatable = false, nullable = false)
+    @Column(name = "timestamp_t_z", updatable = false, nullable = false)
     private Instant createdAt;
 
     public BaseEntity(){
