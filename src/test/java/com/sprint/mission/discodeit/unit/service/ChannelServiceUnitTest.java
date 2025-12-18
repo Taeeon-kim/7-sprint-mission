@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.channel.ChannelInvalidParticipantsException;
 import com.sprint.mission.discodeit.exception.channel.ChannelMinimumMembersNotMetException;
 import com.sprint.mission.discodeit.exception.channel.ChannelModificationNotAllowedException;
+import com.sprint.mission.discodeit.exception.channel.ChannelUnsupportedTypeException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -25,7 +26,6 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -253,10 +253,10 @@ public class ChannelServiceUnitTest {
 
     @Nested
     @DisplayName("채널 삭제")
-    class deleteChannel{
+    class deleteChannel {
         @Test
         @DisplayName("[Behavior][Positive] 채널 삭제 - message, readStats, channel 삭제 위임")
-        void deleteChannel_shouldDeleteChannelAndReadStatusAndMessage(){
+        void deleteChannel_shouldDeleteChannelAndReadStatusAndMessage() {
             // given
             UUID channelId = UUID.randomUUID();
             Channel channel = mock(Channel.class);
@@ -274,12 +274,51 @@ public class ChannelServiceUnitTest {
 
         @Test
         @DisplayName("[Branch][Negative] 채널 삭제 - channelId가 null일시 INVALID_INPUT 전파")
-        void deleteChannel_shouldThrow_whenChannelIdIsNull(){
+        void deleteChannel_shouldThrow_whenChannelIdIsNull() {
 
             // when & then
             DiscodeitException ex = assertThrows(DiscodeitException.class, () -> channelService.deleteChannel(null));
             assertEquals(ErrorCode.INVALID_INPUT, ex.getErrorCode());
         }
+    }
+
+    @Nested
+    @DisplayName("특정 유저 채널 조회")
+    class getAllChannelsByUserId {
+
+        @Test
+        @DisplayName("[Behavior][Positive] 특정 유저 채널 조회 - findAllVisibleByUserId 위임")
+        void getAllChannelsByUserId_shouldReturnChannelList() {
+            // given
+            UUID userId = UUID.randomUUID();
+            Channel channel1 = mock(Channel.class);
+            Channel channel2 = mock(Channel.class);
+
+            given(channel1.getType()).willReturn(ChannelType.PUBLIC);
+            given(channel2.getType()).willReturn(ChannelType.PRIVATE);
+
+            ChannelResponseDto responseDto1 = mock(ChannelResponseDto.class);
+            ChannelResponseDto responseDto2 = mock(ChannelResponseDto.class);
+
+            given(channelRepository.findAllVisibleByUserId(userId)).willReturn(List.of(channel1, channel2));
+            given(channelMapper.toDto(channel1)).willReturn(responseDto1);
+            given(channelMapper.toDto(channel2)).willReturn(responseDto2);
+
+
+            // when
+            List<ChannelResponseDto> responseDtos = channelService.getAllChannelsByUserId(userId);
+
+            // then
+            assertEquals(2, responseDtos.size());
+            assertEquals(List.of(responseDto1, responseDto2), responseDtos);
+
+            then(channelRepository).should().findAllVisibleByUserId(userId);
+            then(channelMapper).should().toDto(channel1);
+            then(channelMapper).should().toDto(channel2);
+
+
+        }
+
     }
 
 }
