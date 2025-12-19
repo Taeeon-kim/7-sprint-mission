@@ -10,6 +10,7 @@ services: # 실행할 여러 컨테이너들을 정의
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JAVA_OPTS: "-Xmx400m -Xms200m" # JVM 메모리 설정
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -36,6 +37,12 @@ services: # 실행할 여러 컨테이너들을 정의
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - my-postgres-data:/var/lib/postgresql/data
+    # DB에서도 사용하는 메모리 제한 설정
+    command: >
+      postgres 
+      -c shared_buffers=128MB 
+      -c max_connections=50
+
     healthcheck: # 컨테이너가 정상인지 주기적으로 확인
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
       interval: 10s # 실패할시 10초마다 재시도
@@ -49,7 +56,7 @@ services: # 실행할 여러 컨테이너들을 정의
     container_name: redis-cache
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 100mb --mexmemory-policy allkeys-lru # 레디스 메모리 제한
     volumes:
       - redis-data:/data
     healthcheck:
