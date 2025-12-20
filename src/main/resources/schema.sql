@@ -2,11 +2,11 @@
 -- Users
 CREATE TABLE users (
     id         UUID PRIMARY KEY,
-    username   VARCHAR(50)  NOT NULL,
-    email      VARCHAR(100) NOT NULL,
-    password   VARCHAR(60)  NOT NULL,
-    created_at TIMESTAMPTZ  NOT NULL,
-    updated_at TIMESTAMPTZ,
+    username   VARCHAR(50)               NOT NULL,
+    email      VARCHAR(100)              NOT NULL,
+    password   VARCHAR(60)               NOT NULL,
+    created_at timestamp with time zone  NOT NULL,
+    updated_at timestamp with time zone,
     profile_id UUID
 );
 
@@ -15,30 +15,30 @@ CREATE TABLE channels (
     id          UUID PRIMARY KEY,
     name        VARCHAR(100),
     description VARCHAR(500),
-    created_at  TIMESTAMPTZ  NOT NULL,
-    updated_at  TIMESTAMPTZ,
+    created_at  timestamp with time zone NOT NULL,
+    updated_at  timestamp with time zone,
 -- type VARCHAR(10) NOT NULL ?
-    type        channel_type NOT NULL
+    type        channel_type             NOT NULL
 );
 
 -- Messages
 CREATE TABLE messages (
     id         UUID PRIMARY KEY,
     content    TEXT,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ,
-    channel_id UUID        NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone,
+    channel_id UUID                     NOT NULL,
     author_id  UUID
 );
 
 -- Binary contents
 CREATE TABLE binary_contents (
     id           UUID PRIMARY KEY,
-    file_name    VARCHAR(255) NOT NULL,
-    size         BIGINT       NOT NULL,
-    content_type VARCHAR(100) NOT NULL,
-    bytes        BYTEA        NOT NULL,
-    created_at   TIMESTAMPTZ  NOT NULL,
+    file_name    VARCHAR(255)              NOT NULL,
+    size         BIGINT                    NOT NULL,
+    content_type VARCHAR(100)              NOT NULL,
+    bytes        BYTEA                     NOT NULL,
+    created_at   timestamp with time zone  NOT NULL,
 );
 
 -- Message Attachments
@@ -51,20 +51,20 @@ CREATE TABLE message_attachments (
 -- User statuses
 CREATE TABLE user_statuses (
     id             UUID PRIMARY KEY,
-    user_id        UUID UNIQUE NOT NULL,
-    last_active_at TIMESTAMPTZ NOT NULL,
-    created_at     TIMESTAMPTZ NOT NULL,
-    updated_at     TIMESTAMPTZ,
+    user_id        UUID UNIQUE              NOT NULL,
+    last_active_at timestamp with time zone NOT NULL,
+    created_at     timestamp with time zone NOT NULL,
+    updated_at     timestamp with time zone,
 );
 
 -- Read status
 CREATE TABLE read_statuses (
     id UUID PRIMARY KEY,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ,
-    user_id UUID NOT NULL,
-    channel_id UUID NOT NULL,
-    last_read_at TIMESTAMPTZ NOT NULL,
+    created_at timestamp with time zone   NOT NULL,
+    updated_at timestamp with time zone,
+    user_id UUID                          NOT NULL,
+    channel_id UUID                       NOT NULL,
+    last_read_at timestamp with time zone NOT NULL,
     UNIQUE (user_id, channel_id)
 );
 
