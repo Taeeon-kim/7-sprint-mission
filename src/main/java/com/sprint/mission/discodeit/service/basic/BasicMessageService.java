@@ -69,7 +69,6 @@ public class BasicMessageService implements MessageService {
                 channelId, pageable.getPageNumber(), pageable.getPageSize(), cursor);
 
         Channel channel = channelReader.findChannelOrThrow(channelId);
-        System.out.println("cursor = " + cursor);
 
         /**
          NOTE: DTO 변환이유중하나가 엔티티를 그대로 컨트롤러까지 넘기면, @Transactional 범위 밖에서 직렬화(Jackson)가 author 같은 lazy 연관필드에 접근하면서
@@ -155,8 +154,9 @@ public class BasicMessageService implements MessageService {
         log.debug("메시지 수정 시도 - messageId={}", command.messageId());
         Message message = messageReader.findMessageOrThrow(command.messageId());
 
-        if (!command.content().equals(message.getContent())) {
-            message.updateContent(command.content());
+
+        boolean isUpdated = message.updateContent(command.content());
+        if (isUpdated) {
             log.info("메시지 수정 완료 - messageId={}", message.getId());
         } else {
             log.debug(
@@ -164,7 +164,6 @@ public class BasicMessageService implements MessageService {
                     command.messageId()
             );
         }
-
         return messageMapper.toUpdateDto(message);
     }
 

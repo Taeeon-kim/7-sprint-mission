@@ -73,7 +73,7 @@ public class UserControllerSliceTest {
 
         @Test
         void returns400_when_email_invalid() throws Exception {
-            var dto = UserSignupRequestDto.builder()
+            UserSignupRequestDto dto = UserSignupRequestDto.builder()
                     .username("user")
                     .email("invalid-email")
                     .password("pw")
@@ -86,7 +86,7 @@ public class UserControllerSliceTest {
 
         @Test
         void returns400_when_password_blank() throws Exception {
-            var dto = UserSignupRequestDto.builder()
+            UserSignupRequestDto dto = UserSignupRequestDto.builder()
                     .username("user")
                     .email("user@test.com")
                     .password(" ")
