@@ -17,6 +17,12 @@ spring:
         default_batch_fetch_size: 50
     open-in-view: false # TODO: 디버깅모드 혹은 jconsole등 영속성컨텍스트/스레드 값 체크하여 실제 어느 스코프까지 가지고있는지 모니터링해볼것
 
+  boot:
+    admin:
+      client:
+        instance:
+          name: discodeit
+
 logging:
   level:
     root: info
@@ -38,3 +44,4 @@ info:
   runtime:
     java-version: 17
     spring-boot-version: 3.4.0
+

@@ -65,6 +65,12 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Swagger/OpenAPI 추가
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
+    // AWS SDK for java
+    implementation platform('software.amazon.awssdk:bom:2.20.56')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'de.codecentric:spring-boot-admin-starter-client:3.4.5'
     compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
@@ -72,8 +78,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    // Swagger/OpenAPI 추가
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
+
 }
 
 tasks.named('test') {
