@@ -34,12 +34,12 @@ public class User extends BaseUpdatableEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private UserStatus userStatus;
 
-    public User(String password, String email, String userName) {
+    public User(String password, String email, String userName, BinaryContent profile) {
         super();
         this.password = password;
         this.email = email;
         this.userName = userName;
-        this.userStatus = new UserStatus(this);
+        this.profile = profile;
     }
 
     public void setPassword(String newPassword) {

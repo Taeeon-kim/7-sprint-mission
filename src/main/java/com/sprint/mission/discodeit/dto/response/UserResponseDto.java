@@ -24,8 +24,8 @@ public class UserResponseDto {
                 .id(user.getId())
                 .userName(user.getUserName())
                 .email(user.getEmail())
-                .status(user.getUserStatus() != null
-                        ? user.getUserStatus().getStatus().name() : null)
+//                .status(user.getUserStatus() != null
+//                        ? user.getUserStatus().getStatus().name() : null)
                 .profile(user.getProfile() != null
                         ? BinaryContentResponseDto.from(user.getProfile()) : null)
                 .build();
