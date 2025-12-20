@@ -36,7 +36,7 @@ class MessageRepositorySliceTest {
 
     private User saveUserWithStatus(String username, String email, String password) {
         User user = User.create(username, email, password, null);
-        // ★ JPQL이 join fetch a.userStatus 이므로 반드시 있어야 함
+        // JPQL이 join fetch a.userStatus 이므로 반드시 있어야 함
         user.initUserStatus();
         userRepository.saveAndFlush(user);
         return user;

@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ChannelController.class)
@@ -105,8 +106,9 @@ public class ChannelControllerSliceTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(body)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
-
+                    .andExpect(status().isBadRequest())
+                            .andExpect(jsonPath("$.message").value("입력값이 잘못되었습니다."))
+                    .andExpect(jsonPath("$.code").value("CM-001"));
             verify(channelService, never()).createChannel(any());
         }
 
