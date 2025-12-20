@@ -67,7 +67,10 @@ public class ChannelControllerSliceTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(body)))
                     .andDo(print())
-                    .andExpect(status().isCreated());
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(channelId.toString()))
+                    .andExpect(jsonPath("$.name").value("public-channel"))
+                    .andExpect(jsonPath("$.description").value("desc"));
 
             // 타입까지 검증 (중요)
             verify(channelService).createChannel(argThat(cmd ->
@@ -107,7 +110,7 @@ public class ChannelControllerSliceTest {
                             .content(objectMapper.writeValueAsString(body)))
                     .andDo(print())
                     .andExpect(status().isBadRequest())
-                            .andExpect(jsonPath("$.message").value("입력값이 잘못되었습니다."))
+                    .andExpect(jsonPath("$.message").value("입력값이 잘못되었습니다."))
                     .andExpect(jsonPath("$.code").value("CM-001"));
             verify(channelService, never()).createChannel(any());
         }
@@ -116,7 +119,7 @@ public class ChannelControllerSliceTest {
         void create_private_channel_returns_201() throws Exception {
             // given
             Map<String, Object> body = Map.of(
-                    "memberIds" , List.of(UUID.randomUUID(), UUID.randomUUID())
+                    "memberIds", List.of(UUID.randomUUID(), UUID.randomUUID())
             );
 
             UUID channelId = UUID.randomUUID();

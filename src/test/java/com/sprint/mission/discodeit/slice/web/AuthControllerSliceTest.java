@@ -20,6 +20,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AuthController.class)
@@ -92,7 +93,11 @@ public class AuthControllerSliceTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(body)))
                     .andDo(print())
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(id.toString()))
+                    .andExpect(jsonPath("$.username").value("user"))
+                    .andExpect(jsonPath("$.email").value("test@test.com"));
+
 
             verify(authService, times(1)).login(any(AuthLoginRequestDto.class));
         }
