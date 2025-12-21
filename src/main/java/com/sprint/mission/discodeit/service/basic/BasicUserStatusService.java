@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,22 +27,22 @@ public class BasicUserStatusService implements UserStatusService {
     @Override
     public UserStatusResponseDto create(UserStatusCreateRequestDto userStatusCreateRequestDto) {
         User user = userRepository.findById(userStatusCreateRequestDto.getUserId())
-                .orElseThrow(()->new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        UserStatus existing = userStatusRepository.findByUserId(userStatusCreateRequestDto.getUserId());
-        if(existing!=null){
+        Optional<UserStatus> existing = userStatusRepository.findByUser_Id(user.getId());
+        if (existing.isPresent()) {
             throw new RuntimeException("이미 UserStatus가 존재합니다.");
         }
-        UserStatus userStatus = new UserStatus(userStatusCreateRequestDto.getUserId());
+
+        UserStatus userStatus = new UserStatus(user);
         userStatusRepository.save(userStatus);
         return UserStatusResponseDto.from(userStatus);
     }
 
     @Override
     public UserStatusResponseDto findById(UUID uuid) {
-        UserStatus userStatus = userStatusRepository.findAll().stream()
-                .filter(s->s.getUuid().equals(uuid))
-                .findFirst().orElseThrow(()->new RuntimeException("해당 UserStatus를 찾을 수 없습니다."));
+        UserStatus userStatus = userStatusRepository.findById(uuid)
+                .orElseThrow(() -> new RuntimeException("해당 UserStatus를 찾을 수 없습니다."));
         return UserStatusResponseDto.from(userStatus);
     }
 
@@ -55,29 +56,30 @@ public class BasicUserStatusService implements UserStatusService {
     @Override
     public UserStatusResponseDto update(UUID uuid, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         UserStatus userStatus = userStatusRepository.findAll().stream()
-                .filter(s->s.getUuid().equals(uuid))
-                .findFirst().orElseThrow(()->new RuntimeException("해당 UserStatus를 찾을 수 없습니다."));
+                .filter(s -> s.getId().equals(uuid))
+                .findFirst().orElseThrow(() -> new RuntimeException("해당 UserStatus를 찾을 수 없습니다."));
 
-        if(userStatusUpdateRequestDto.getLastActiveAt()!=null){
-            userStatus.updateLastActiveAt();
+        if (userStatusUpdateRequestDto.getLastActiveAt() != null) {
+            userStatus.update();
         }
         return UserStatusResponseDto.from(userStatus);
     }
 
     @Override
     public UserStatusResponseDto updateByUserId(UUID userId, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
-        UserStatus userStatus = userStatusRepository.findByUserId(userId);
-        if(userStatus==null){
+        UserStatus userStatus = userStatusRepository.findByUser_Id(userId)
+                .orElseThrow(()->new IllegalArgumentException("User를 찾을 수 없습니다."));
+        if (userStatus == null) {
             throw new RuntimeException("해당 유저의 상태를 찾을 수 없습니다");
         }
-        if(userStatusUpdateRequestDto.getLastActiveAt()!=null){
-            userStatus.updateLastActiveAt();
+        if (userStatusUpdateRequestDto.getLastActiveAt() != null) {
+            userStatus.update();
         }
         return UserStatusResponseDto.from(userStatus);
     }
 
     @Override
     public void delete(UUID uuid) {
-        userStatusRepository.delete(uuid);
+        userStatusRepository.deleteById(uuid);
     }
 }

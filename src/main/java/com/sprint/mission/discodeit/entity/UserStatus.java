@@ -21,14 +21,20 @@ public class UserStatus extends BaseUpdatableEntity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    public UserStatus(User user) {
-        super();
-        this.user = user;
-        this.lastActiveAt = Instant.now();
+    public UserStatus(User user){
+        this(user, Instant.now());
     }
 
-    public void updateLastActiveAt() {
-        this.lastActiveAt = Instant.now();
+    public UserStatus(User user, Instant lastActiveAt) {
+        super();
+        this.user = user;
+        this.lastActiveAt = lastActiveAt;
+    }
+
+    public void update() {
+        if(lastActiveAt != null && !lastActiveAt.equals(this.lastActiveAt)) {
+            this.lastActiveAt = lastActiveAt;
+        }
     }
 
     public boolean isOnline(){
