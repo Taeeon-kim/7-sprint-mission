@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequestDto;
 import com.sprint.mission.discodeit.dto.response.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,8 +32,8 @@ public class BasicBinaryContentService implements BinaryContentService {
     public BinaryContentResponseDto create(BinaryContentCreateRequestDto binaryContentCreateRequestDto) {
         BinaryContent entity = new BinaryContent(
                 binaryContentCreateRequestDto.getFileName(),
-                binaryContentCreateRequestDto.getContentType(),
-                binaryContentCreateRequestDto.getBytes()
+                (long) binaryContentCreateRequestDto.getBytes().length,
+                binaryContentCreateRequestDto.getContentType()
         );
         binaryContentRepository.save(entity);
         return BinaryContentResponseDto.from(entity);
@@ -39,7 +41,8 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     @Override
     public BinaryContentResponseDto find(UUID uuid) {
-        BinaryContent entity = binaryContentRepository.findById(uuid);
+        BinaryContent entity = binaryContentRepository.findById(uuid)
+                .orElseThrow(()->new IllegalArgumentException("BinaryContent를 찾을 수 없습니다."));
         if (entity == null) {
             throw new RuntimeException("Binary content를 찾을 수 없음");
         }
@@ -50,12 +53,13 @@ public class BasicBinaryContentService implements BinaryContentService {
     public List<BinaryContentResponseDto> findByUserId(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new IllegalArgumentException("User not found"));
-        UUID profileId = user.getProfileImageId();
+        UUID profileId = user.getProfile().getId();
 
         if(profileId==null){
             return List.of();
         }
-        BinaryContent content = binaryContentRepository.findById(profileId);
+        BinaryContent content = binaryContentRepository.findById(profileId)
+                .orElseThrow(()->new IllegalArgumentException("BinaryContent를 찾을 수 없습니다."));
         if(content==null){
             return List.of();
         }
@@ -71,11 +75,12 @@ public class BasicBinaryContentService implements BinaryContentService {
     }
 
     @Override
-    public List<BinaryContentResponseDto> findByChannelId(UUID channelId) {
+    public List<BinaryContentResponseDto> findByChannelId(Channel channelId) {
         List<Message> messages = messageRepository.findByChannelId(channelId);
 
         List<UUID> attachmentIds = messages.stream()
-                .flatMap(message->message.getAttachmentIds().stream())
+                .flatMap(message->message.getAttachments().stream())
+                .map(BinaryContent::getId)
                 .toList();
 
         if(attachmentIds.isEmpty()){
@@ -84,17 +89,15 @@ public class BasicBinaryContentService implements BinaryContentService {
 
         return attachmentIds.stream()
                 .map(binaryContentRepository::findById)
-                .filter(Objects::nonNull)
+                .flatMap(Optional::stream)
                 .map(BinaryContentResponseDto::from)
                 .toList();
     }
 
     @Override
     public void delete(UUID uuid) {
-        BinaryContent binaryContent = binaryContentRepository.findById(uuid);
-        if (binaryContent == null) {
-            throw new RuntimeException("BinaryContent를 찾을 수 없다.");
-        }
-        binaryContentRepository.delete(uuid);
+        BinaryContent binaryContent = binaryContentRepository.findById(uuid)
+                .orElseThrow(()->new IllegalArgumentException("BinaryContent를 찾을 수 없습니다."));
+        binaryContentRepository.delete(binaryContent);
     }
 }

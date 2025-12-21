@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.dto.response.BinaryContentResponseDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.Channel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -14,7 +15,7 @@ public interface BinaryContentRepository extends JpaRepository<BinaryContent, UU
 
     // 조회 : findById
 
-    List<BinaryContent> findAllById(UUID uuid);
+    List<BinaryContent> findAllById(Channel channel);
 
     // 삭제 : delete
 

@@ -6,13 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.Base64;
 import java.util.UUID;
 
 @Getter
 @Builder
 public class BinaryContentResponseDto {
 
-//    private UUID messageId;
     private UUID id;
     private String fileName;
     private String contentType;
@@ -24,13 +24,12 @@ public class BinaryContentResponseDto {
 
     public static BinaryContentResponseDto from(BinaryContent binaryContent) {
         return BinaryContentResponseDto.builder()
-//                .messageId(binaryContent.getUuid())
-                .id(binaryContent.getUuid())
+                .id(binaryContent.getId())
                 .contentType(binaryContent.getContentType())
                 .fileName(binaryContent.getFileName())
-                .size(binaryContent.getBytes().length)
-                .bytes(binaryContent.getBytes().toString())
-                .createdAt(binaryContent.getCreateAt())
+                .size(binaryContent.getSize())
+//                .bytes(Base64.getEncoder().encodeToString(binaryContent.getSize()))
+                .createdAt(binaryContent.getCreatedAt())
                 .build();
     }
 }
