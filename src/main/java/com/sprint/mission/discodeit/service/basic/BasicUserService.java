@@ -24,22 +24,26 @@ public class BasicUserService implements UserService {
 
     // 레파지토리 의존성 주입
     private final UserRepository userRepository;
+    private final UserStatusRepository userStatusRepository;
+    private final BinaryContentRepository binaryContentRepository;
 
     @Transactional
     @Override
     public void createUser(UserCreateRequestDto userCreateRequest) {
+
         //유저 생성
         if (userRepository.existsByEmail(userCreateRequest.getEmail()) ||
                 userRepository.existsByUserName(userCreateRequest.getUserName())) {
-            throw new IllegalStateException("이미 존재하는 Name 혹은 Email 입니다.");
+            throw new IllegalArgumentException("이미 존재하는 Name 혹은 Email 입니다.");
         }
 
         // 유저 생성
         User user = new User(
                 userCreateRequest.getPassword(),
                 userCreateRequest.getEmail(),
-                userCreateRequest.getUserName()
-        );
+                userCreateRequest.getUserName(),
+                null
+                );
 
         //프로필 이미지 등록(선택)
         if (userCreateRequest.getProfile() != null
@@ -48,17 +52,15 @@ public class BasicUserService implements UserService {
                 BinaryContent profile = new BinaryContent(
                         userCreateRequest.getProfile().getOriginalFilename(),
                         userCreateRequest.getProfile().getSize(),
-                        userCreateRequest.getProfile().getContentType(),
-                        userCreateRequest.getProfile().getBytes()
+                        userCreateRequest.getProfile().getContentType()
+//                        userCreateRequest.getProfile().getBytes()
                 );
                 user.changeProfile(profile);
+                binaryContentRepository.save(profile);
             } catch (Exception e) {
                 throw new RuntimeException("프로필 처리 중 ERROR", e);
             }
         }
-
-        // 상태 생성
-//        user.initStatus();
 
         userRepository.save(user);
 
@@ -110,8 +112,8 @@ public class BasicUserService implements UserService {
                 BinaryContent newProfile = new BinaryContent(
                         userUpdateRequestDto.getProfileImage().getOriginalFilename(),
                         userUpdateRequestDto.getProfileImage().getSize(),
-                        userUpdateRequestDto.getProfileImage().getContentType(),
-                        userUpdateRequestDto.getProfileImage().getBytes()
+                        userUpdateRequestDto.getProfileImage().getContentType()
+//                        userUpdateRequestDto.getProfileImage().getBytes()
                 );
                 user.changeProfile(newProfile);
             } catch (Exception e) {

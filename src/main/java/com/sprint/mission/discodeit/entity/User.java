@@ -45,28 +45,24 @@ public class User extends BaseUpdatableEntity {
     public void setPassword(String newPassword) {
         if (newPassword != null && !newPassword.equals(this.password)) { //비밀번호 변경
             this.password = newPassword;
-            setUpdatedAt(Instant.now());
         }
     }
 
     public void setEmail(String newEmail) {
         if (newEmail != null && !newEmail.equals(this.email)) { //이메일 변경
             this.email = newEmail;
-            setUpdatedAt(Instant.now());
         }
     }
 
     public void setUserName(String newUserName) {
         if (newUserName != null && !newUserName.equals(this.userName)) {
             this.userName = newUserName;
-            setUpdatedAt(Instant.now());
         }
     }
 
     public void changeProfile(BinaryContent newProfile) {
         if (newProfile != null && !newProfile.equals(this.profile)) { //프로필 변경
             this.profile = newProfile;
-            setUpdatedAt(Instant.now());
         }
     }
 }
