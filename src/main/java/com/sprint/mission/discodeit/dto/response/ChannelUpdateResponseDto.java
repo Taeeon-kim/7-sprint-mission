@@ -20,11 +20,8 @@ import java.util.UUID;
 @Builder
 public class ChannelUpdateResponseDto {
 
-//    private UUID channelId;
     private UUID id;
-//    private String channelName;
     private String name;
-//    private ChannelType channelType;
     private ChannelType type;
     private Instant createdAt;
     private Instant updatedAt;
@@ -32,12 +29,12 @@ public class ChannelUpdateResponseDto {
 
     public static ChannelUpdateResponseDto from(Channel channel) {
         return ChannelUpdateResponseDto.builder()
-                .id(channel.getUuid())
-                .name(channel.getChannelName())
-                .type(channel.getChannelType())
-                .createdAt(channel.getCreateAt())
+                .id(channel.getId())
+                .name(channel.getName())
+                .type(channel.getType())
+                .createdAt(channel.getCreatedAt())
                 .updatedAt(channel.getUpdatedAt())
-                .description(channel.getDiscription())
+                .description(channel.getDescription())
                 .build();
     }
 

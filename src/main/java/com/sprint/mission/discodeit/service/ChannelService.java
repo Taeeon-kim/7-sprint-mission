@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.request.ChannelPublicCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ChannelUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ChannelResponseDto;
 import com.sprint.mission.discodeit.dto.response.ChannelUpdateResponseDto;
+import com.sprint.mission.discodeit.entity.Channel;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public interface ChannelService {
     ChannelUpdateResponseDto createPublicChannel(ChannelPublicCreateRequestDto channelCreateRequestDto); //채널 생성
     ChannelUpdateResponseDto createPrivateChannel(ChannelPrivateCreateRequestDto channelPrivateCreateRequestDto); //채널 생성
 
-    ChannelUpdateResponseDto findById(UUID channelId); //채널 내용 보기
+    ChannelUpdateResponseDto findById(Channel channelId); //채널 내용 보기
 
     List<ChannelResponseDto> findAllByUserId(UUID userId);
 

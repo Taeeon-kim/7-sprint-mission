@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -25,19 +26,18 @@ public class Channel extends BaseUpdatableEntity {
 
     @Column(length = 500)
     private String description;
-//    private List<UUID> participantIds = new ArrayList<>();
 
     // 1:N 관계
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> messages;
+    private List<Message> messages = new ArrayList<>();
 
-    // N:M 관계
-    @ManyToMany(mappedBy = "channels")
-    private List<User> member;
+//    // N:M 관계
+//    @ManyToMany(mappedBy = "channels")
+//    private List<User> member;
 
     // 1:N 관계
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReadStatus> readStatuses;
+    private List<ReadStatus> readStatuses = new ArrayList<>();
 
     public void setUpdate(String newName, String newDescription) {
         if(this.type == ChannelType.PRIVATE){
@@ -48,9 +48,6 @@ public class Channel extends BaseUpdatableEntity {
         }
         if(newDescription != null && !newDescription.equals(this.description)) {
             this.description = newDescription;
-        }
-        if(newName != null || newDescription != null) {
-            setUpdatedAt(Instant.now());
         }
     }
 
@@ -65,7 +62,5 @@ public class Channel extends BaseUpdatableEntity {
     public Channel(ChannelType type) {
         super();
         this.type = type;
-        this.name = null;
-        this.description = null;
     }
 }
