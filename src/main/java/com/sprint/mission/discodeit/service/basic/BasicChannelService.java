@@ -104,6 +104,7 @@ public class BasicChannelService implements ChannelService {
 //                .collect(Collectors.toList());
 //    }
 
+    @Transactional
     @Override
     public void updateChannel(UUID uuid, ChannelUpdateRequestDto channelUpdateRequestDto) {
         Channel channel = channelRepository.findById(uuid)
@@ -115,6 +116,7 @@ public class BasicChannelService implements ChannelService {
         channel.setUpdate(channelUpdateRequestDto.getNewName(), channelUpdateRequestDto.getNewDescription());
     }
 
+    @Transactional
     @Override
     public void deleteChannel(UUID channelId) {
         Channel channel = channelRepository.findById(channelId).orElse(null);

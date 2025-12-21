@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final UserRepository userRepository;
     private final ChannelRepository channelRepository;
 
+    @Transactional
     @Override
     public ReadStatusDto create(ReadStatusCreateRequestDto readStatusCreateRequestDto) {
         ReadStatus existing = readStatusRepository.findByUserAndChannel(
@@ -44,6 +46,7 @@ public class BasicReadStatusService implements ReadStatusService {
         return ReadStatusDto.from(readStatus);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ReadStatusDto findById(UUID uuid) {
         ReadStatus readStatus = readStatusRepository.findById(uuid)
@@ -52,6 +55,7 @@ public class BasicReadStatusService implements ReadStatusService {
         return ReadStatusDto.from(readStatus);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReadStatusDto> findAllByUserId(UUID uuid) {
         User user = userRepository.findById(uuid)
@@ -62,6 +66,7 @@ public class BasicReadStatusService implements ReadStatusService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ReadStatusDto update(ReadStatusUpdateRequestDto readStatusUpdateRequestDto) {
         ReadStatus readStatus = readStatusRepository.findById(readStatusUpdateRequestDto.getId())
@@ -75,6 +80,7 @@ public class BasicReadStatusService implements ReadStatusService {
         return ReadStatusDto.from(readStatus);
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         ReadStatus readStatus = readStatusRepository.findById(uuid)

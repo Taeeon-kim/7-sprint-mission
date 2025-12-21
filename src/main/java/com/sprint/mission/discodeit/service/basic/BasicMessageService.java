@@ -16,6 +16,7 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class BasicMessageService implements MessageService {
     private final UserRepository userRepository;
     private final BinaryContentRepository binaryContentRepository;
 
+    @Transactional
     @Override
     public Message createMessage(MessageCreateRequestDto messageCreateRequestDto,
                                  List<MultipartFile> files) {
@@ -42,10 +44,6 @@ public class BasicMessageService implements MessageService {
         if (userRepository.findById(messageCreateRequestDto.getAuthor().getId()) == null)
             throw new IllegalStateException("작성자가 없습니다.");
 
-        // attachmentIds + 새로 업로드한 파일UUID
-//        List<UUID> attachmentIds = messageCreateRequestDto.getAttachments() != null
-//                ? new ArrayList<>(messageCreateRequestDto.getAttachments())
-//                : new ArrayList<>();
         List<UUID> attachmentIds = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             for (MultipartFile file : files) {
@@ -64,17 +62,18 @@ public class BasicMessageService implements MessageService {
                 messageCreateRequestDto.getAuthor(),
                 messageCreateRequestDto.getContent(),
                 messageCreateRequestDto.getAttachmentIds()
-//                messageCreateRequestDto.getAttachmentIds() != null ? messageCreateRequestDto.getAttachmentIds() : new ArrayList<>()
         );
         return messageRepository.save(message);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Message findByMessage(UUID uuid) {
         return messageRepository.findById(uuid)
-                .orElse(null); //.orElseThrow(()->new IllegalStateException("메시지를 찾을 수 없습니다."));
+                .orElse(null);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Message> findUserAllMessage(User users) {
         if (users == null) {
@@ -87,6 +86,7 @@ public class BasicMessageService implements MessageService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Message> findChannelAllMessage(Channel channels) {
         if (channels == null) {
@@ -95,9 +95,9 @@ public class BasicMessageService implements MessageService {
         return messageRepository.findAllByChannelId(channels);
     }
 
+    @Transactional
     @Override
     public Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto){
-//                                 List<MultipartFile> files) {
         Message message = messageRepository.findById(messageUpdateRequestDto.getMessageId().getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정할 메시지를 찾을 수 없습니다."));
 
@@ -106,26 +106,12 @@ public class BasicMessageService implements MessageService {
         List<BinaryContent> attachments = message.getAttachments() != null
                 ? new ArrayList<>(message.getAttachments())
                 : new ArrayList<>();
-//        if (files != null && !files.isEmpty()) {
-//            for (MultipartFile file : files) {
-//                if (file != null && !file.isEmpty()) {
-//                    try {
-//                        BinaryContent saved = binaryContentRepository.save(
-//                                new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes())
-//                        );
-//                        attachments.add(saved.getUuid());
-//                        System.out.println("[파일 저장 완료] : " + file.getOriginalFilename());
-//                    } catch (Exception e) {
-//                        throw new RuntimeException("파일 저장 실패", e);
-//                    }
-//                }
-//            }
-//        }
         message.setAttachmentIds(attachments);
         System.out.println("[Message 수정] : " + message.getContent());
         return messageRepository.save(message);
     }
 
+    @Transactional
     @Override
     public void deleteMessage(UUID uuid) {
         Message message = messageRepository.findById(uuid)

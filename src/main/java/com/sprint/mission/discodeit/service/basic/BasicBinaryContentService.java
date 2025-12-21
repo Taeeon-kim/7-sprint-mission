@@ -13,6 +13,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,6 +29,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
 
+    @Transactional
     @Override
     public BinaryContentResponseDto create(BinaryContentCreateRequestDto binaryContentCreateRequestDto) {
         BinaryContent entity = new BinaryContent(
@@ -39,6 +41,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         return BinaryContentResponseDto.from(entity);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public BinaryContentResponseDto find(UUID uuid) {
         BinaryContent entity = binaryContentRepository.findById(uuid)
@@ -49,6 +52,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         return BinaryContentResponseDto.from(entity);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BinaryContentResponseDto> findByUserId(UUID userId) {
         User user = userRepository.findById(userId)
@@ -67,6 +71,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         return List.of(BinaryContentResponseDto.from(content));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BinaryContentResponseDto> findAll() {
         return binaryContentRepository.findAll().stream()
@@ -74,6 +79,7 @@ public class BasicBinaryContentService implements BinaryContentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BinaryContentResponseDto> findByChannelId(Channel channelId) {
         List<Message> messages = messageRepository.findByChannelId(channelId);
@@ -94,6 +100,7 @@ public class BasicBinaryContentService implements BinaryContentService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         BinaryContent binaryContent = binaryContentRepository.findById(uuid)

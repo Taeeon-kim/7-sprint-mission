@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class BasicUserStatusService implements UserStatusService {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
 
+    @Transactional
     @Override
     public UserStatusResponseDto create(UserStatusCreateRequestDto userStatusCreateRequestDto) {
         User user = userRepository.findById(userStatusCreateRequestDto.getUserId())
@@ -39,6 +41,7 @@ public class BasicUserStatusService implements UserStatusService {
         return UserStatusResponseDto.from(userStatus);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserStatusResponseDto findById(UUID uuid) {
         UserStatus userStatus = userStatusRepository.findById(uuid)
@@ -46,6 +49,7 @@ public class BasicUserStatusService implements UserStatusService {
         return UserStatusResponseDto.from(userStatus);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserStatusResponseDto> findAll() {
         return userStatusRepository.findAll().stream()
@@ -53,6 +57,7 @@ public class BasicUserStatusService implements UserStatusService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserStatusResponseDto update(UUID uuid, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         UserStatus userStatus = userStatusRepository.findAll().stream()
@@ -65,6 +70,7 @@ public class BasicUserStatusService implements UserStatusService {
         return UserStatusResponseDto.from(userStatus);
     }
 
+    @Transactional
     @Override
     public UserStatusResponseDto updateByUserId(UUID userId, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         UserStatus userStatus = userStatusRepository.findByUser_Id(userId)
@@ -78,6 +84,7 @@ public class BasicUserStatusService implements UserStatusService {
         return UserStatusResponseDto.from(userStatus);
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         userStatusRepository.deleteById(uuid);
