@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.controller.api;
 
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequestDto;
 import com.sprint.mission.discodeit.dto.response.MessageResponseDto;
+import com.sprint.mission.discodeit.entity.Message;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -63,7 +64,7 @@ public interface MessageApi {
     })
     public MessageResponseDto updateMessage(
             @Parameter(description = "수정할 Message ID")
-            @PathVariable UUID messageId
+            @PathVariable Message messageId
 //            @RequestParam String newContent
 //            @RequestPart(value = "file", required = false) List<MultipartFile> files
     );

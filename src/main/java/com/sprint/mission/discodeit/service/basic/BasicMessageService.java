@@ -37,9 +37,9 @@ public class BasicMessageService implements MessageService {
     @Override
     public Message createMessage(MessageCreateRequestDto messageCreateRequestDto,
                                  List<MultipartFile> files) {
-        channelRepository.findByChannel(messageCreateRequestDto.getChannelId())
+        channelRepository.findById(messageCreateRequestDto.getChannel().getId())
                 .orElseThrow(() -> new IllegalStateException("채널정보를 찾을 수 없습니다."));
-        if (userRepository.findById(messageCreateRequestDto.getAuthorId()) == null)
+        if (userRepository.findById(messageCreateRequestDto.getAuthor().getId()) == null)
             throw new IllegalStateException("작성자가 없습니다.");
 
         // attachmentIds + 새로 업로드한 파일UUID
@@ -51,22 +51,19 @@ public class BasicMessageService implements MessageService {
             for (MultipartFile file : files) {
                 if (file == null || file.isEmpty()) continue;
                 BinaryContent saved;
-                try {
                     saved = binaryContentRepository.save(
-                            new BinaryContent(file.getOriginalFilename(), file.getContentType(), file.getBytes()));
-                    attachmentIds.add(saved.getUuid());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException("파일 저장 실패", e);
-                }
+                            new BinaryContent(file.getOriginalFilename(), file.getSize(), file.getContentType() ));
+                    attachmentIds.add(saved.getId());
             }
         }
 
+        Channel channel;
+
         Message message = new Message(
-                messageCreateRequestDto.getChannelId(),
-                messageCreateRequestDto.getAuthorId(),
+                messageCreateRequestDto.getChannel(),
+                messageCreateRequestDto.getAuthor(),
                 messageCreateRequestDto.getContent(),
-                attachmentIds
+                messageCreateRequestDto.getAttachmentIds()
 //                messageCreateRequestDto.getAttachmentIds() != null ? messageCreateRequestDto.getAttachmentIds() : new ArrayList<>()
         );
         return messageRepository.save(message);
@@ -74,7 +71,7 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public Message findByMessage(UUID uuid) {
-        return messageRepository.findByMessage(uuid)
+        return messageRepository.findById(uuid)
                 .orElse(null); //.orElseThrow(()->new IllegalStateException("메시지를 찾을 수 없습니다."));
     }
 
@@ -85,8 +82,8 @@ public class BasicMessageService implements MessageService {
         }
 
         return messageRepository.findAll().stream()
-                .filter(m -> m.getUserId().equals(users.getUuid()))
-                .sorted(Comparator.comparing(Message::getCreateAt))
+                .filter(m -> m.getId().equals(users.getId()))
+                .sorted(Comparator.comparing(Message::getCreatedAt))
                 .toList();
     }
 
@@ -101,13 +98,13 @@ public class BasicMessageService implements MessageService {
     @Override
     public Message updateMessage(MessageUpdateRequestDto messageUpdateRequestDto){
 //                                 List<MultipartFile> files) {
-        Message message = messageRepository.findByMessage(messageUpdateRequestDto.getMessageId())
+        Message message = messageRepository.findById(messageUpdateRequestDto.getMessageId().getId())
                 .orElseThrow(() -> new IllegalArgumentException("수정할 메시지를 찾을 수 없습니다."));
 
         message.setUpdate(messageUpdateRequestDto.getContent());
 
-        List<UUID> attachments = message.getAttachmentIds() != null
-                ? new ArrayList<>(message.getAttachmentIds())
+        List<BinaryContent> attachments = message.getAttachments() != null
+                ? new ArrayList<>(message.getAttachments())
                 : new ArrayList<>();
 //        if (files != null && !files.isEmpty()) {
 //            for (MultipartFile file : files) {
@@ -131,17 +128,17 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public void deleteMessage(UUID uuid) {
-        Message message = messageRepository.findByMessage(uuid)
+        Message message = messageRepository.findById(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 메시지를 찾을 수 없습니다."));
 
-        List<UUID> attachments = message.getAttachmentIds();
+        List<BinaryContent> attachments = message.getAttachments();
         if (attachments != null) {
-            for (UUID attachmentId : attachments) {
+            for (BinaryContent attachmentId : attachments) {
                 binaryContentRepository.delete(attachmentId);
             }
         }
 
-        messageRepository.deleteMessage(uuid);
-        System.out.println("[Message 삭제] : " + messageRepository.findByMessage(uuid));
+        messageRepository.delete(message);
+        System.out.println("[Message 삭제] : " + messageRepository.findById(uuid));
     }
 }

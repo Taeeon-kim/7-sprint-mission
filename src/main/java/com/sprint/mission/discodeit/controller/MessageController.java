@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.controller.api.MessageApi;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.MessageResponseDto;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +42,7 @@ public class MessageController implements MessageApi {
     // 메시지 수정
     public MessageResponseDto updateMessage(
             @Parameter(description = "수정할 Message ID")
-            @PathVariable UUID messageId
+            @PathVariable Message messageId
 //            @RequestParam String newContent
             /*@RequestPart(value = "file", required = false) List<MultipartFile> files*/) {
         MessageUpdateRequestDto dto = new MessageUpdateRequestDto();
@@ -62,7 +63,7 @@ public class MessageController implements MessageApi {
     public List<MessageResponseDto> getMessageByChannel(
             @Parameter(description = "조회할 Channel ID")
             @RequestParam UUID channelId) {
-        var channel = channelRepository.findByChannel(channelId)
+        var channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다."));
         return messageService.findChannelAllMessage(channel)
                 .stream().map(MessageResponseDto::from)

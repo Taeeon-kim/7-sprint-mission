@@ -49,13 +49,11 @@ public class Message extends BaseUpdatableEntity {
     public void setUpdate(String newContent){
         if(newContent != null && !newContent.equals(this.content)){
             this.content = newContent;
-            setUpdatedAt(Instant.now());
         }
     }
 
     public void setAttachmentIds(List<BinaryContent> newAttachments) {
         this.attachments = (newAttachments != null) ? new ArrayList<>(newAttachments) : new ArrayList<>();
-        setUpdatedAt(Instant.now());
     }
 }
 
