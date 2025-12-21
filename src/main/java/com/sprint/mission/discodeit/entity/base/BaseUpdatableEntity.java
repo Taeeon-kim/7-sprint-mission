@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity.base;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,12 +11,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.Instant;
 
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @MappedSuperclass
 public class BaseUpdatableEntity extends BaseEntity {
 
     @LastModifiedDate
+    @Column(name = "updateAt")
     private Instant updatedAt;
 
     public BaseUpdatableEntity(Instant updatedAt) {

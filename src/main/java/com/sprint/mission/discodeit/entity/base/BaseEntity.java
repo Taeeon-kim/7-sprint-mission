@@ -18,7 +18,7 @@ public class BaseEntity {//implements Serializable {
     private UUID id; //객체 식별 id
 
     @CreatedDate
-    @Column(name = "timestamp_t_z", updatable = false, nullable = false)
+    @Column(name = "createAt", updatable = false, nullable = false)
     private Instant createdAt;
 
     public BaseEntity(){
