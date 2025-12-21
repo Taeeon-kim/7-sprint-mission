@@ -4,6 +4,8 @@ import com.sprint.mission.discodeit.controller.api.ReadStatusApi;
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ReadStatusDto;
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,10 +27,10 @@ public class ReadStatusController implements ReadStatusApi {
     private final ReadStatusService readStatusService;
 
     public ReadStatusDto create_1(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
-                                  @RequestParam UUID userId,
-                                  @RequestParam UUID channelId) {
-        readStatusCreateRequestDto.setUserId(userId);
-        readStatusCreateRequestDto.setChannelId(channelId);
+                                  @RequestParam User userId,
+                                  @RequestParam Channel channelId) {
+        readStatusCreateRequestDto.setUser(userId);
+        readStatusCreateRequestDto.setChannel(channelId);
         return readStatusService.create(readStatusCreateRequestDto);
     }
 
