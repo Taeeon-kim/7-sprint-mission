@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import static com.sprint.mission.discodeit.entity.ChannelType.PUBLIC;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BasicChannelService implements ChannelService {
 
     //의존성 주입

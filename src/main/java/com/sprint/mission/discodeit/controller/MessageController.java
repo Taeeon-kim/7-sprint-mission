@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
 @Tag(name = "Message")
+@Slf4j
 public class MessageController implements MessageApi {
     private final MessageService messageService;
     private final ChannelRepository channelRepository;
