@@ -115,7 +115,7 @@ jobs:
       - name: Download current task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition my-spring-app \
+            --task-definition my-psring-app \
             --query taskDefinition > task-definition.json
 
       # 9. Task Definition에 새 이미지 반영
