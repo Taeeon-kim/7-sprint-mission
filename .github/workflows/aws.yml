@@ -39,7 +39,7 @@ env:
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER}}                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: task-definition.json # set this to the path to your Amazon ECS task definition
   # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: my-spring-app           # set this to the name of the container in the
+  CONTAINER_NAME: speing-app           # set this to the name of the container in the
   # containerDefinitions section of your task definition
 
 # 워크플로우에서 실행될 작업을 정의
@@ -118,6 +118,8 @@ jobs:
             --task-definition my-psring-app \
             --query taskDefinition > task-definition.json
           
+          # AWS ECS에서 Task Definition을 다운로드 할 때 읽기 전용 필드들이 포함되는데 이걸 마지막 스탭에서 그대로 등록하려 하면 에러발생
+          # 읽기 전용 필드들을 제거해 주는 작업 진행
           sudo apt-get update && sudo apt-get install -y jq
           
           jq 'del(
