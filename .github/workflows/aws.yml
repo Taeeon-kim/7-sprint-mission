@@ -1,0 +1,145 @@
+# This workflow will build and push a new container image to Amazon ECR,
+# and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
+#
+# To use this workflow, you will need to complete the following set-up steps:
+#
+# 1. Create an ECR repository to store your images.
+#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
+#    Replace the value of the `ECR_REPOSITORY` environment variable in the workflow below with your repository's name.
+#    Replace the value of the `AWS_REGION` environment variable in the workflow below with your repository's region.
+#
+# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
+#    For example, follow the Getting Started guide on the ECS console:
+#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
+#    Replace the value of the `ECS_SERVICE` environment variable in the workflow below with the name you set for the Amazon ECS service.
+#    Replace the value of the `ECS_CLUSTER` environment variable in the workflow below with the name you set for the cluster.
+#
+# 3. Store your ECS task definition as a JSON file in your repository.
+#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
+#    Replace the value of the `ECS_TASK_DEFINITION` environment variable in the workflow below with the path to the JSON file.
+#    Replace the value of the `CONTAINER_NAME` environment variable in the workflow below with the name of the container
+#    in the `containerDefinitions` section of the task definition.
+#
+# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
+#    and best practices on handling the access key credentials.
+
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - "*"
+
+# 해당 워크플로우에서 자주 사용할 만한 값을 환경변수로 등록해 놓고 사용 가능
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}              # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY}}           # set this to your Amazon ECR repository name
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE}}                # set this to your Amazon ECS service name
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER}}                 # set this to your Amazon ECS cluster name
+  ECS_TASK_DEFINITION: task-definition.json # set this to the path to your Amazon ECS task definition
+  # file, e.g. .aws/task-definition.json
+  CONTAINER_NAME: spring-app           # set this to the name of the container in the
+  # containerDefinitions section of your task definition
+
+# 워크플로우에서 실행될 작업을 정의
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest # 작업이 실행될 환경을 정의
+#    environment: production
+
+    steps:
+      # 1. 코드 체크아웃 (깃허브의 코드를 actions 작업 환경으로 가져 옴)
+      - name: Checkout
+       # 깃허브에서 제공하는 미리 완성된 액션을 사
+        uses: actions/checkout@v4
+
+        # 2. 자바 설치
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 3. Gradle 캐싱 (빌드 속도 향상)
+      # workflow가 실행될 떄마다 매번 라이브러리를 새로 받으면 오래걸리므로 기존에 썼던게 있다면 그대로 써서(캐싱) 시간절약
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      #4. Gradle build
+      - name: Build with Gradle
+        run: | 
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
+
+      # 5. AWS 자격 증명 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 6. ECR 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 7. Docker 이미지 빌드 & ECR push
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }} # Git commit hash를 이미지 태그로 사용
+        run: |
+          # Docker 이미지 빌드
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          # ECR에 푸시
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          # 다음 스텝에서 사용할 수 있도록 출력
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # 8. 현재 Task Definition 다운로드
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition my-spring-app \
+            --query taskDefinition > task-definition.json
+
+      # 9. Task Definition에 새 이미지 반영
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      # 10. ECS Service에 새 Task Definition 배포
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # 11. 배포 완료 메시지
+      - name: Deployment result
+        run: |
+          echo "Deployment completed successfully!"
+          echo "Image: ${{ steps.build-image.outputs.image }}"
+          echo "Service: ${{ env.ECS_SERVICE }}"
+          echo "Cluster: ${{ env.ECS_CLUSTER }}"      

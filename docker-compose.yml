@@ -10,6 +10,7 @@ services: # 실행할 여러 컨테이너들을 정의
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_BOOT_ADMIN_CLIENT_URL: ${SPRING_BOOT_ADMIN_CLIENT_URL}
       JAVA_OPTS: "-Xmx400m -Xms200m" # JVM 메모리 설정
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
