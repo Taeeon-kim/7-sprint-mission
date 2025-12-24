@@ -33,12 +33,12 @@ public class ChannelResponseDto {
 
     public static ChannelResponseDto from(Channel channel , Instant lastMessageAt, List<UUID> participantIds) {
         return ChannelResponseDto.builder()
-                .id(channel.getUuid())
-                .name(channel.getChannelName())
-                .type(channel.getChannelType())
+                .id(channel.getId())
+                .name(channel.getName())
+                .type(channel.getType())
 //                .createdAt(channel.getCreateAt())
 //                .updatedAt(channel.getUpdatedAt())
-                .description(channel.getDiscription())
+                .description(channel.getDescription())
                 .lastMessageAt(lastMessageAt)
                 .participantIds(participantIds)
                 .build();

@@ -21,8 +21,8 @@ public class UserStatusResponseDto {
 
     public static UserStatusResponseDto from(UserStatus userStatus){
         return UserStatusResponseDto.builder()
-                .uuid(userStatus.getUserId())
-                .userId(userStatus.getUserId())
+                .uuid(userStatus.getId())
+                .userId(userStatus.getUser().getId())
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .lastActiveAt(Instant.now())

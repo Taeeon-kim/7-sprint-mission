@@ -7,23 +7,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 @AllArgsConstructor
 @Builder
 public class UserResponseDto {
-    private String userId;
+    private UUID id;
     private String userName;
-    private String userEmail;
-    private String userStatus;
-    private String profileImagePath;
+    private String email;
+    private String status;
+    private BinaryContentResponseDto profile;
 
     public static UserResponseDto from(User user, UserStatus userStatus, BinaryContent binaryContent) {
         return UserResponseDto.builder()
-                .userId(user.getUserId())
+                .id(user.getId())
                 .userName(user.getUserName())
-                .userEmail(user.getEmail())
-                .userStatus(userStatus != null ? userStatus.getStatus().name() : null)
-                .profileImagePath(binaryContent != null ? binaryContent.getFileName() : null)
+                .email(user.getEmail())
+//                .status(user.getUserStatus() != null
+//                        ? user.getUserStatus().getStatus().name() : null)
+                .profile(user.getProfile() != null
+                        ? BinaryContentResponseDto.from(user.getProfile()) : null)
                 .build();
     }
 }

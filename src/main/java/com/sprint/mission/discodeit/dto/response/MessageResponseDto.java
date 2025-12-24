@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.dto.response;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import lombok.*;
 
@@ -20,12 +21,12 @@ public class MessageResponseDto {
 
     public static MessageResponseDto from (Message message){
         return MessageResponseDto.builder()
-                .id(message.getUuid())
+                .id(message.getId())
                 .content(message.getContent())
-                .authorId(message.getUserId())
-                .channelId(message.getChannelId())
-                .attachmentIds(message.getAttachmentIds())
-                .createdAt(message.getCreateAt())
+                .authorId(message.getAuthor().getId())
+                .channelId(message.getChannel().getId())
+                .attachmentIds(message.getAttachments().stream().map(BinaryContent::getId).toList())
+                .createdAt(message.getCreatedAt())
                 .updatedAt(Instant.now())
                 .build();
     }

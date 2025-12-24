@@ -16,6 +16,7 @@ import jakarta.servlet.http.Part;
 import jakarta.websocket.server.PathParam;
 import jdk.jfr.Description;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Tag(name = "User")
+@Slf4j
 public class UserController implements UserApi {
 
     private final UserService userService;
@@ -46,7 +48,7 @@ public class UserController implements UserApi {
     //사용자 수정
     public void update (
             @Parameter(description = "수정할 User ID")
-            @PathVariable String userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
+            @PathVariable UUID userId, @ModelAttribute UserUpdateRequestDto userUpdateRequestDto) {
         userService.updateUser(userId, userUpdateRequestDto);
     }
 

@@ -20,11 +20,11 @@ public class ReadStatusDto {
 
     public static ReadStatusDto from(ReadStatus readStatus) {
         return ReadStatusDto.builder()
-                .id(readStatus.getUuid())
-                .userId(readStatus.getUserId())
-                .channelId(readStatus.getChannelId())
-                .lastReadAt(readStatus.getLastActiveAt())
-                .createdAt(readStatus.getCreateAt())
+                .id(readStatus.getId())
+                .userId(readStatus.getUser().getId())
+                .channelId(readStatus.getChannel().getId())
+                .lastReadAt(readStatus.getLastReadAt())
+                .createdAt(readStatus.getCreatedAt())
                 .updatedAt(Instant.now())
                 .build();
     }

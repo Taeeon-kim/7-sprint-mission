@@ -1,41 +1,47 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.AllArgsConstructor;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * 사용자가 채널 별 마지막으로 메시지를 읽은 시간을 표현하는 도메인 모델
- * 사용자별 각 채널에 읽지 않은 메시지를 확인하기 위해 활용
- */
 @Getter
-@ToString
-public class ReadStatus {
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "read_statuses", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "channel_id"})
+})
+public class ReadStatus extends BaseUpdatableEntity {
 
-    private UUID uuid; //고유 uuid
-    private Instant createAt;
-    private Instant updateAt;
+    @Column(name = "last_read_at", nullable = false)
+    private Instant lastReadAt; //마지막으로 읽은 시각
 
-    private UUID userId; //읽은 유저 정보
-    private UUID channelId; //채널 정보
-    private Instant lastActiveAt; //마지막으로 읽은 시각
+    //N:1
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",  nullable = false)
+    private User user; //읽은 유저 정보
 
-    public ReadStatus(UUID userId, UUID channelId) {
-        this.uuid = UUID.randomUUID();
-        this.createAt = Instant.now();
-        this.updateAt = Instant.now();
-        this.userId = userId;
-        this.channelId = channelId;
-        this.lastActiveAt = Instant.now();
+    // N:1
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "channel_id", nullable = false)
+    private Channel channel; //채널 정보
+
+    public ReadStatus(User user, Channel channel
+    ) {
+        super();
+        this.user = user;
+        this.channel = channel;
+        this.lastReadAt = Instant.now();
     }
 
-    public void setUpdate(Instant newLastActiveAt) {
-        if(newLastActiveAt != null && newLastActiveAt.isAfter(this.lastActiveAt)) {
-            this.lastActiveAt = newLastActiveAt;
+    public void setUpdate(Instant newLastReadAt) {
+        if(newLastReadAt != null && newLastReadAt.isAfter(this.lastReadAt)) {
+            this.lastReadAt = newLastReadAt;
         }
     }
 }

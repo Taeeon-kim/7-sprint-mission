@@ -1,43 +1,66 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.AllArgsConstructor;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
-@ToString
-public class Channel extends BaseEntity {
-    //채널 id, 생성, 수정은 BaseEntity에
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "channels")
+public class Channel extends BaseUpdatableEntity {
 
-    private String channelName;
-    private ChannelType channelType;
-    private String discription;
-    private List<UUID> participantIds = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private ChannelType type;
 
-    public void setUpdate(String newChannelName) {
-        if(newChannelName != null && !newChannelName.equals(this.channelName)){
-            this.channelName = newChannelName;
-            setUpdatedAt(Instant.now());
+    @Column(length = 100)
+    private String name;
+
+    @Column(length = 500)
+    private String description;
+
+    // 1:N 관계
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
+
+//    // N:M 관계
+//    @ManyToMany(mappedBy = "channels")
+//    private List<User> member;
+
+    // 1:N 관계
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReadStatus> readStatuses = new ArrayList<>();
+
+    public void setUpdate(String newName, String newDescription) {
+        if(this.type == ChannelType.PRIVATE){
+            throw new UnsupportedOperationException("Private channels cannot be updated");
+        }
+        if(newName != null && !newName.equals(this.name)) {
+            this.name = newName;
+        }
+        if(newDescription != null && !newDescription.equals(this.description)) {
+            this.description = newDescription;
         }
     }
 
     //PUBLIC
-    public Channel(String channelName, ChannelType channelType, String discription) {
+    public Channel(String name, ChannelType type, String description) {
         super();
-        this.channelName = channelName;
-        this.channelType = channelType;
-        this.discription = discription;
+        this.name = name;
+        this.type = type;
+        this.description = description;
     }
 
-    public Channel(List<UUID> participantIds, ChannelType channelType) {
+    public Channel(ChannelType type) {
         super();
-        this.participantIds = participantIds;
-        this.channelType = channelType;
-        this.channelName = null;
+        this.type = type;
     }
 }

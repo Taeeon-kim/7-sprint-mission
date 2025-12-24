@@ -3,6 +3,8 @@ package com.sprint.mission.discodeit.controller.api;
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequestDto;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.dto.response.ReadStatusDto;
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,8 +44,8 @@ public interface ReadStatusApi {
             )
     })
     public ReadStatusDto create_1(@RequestBody ReadStatusCreateRequestDto readStatusCreateRequestDto,
-                                  @RequestParam UUID userId,
-                                  @RequestParam UUID channelId);
+                                  @RequestParam User userId,
+                                  @RequestParam Channel channelId);
 
     @PatchMapping("/{readStatusId}")
     @Operation(summary = "Message 읽음 상태 수정", operationId = "update_1")

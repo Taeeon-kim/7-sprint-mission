@@ -23,15 +23,11 @@ public class LoginResponseDto {
 
     public static LoginResponseDto from(User user) {
         return LoginResponseDto.builder()
-//                .userId(user.getUserId())
-                .id(user.getUuid())
+                .id(user.getId())
                 .username(user.getUserName())
                 .email(user.getEmail())
-                .password(user.getPassword())
-                .createdAt(user.getCreateAt())
+                .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .profileId(user.getProfileImageId())
-//                .userEmail(user.getEmail())
                 .build();
     }
 }
