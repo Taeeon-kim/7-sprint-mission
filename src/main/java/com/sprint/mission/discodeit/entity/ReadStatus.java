@@ -2,6 +2,9 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.type.ChannelType;
+import com.sprint.mission.discodeit.exception.DiscodeitException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.readStatus.ReadStatusCreateNotAllowedException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +12,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -35,7 +37,7 @@ public class ReadStatus extends BaseUpdatableEntity {
     @Builder
     public ReadStatus(User user, Channel channel) {
         if (channel.getType() != ChannelType.PRIVATE) {
-            throw new IllegalArgumentException("public channel은 readStatus 생성 허용 되지 않습니다.");
+            throw new ReadStatusCreateNotAllowedException(channel.getType());
         }
         this.user = user;
         this.channel = channel;
@@ -44,7 +46,7 @@ public class ReadStatus extends BaseUpdatableEntity {
     public boolean updateReadAt(Instant readAt) {
 
         if (readAt == null) {
-            throw new IllegalArgumentException("값이 잘못되었습니다");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         // 최초이면 무조건 세팅
         if (this.lastReadAt == null) {
