@@ -15,6 +15,10 @@ spring:
       client:
         url: ${SPRING_BOOT_ADMIN_CLIENT_URL:http://localhost:9090}
 
+discodeit:
+  storage:
+    type: s3  # <= 여기 값이 'local'일 때만 LocalBinaryContentStorage를 빈으로 등록, s3 이면 S3BinaryContentStorage 빈 등록
+
 logging:
   level:
     com.sprint.mission.discodeit: info

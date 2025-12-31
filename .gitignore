@@ -5,6 +5,8 @@ build/
 !**/src/test/**/build/
 data/
 .env
+**/src/**/application-local.yml
+**/src/test/**/application-test-local.yml
 
 ### IntelliJ IDEA ###
 .idea

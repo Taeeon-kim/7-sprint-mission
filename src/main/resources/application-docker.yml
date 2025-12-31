@@ -1,5 +1,4 @@
 spring:
-  # 기본 프로필 (로컬 개발용)
   datasource:
 #    url: jdbc:postgresql://host.docker.internal:5433/postgres
     url: ${SPRING_DATASOURCE_URL}
@@ -13,12 +12,16 @@ spring:
 
   sql:
     init:
-      mode: always # schema.sql, data.sql 사용여부
+      mode: never # schema.sql, data.sql 사용여부, 배포이후 서버껏다킬때 날라가면 안되기떄문
 
   h2:
     console:
       enabled: off
       path: /h2-console
+
+discodeit:
+  storage:
+    type: s3  # <= 여기 값이 'local'일 때만 LocalBinaryContentStorage를 빈으로 등록, s3 이면 S3BinaryContentStorage 빈 등록
 
 logging:
   level:
