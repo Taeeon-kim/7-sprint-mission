@@ -18,6 +18,9 @@ services: # 실행할 여러 컨테이너들을 정의
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_S3_REGION: ${AWS_S3_REGION}
       AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_S3_PRESIGNED_URL_EXPIRATION: ${AWS_S3_PRESIGNED_URL_EXPIRATION}
+      STORAGE_LOCAL_ROOT_PATH: ${STORAGE_LOCAL_ROOT_PATH}
+      STORAGE_TYPE: ${STORAGE_TYPE}
       JAVA_OPTS: "-Xmx400m -Xms200m" # JVM 메모리 설정
     volumes:
       - app-storage:/app/storage

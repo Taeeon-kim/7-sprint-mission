@@ -47,6 +47,9 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
     @Value("${spring.cloud.aws.region.static}")
     private String region;
 
+    @Value("${spring.cloud.aws.s3.presigned-url-expiration}")
+    private long presignedExpiration;
+
     @PostConstruct // NOTE: 클래스 기반으로 객체가 생성된 후 1번 자동 실행되도록 설정
     private void initializeAmazonS3Client() {
         // 액세스 키와 시크릿 키를 이용해서 계정 인증 받기
@@ -128,7 +131,7 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
                     .build();
 
             PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(10))
+                    .signatureDuration(Duration.ofSeconds(presignedExpiration))
                     .putObjectRequest(putObjectRequest)
                     .build();
 
