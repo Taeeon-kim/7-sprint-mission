@@ -1,3 +1,12 @@
+--- 존재하면 지우고 실행
+DROP TABLE IF EXISTS message_attachments CASCADE;
+DROP TABLE IF EXISTS read_statuses CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS user_statuses CASCADE;
+DROP TABLE IF EXISTS channels CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS binary_contents CASCADE;
+
 --- 바이너리컨텐츠 테이블 DDL
 CREATE TABLE binary_contents
 (

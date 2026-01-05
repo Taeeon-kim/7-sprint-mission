@@ -3,8 +3,8 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.api.MessageApi;
 import com.sprint.mission.discodeit.dto.message.*;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.MessageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +28,7 @@ public class MessageController implements MessageApi {
 
     @Override
     @PatchMapping("/messages/{messageId}")
-    public ResponseEntity<MessageUpdateResponseDto> updateMessage(@PathVariable UUID messageId, @RequestBody MessageUpdateRequestDto request) {
+    public ResponseEntity<MessageUpdateResponseDto> updateMessage(@PathVariable UUID messageId, @Valid @RequestBody MessageUpdateRequestDto request) {
         log.debug("메시지 수정 요청 - messageId={}", messageId);
         MessageUpdateCommand command = MessageUpdateCommand.from(request, messageId);
         messageService.updateMessage(command);
@@ -48,7 +48,7 @@ public class MessageController implements MessageApi {
     @Override
     @PostMapping(value = "/messages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponseDto> sendMessageByChannelId(
-            @RequestPart("messageCreateRequest") MessageSendRequestDto request, // TODO: @Valid
+            @Valid @RequestPart("messageCreateRequest") MessageSendRequestDto request,
             @RequestPart(value = "attachments", required = false) List<MultipartFile> files
     ) {
         log.info(

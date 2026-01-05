@@ -2,13 +2,10 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.dto.user.UserUpdateParams;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
-import com.sprint.mission.discodeit.entity.type.RoleType;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -52,7 +49,7 @@ public class User extends BaseUpdatableEntity {
     }
 
     public void update(UserUpdateParams request) {
-
+        // PATCH방식으로 체크, null이면 바꾸지않기
         this.updateNickname(request.nickname());
         this.updateEmail(request.email());
         this.updatePassword(request.password());

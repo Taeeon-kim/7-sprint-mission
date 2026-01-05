@@ -1,13 +1,13 @@
-package com.sprint.mission.discodeit;
+package com.sprint.mission.admin;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DiscodeitApplicationTests {
+class AdminApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

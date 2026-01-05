@@ -1,0 +1,59 @@
+spring:
+  datasource:
+#    url: jdbc:postgresql://host.docker.internal:5433/postgres
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  sql:
+    init:
+      mode: never # schema.sql, data.sql 사용여부, 배포이후 서버껏다킬때 날라가면 안되기떄문
+
+  h2:
+    console:
+      enabled: off
+      path: /h2-console
+
+logging:
+  level:
+    com.sprint.mission.discodeit: debug
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    health:
+      show-details: always  # Health 상세 정보 표시
+
+  info:
+    env:
+      enabled: true
+
+info:
+  datasource:
+    url: ${spring.datasource.url}
+    driver: ${spring.datasource.driver-class-name}
+
+  jpa:
+    ddl-auto: ${spring.jpa.hibernate.ddl-auto}
+
+  storage:
+    type: ${discodeit.storage.type}
+    path: ${discodeit.storage.local.root-path}
+
+  multipart:
+    max-file-size: ${spring.servlet.multipart.max-file-size}
+    max-request-size: ${spring.servlet.multipart.max-request-size}

@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.userStatus.UserStatusUpdateRequestDto;
 import com.sprint.mission.discodeit.service.UserStatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,7 @@ public class UserStatusController {
     @PatchMapping("/users/{userId}/userStatus")
     public ResponseEntity<Void> updateUserStatusByUserId(
             @PathVariable UUID userId,
-            @RequestBody UserStatusUpdateRequestDto requestDto
+            @Valid @RequestBody UserStatusUpdateRequestDto requestDto
     ) {
 
         log.debug(

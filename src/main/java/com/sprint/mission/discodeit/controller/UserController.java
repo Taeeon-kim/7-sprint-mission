@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.api.UserApi;
 import com.sprint.mission.discodeit.dto.user.*;
 import com.sprint.mission.discodeit.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class UserController implements UserApi {
 
     @Override
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserResponseDto> createUser(@RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto, // TODO: @Valid
+    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestPart("userCreateRequest") UserSignupRequestDto userSignupRequestDto,
                                                       @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
 
@@ -40,7 +41,7 @@ public class UserController implements UserApi {
     @PatchMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID userId,
-            @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
+            @Valid @RequestPart("userUpdateRequest") UserUpdateRequestDto request,
             @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
 

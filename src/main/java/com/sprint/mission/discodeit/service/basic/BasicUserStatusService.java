@@ -74,7 +74,7 @@ public class BasicUserStatusService implements UserStatusService {
     @Transactional
     public void updateUserStatus(UUID id, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (id == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug(
@@ -96,7 +96,7 @@ public class BasicUserStatusService implements UserStatusService {
     @Transactional
     public void updateUserStatusByUserId(UUID userId, UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
         if (userId == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
 
         log.debug("유저 활동시각 갱신 시도 - userId={}, newLastActiveAt={}", userId, userStatusUpdateRequestDto.newLastActiveAt());
@@ -104,7 +104,6 @@ public class BasicUserStatusService implements UserStatusService {
         UserStatus userStatus = userStatusRepository.findByUserId(userId).orElseThrow(() -> new UserStatusNotFoundByUserIdException(userId));
         boolean isUpdated = userStatus.updateLastActiveAt(userStatusUpdateRequestDto.newLastActiveAt());
         if (isUpdated) {
-            userStatusRepository.save(userStatus);
             log.debug("유저 활동시각 갱신 완료 - userId={}", userId);
         }
     }
@@ -113,7 +112,7 @@ public class BasicUserStatusService implements UserStatusService {
     @Transactional
     public void deleteUserStatus(UUID id) {
         if (id == null) {
-            throw new IllegalArgumentException("입력값이 잘못 되었습니다.");
+            throw new DiscodeitException(ErrorCode.INVALID_INPUT);
         }
         userStatusRepository.deleteById(id);
         log.info("유저 상태 삭제 완료 - userStatusId={}", id);

@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.api.ReadStatusApi;
 import com.sprint.mission.discodeit.dto.readStatus.*;
 import com.sprint.mission.discodeit.service.ReadStatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class ReadStatusController implements ReadStatusApi {
     @Override
     @PostMapping("/readStatuses")
     public ResponseEntity<ReadStatusResponseDto> createReadStatus(
-            @RequestBody ReadStatusCreateRequestDto request // TODO: @Valid
+            @Valid @RequestBody ReadStatusCreateRequestDto request
     ) {
         // 생성 요청 자체는 debug
         log.debug(
