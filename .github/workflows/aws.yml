@@ -52,7 +52,7 @@ jobs:
     steps:
       # 1. 코드 체크아웃 (깃허브의 코드를 actions 작업 환경으로 가져 옴)
       - name: Checkout
-       # 깃허브에서 제공하는 미리 완성된 액션을 사
+       # 깃허브에서 제공하는 미리 완성된 액션을 사용
         uses: actions/checkout@v4
 
         # 2. 자바 설치

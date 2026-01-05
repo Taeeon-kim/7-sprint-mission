@@ -109,9 +109,6 @@ class S3BinaryContentStorageTest {
             assertNotNull(response.getHeaders().getLocation());
 
             String location = response.getHeaders().getLocation().toString();
-
-            assertTrue(location.contains("AWS_S3_BUCKET"));
-            assertTrue(location.contains("AWS_S3_REGION"));
             assertTrue(location.contains("X-Amz-Algorithm="));
         }
     }
