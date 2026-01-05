@@ -12,7 +12,6 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}              # set this to your preferred AWS region
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY}}           # set this to your Amazon ECR repository name
 
-
 jobs:
   test:
     name: Run Tests
