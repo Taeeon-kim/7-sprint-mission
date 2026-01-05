@@ -24,7 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//@Disabled("CI 환경에서는 S3 통합 테스트를 실행하지 않는다, .env 이슈")
+@Disabled("CI 환경에서는 S3 통합 테스트를 실행하지 않는다, .env 이슈")
 public class AWSS3Test {
 
     private static final String TEST_CONTENT = "hello s3";
