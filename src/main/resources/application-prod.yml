@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/discodeit
+    username: discodeit_user
+    password: discodeit1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database: POSTGRESQL
+    hibernate:
+      ddl-auto: validate
+
+  boot:
+    admin:
+      client:
+        url: ${SPRING_BOOT_ADMIN_CLIENT_URL:http://localhost:9090}
+
+logging:
+  level:
+    com.sprint.mission.discodeit: info
+    org.hibernate.SQL: warn
+    org.hibernate.orm.jdbc.bind: error
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,threaddump
+
+  endpoint:
+    health:
+      show-details: always  # Health 상세 정보 표시, 추후 Security 배우면 운영은 when-authorized로 변경
+
+  info:
+    env:
+      enabled: true
+
+info:
+  jpa:
+    ddl-auto: ${spring.jpa.hibernate.ddl-auto}
+
+  multipart:
+    max-file-size: ${spring.servlet.multipart.max-file-size}
+    max-request-size: ${spring.servlet.multipart.max-request-size}

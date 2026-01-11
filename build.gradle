@@ -1,0 +1,82 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.10'
+	id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+}
+
+group = 'com.sprint.mission'
+version = '1.2-M8'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacoco {
+    toolVersion = "0.8.8" // 버전 명시
+}
+
+
+jacocoTestReport {
+    dependsOn test // 리포트 생성 전에 test를 반드시 수행해야 한다!
+    reports { // 어떤 파일들을 생성할지, 어디에 생성할지 설정
+        xml.required.set(true) // Gradle 8+: enabled → required
+        html.required.set(true)
+        // 경로 명시 안 할 경우 기본 경로는 build/reports/jacoco 이하 경로
+    }
+}
+
+//jacocoTestCoverageVerification {
+//    violationRules {
+//        rule {
+//            limit {
+//                counter = 'INSTRUCTION'
+//                value = 'COVERED_RATIO'
+//                minimum = 0.60
+//            }
+//        }
+//    }
+//}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Swagger/OpenAPI 추가
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
+    // AWS SDK for java
+    implementation platform('software.amazon.awssdk:bom:2.20.56')
+    implementation 'software.amazon.awssdk:s3:2.31.7'
+    implementation 'de.codecentric:spring-boot-admin-starter-client:3.4.5'
+    compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
